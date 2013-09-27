@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#if defined(_WIN32)
+#ifdef _MSC_VER
 #define strncasecmp	_strnicmp
 #endif
 
@@ -190,7 +190,7 @@ hoedown_autolink__email(
 	int nb = 0, np = 0;
 
 	for (rewind = 0; rewind < max_rewind; ++rewind) {
-		uint8_t c = data[-rewind - 1];
+		uint8_t c = data[-1 - rewind];
 
 		if (isalnum(c))
 			continue;
@@ -247,7 +247,7 @@ hoedown_autolink__url(
 	if (size < 4 || data[1] != '/' || data[2] != '/')
 		return 0;
 
-	while (rewind < max_rewind && isalpha(data[-rewind - 1]))
+	while (rewind < max_rewind && isalpha(data[-1 - rewind]))
 		rewind++;
 
 	if (!hoedown_autolink_is_safe(data - rewind, size + rewind))

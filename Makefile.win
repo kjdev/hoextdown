@@ -1,5 +1,5 @@
 CC = cl
-CFLAGS = /O2 /EHsc /I"src/"
+CFLAGS = /O2 /sdl /Isrc /D_CRT_SECURE_NO_WARNINGS
 
 HOEDOWN_SRC = \
 	src\autolink.obj \

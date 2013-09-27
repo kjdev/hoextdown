@@ -9,7 +9,7 @@
 
 #include "stack.h"
 
-#if defined(_WIN32)
+#ifdef _MSC_VER
 #define strncasecmp	_strnicmp
 #endif
 

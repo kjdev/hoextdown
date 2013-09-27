@@ -1,5 +1,3 @@
-#define BUFFER_MAX_ALLOC_SIZE (1024 * 1024 * 16) /* 16mb */
-
 #include "buffer.h"
 
 #include <stdio.h>
@@ -7,12 +5,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* MSVC compat */
-#if defined(_MSC_VER)
-#	define _buf_vsnprintf _vsnprintf
-#else
-#	define _buf_vsnprintf vsnprintf
-#endif
+#define BUFFER_MAX_ALLOC_SIZE (1024 * 1024 * 16) /* 16mb */
 
 /* hoedown_buffer_new: allocation of a new buffer */
 struct hoedown_buffer *
@@ -176,25 +169,18 @@ hoedown_buffer_printf(struct hoedown_buffer *buf, const char *fmt, ...)
 		return;
 	
 	va_start(ap, fmt);
-	n = _buf_vsnprintf((char *)buf->data + buf->size, buf->asize - buf->size, fmt, ap);
+	n = vsnprintf((char *)buf->data + buf->size, buf->asize - buf->size, fmt, ap);
 	va_end(ap);
 
-	if (n < 0) {
-#ifdef _MSC_VER
-		va_start(ap, fmt);
-		n = _vscprintf(fmt, ap);
-		va_end(ap);
-#else
+	if (n < 0)
 		return;
-#endif
-	}
 
 	if ((size_t)n >= buf->asize - buf->size) {
 		if (hoedown_buffer_grow(buf, buf->size + n + 1) < 0)
 			return;
 
 		va_start(ap, fmt);
-		n = _buf_vsnprintf((char *)buf->data + buf->size, buf->asize - buf->size, fmt, ap);
+		n = vsnprintf((char *)buf->data + buf->size, buf->asize - buf->size, fmt, ap);
 		va_end(ap);
 	}
 
