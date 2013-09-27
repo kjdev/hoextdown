@@ -58,7 +58,9 @@ Bindings
 --------
 
 You can see a community-maintained list of `Hoedown` bindings at
-[the wiki](https://github.com/devinus/hoedown/wiki/Bindings).
+[the wiki](https://github.com/devinus/hoedown/wiki/Bindings). There is also a
+[migration guide](https://github.com/hoedown/hoedown/wiki/Migration-Guide)
+available for authors of Sundown bindings.
 
 Help us
 -------
