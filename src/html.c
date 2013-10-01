@@ -700,15 +700,18 @@ hoedown_html_toc_renderer(struct hoedown_callbacks *callbacks, struct hoedown_ht
 		toc_finalize,
 	};
 
-	memset(options, 0x0, sizeof(struct hoedown_html_renderopt));
-	options->flags = HOEDOWN_HTML_TOC;
-	options->toc_data.nesting_level = nesting_level;
-
 	memcpy(callbacks, &cb_default, sizeof(struct hoedown_callbacks));
+
+	memset(options, 0, sizeof(struct hoedown_html_renderopt));
+
+	if (nesting_level > 0) {
+		options->flags |= HOEDOWN_HTML_TOC;
+		options->toc_data.nesting_level = nesting_level;
+	}
 }
 
 void
-hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, unsigned int render_flags, int toc_nesting_lvl)
+hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level)
 {
 	static const struct hoedown_callbacks cb_default = {
 		rndr_blockcode,
@@ -752,9 +755,9 @@ hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_r
 	memset(options, 0x0, sizeof(struct hoedown_html_renderopt));
 	options->flags = render_flags;
 
-	if (toc_nesting_lvl > 0) {
+	if (nesting_level > 0) {
 		options->flags |= HOEDOWN_HTML_TOC;
-		options->toc_data.nesting_level = toc_nesting_lvl;
+		options->toc_data.nesting_level = nesting_level;
 	}
 
 	/* Prepare the callbacks */

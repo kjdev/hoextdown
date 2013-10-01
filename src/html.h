@@ -48,7 +48,7 @@ int
 hoedown_html_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagname);
 
 extern void
-hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, unsigned int render_flags, int toc_nesting_lvl);
+hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level);
 
 extern void
 hoedown_html_toc_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, int nesting_level);
