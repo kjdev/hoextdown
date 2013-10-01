@@ -53,47 +53,51 @@ enum hoedown_extensions {
 /* hoedown_callbacks - functions for rendering parsed data */
 struct hoedown_callbacks {
 	/* block level callbacks - NULL skips the block */
-	void (*blockcode)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, const struct hoedown_buffer *lang, void *opaque);
-	void (*blockquote)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	void (*blockhtml)(struct hoedown_buffer *ob,const  struct hoedown_buffer *text, void *opaque);
-	void (*header)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int level, void *opaque);
-	void (*hrule)(struct hoedown_buffer *ob, void *opaque);
-	void (*list)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int flags, void *opaque);
-	void (*listitem)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int flags, void *opaque);
-	void (*paragraph)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	void (*table)(struct hoedown_buffer *ob, const struct hoedown_buffer *header, const struct hoedown_buffer *body, void *opaque);
-	void (*table_row)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	void (*table_cell)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int flags, void *opaque);
-	void (*footnotes)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	void (*footnote_def)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, unsigned int num, void *opaque);
+	void (*blockcode)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, void *opaque);
+	void (*blockquote)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	void (*blockhtml)(hoedown_buffer *ob,const  hoedown_buffer *text, void *opaque);
+	void (*header)(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque);
+	void (*hrule)(hoedown_buffer *ob, void *opaque);
+	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
+	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
+	void (*paragraph)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	void (*table)(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, void *opaque);
+	void (*table_row)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
+	void (*footnotes)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	void (*footnote_def)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int num, void *opaque);
 
 	/* span level callbacks - NULL or return 0 prints the span verbatim */
-	int (*autolink)(struct hoedown_buffer *ob, const struct hoedown_buffer *link, enum hoedown_autolink type, void *opaque);
-	int (*codespan)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*double_emphasis)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*emphasis)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*underline)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*highlight)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*quote)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*image)(struct hoedown_buffer *ob, const struct hoedown_buffer *link, const struct hoedown_buffer *title, const struct hoedown_buffer *alt, void *opaque);
-	int (*linebreak)(struct hoedown_buffer *ob, void *opaque);
-	int (*link)(struct hoedown_buffer *ob, const struct hoedown_buffer *link, const struct hoedown_buffer *title, const struct hoedown_buffer *content, void *opaque);
-	int (*raw_html_tag)(struct hoedown_buffer *ob, const struct hoedown_buffer *tag, void *opaque);
-	int (*triple_emphasis)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*strikethrough)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*superscript)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
-	int (*footnote_ref)(struct hoedown_buffer *ob, unsigned int num, void *opaque);
+	int (*autolink)(hoedown_buffer *ob, const hoedown_buffer *link, enum hoedown_autolink type, void *opaque);
+	int (*codespan)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*double_emphasis)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*emphasis)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*underline)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*highlight)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*quote)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*image)(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *alt, void *opaque);
+	int (*linebreak)(hoedown_buffer *ob, void *opaque);
+	int (*link)(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *content, void *opaque);
+	int (*raw_html_tag)(hoedown_buffer *ob, const hoedown_buffer *tag, void *opaque);
+	int (*triple_emphasis)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*strikethrough)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*superscript)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*footnote_ref)(hoedown_buffer *ob, unsigned int num, void *opaque);
 
 	/* low level callbacks - NULL copies input directly into the output */
-	void (*entity)(struct hoedown_buffer *ob, const struct hoedown_buffer *entity, void *opaque);
-	void (*normal_text)(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque);
+	void (*entity)(hoedown_buffer *ob, const hoedown_buffer *entity, void *opaque);
+	void (*normal_text)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 
 	/* header and footer */
-	void (*doc_header)(struct hoedown_buffer *ob, void *opaque);
-	void (*doc_footer)(struct hoedown_buffer *ob, void *opaque);
+	void (*doc_header)(hoedown_buffer *ob, void *opaque);
+	void (*doc_footer)(hoedown_buffer *ob, void *opaque);
 };
 
+typedef struct hoedown_callbacks hoedown_callbacks;
+
 struct hoedown_markdown;
+
+typedef struct hoedown_markdown hoedown_markdown;
 
 /*********
  * FLAGS *
@@ -107,18 +111,18 @@ struct hoedown_markdown;
  * EXPORTED FUNCTIONS *
  **********************/
 
-extern struct hoedown_markdown *
+extern hoedown_markdown *
 hoedown_markdown_new(
 	unsigned int extensions,
 	size_t max_nesting,
-	const struct hoedown_callbacks *callbacks,
+	const hoedown_callbacks *callbacks,
 	void *opaque);
 
 extern void
-hoedown_markdown_render(struct hoedown_buffer *ob, const uint8_t *document, size_t doc_size, struct hoedown_markdown *md);
+hoedown_markdown_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_size, hoedown_markdown *md);
 
 extern void
-hoedown_markdown_free(struct hoedown_markdown *md);
+hoedown_markdown_free(hoedown_markdown *md);
 
 extern void
 hoedown_version(int *major, int *minor, int *revision);

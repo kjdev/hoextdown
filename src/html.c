@@ -42,12 +42,12 @@ hoedown_html_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagnam
 	return HOEDOWN_HTML_TAG_NONE;
 }
 
-static inline void escape_html(struct hoedown_buffer *ob, const uint8_t *source, size_t length)
+static inline void escape_html(hoedown_buffer *ob, const uint8_t *source, size_t length)
 {
 	hoedown_escape_html(ob, source, length, 0);
 }
 
-static inline void escape_href(struct hoedown_buffer *ob, const uint8_t *source, size_t length)
+static inline void escape_href(hoedown_buffer *ob, const uint8_t *source, size_t length)
 {
 	hoedown_escape_href(ob, source, length);
 }
@@ -56,9 +56,9 @@ static inline void escape_href(struct hoedown_buffer *ob, const uint8_t *source,
  * GENERIC RENDERER *
  ********************/
 static int
-rndr_autolink(struct hoedown_buffer *ob, const struct hoedown_buffer *link, enum hoedown_autolink type, void *opaque)
+rndr_autolink(hoedown_buffer *ob, const hoedown_buffer *link, enum hoedown_autolink type, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 
 	if (!link || !link->size)
 		return 0;
@@ -98,9 +98,9 @@ rndr_autolink(struct hoedown_buffer *ob, const struct hoedown_buffer *link, enum
 }
 
 static void
-rndr_blockcode(struct hoedown_buffer *ob, const struct hoedown_buffer *text, const struct hoedown_buffer *lang, void *opaque)
+rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 
@@ -144,7 +144,7 @@ rndr_blockcode(struct hoedown_buffer *ob, const struct hoedown_buffer *text, con
 }
 
 static void
-rndr_blockquote(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_blockquote(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	BUFPUTSL(ob, "<blockquote>\n");
@@ -153,9 +153,9 @@ rndr_blockquote(struct hoedown_buffer *ob, const struct hoedown_buffer *text, vo
 }
 
 static int
-rndr_codespan(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_codespan(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 	if (options->flags & HOEDOWN_HTML_PRETTIFY)
 		BUFPUTSL(ob, "<code class=\"prettyprint\">");
 	else
@@ -166,7 +166,7 @@ rndr_codespan(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void
 }
 
 static int
-rndr_strikethrough(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_strikethrough(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (!text || !text->size)
 		return 0;
@@ -178,7 +178,7 @@ rndr_strikethrough(struct hoedown_buffer *ob, const struct hoedown_buffer *text,
 }
 
 static int
-rndr_double_emphasis(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_double_emphasis(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (!text || !text->size)
 		return 0;
@@ -191,7 +191,7 @@ rndr_double_emphasis(struct hoedown_buffer *ob, const struct hoedown_buffer *tex
 }
 
 static int
-rndr_emphasis(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_emphasis(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (!text || !text->size) return 0;
 	BUFPUTSL(ob, "<em>");
@@ -201,7 +201,7 @@ rndr_emphasis(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void
 }
 
 static int
-rndr_underline(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_underline(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (!text || !text->size)
 		return 0;
@@ -214,7 +214,7 @@ rndr_underline(struct hoedown_buffer *ob, const struct hoedown_buffer *text, voi
 }
 
 static int
-rndr_highlight(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_highlight(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (!text || !text->size)
 		return 0;
@@ -227,7 +227,7 @@ rndr_highlight(struct hoedown_buffer *ob, const struct hoedown_buffer *text, voi
 }
 
 static int
-rndr_quote(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_quote(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (!text || !text->size)
 		return 0;
@@ -240,15 +240,15 @@ rndr_quote(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *o
 }
 
 static int
-rndr_linebreak(struct hoedown_buffer *ob, void *opaque)
+rndr_linebreak(hoedown_buffer *ob, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 	hoedown_buffer_puts(ob, USE_XHTML(options) ? "<br/>\n" : "<br>\n");
 	return 1;
 }
 
 static char *
-header_id(const struct hoedown_buffer *text)
+header_id(const hoedown_buffer *text)
 {
 	char *str = malloc(text->size);
 
@@ -271,9 +271,9 @@ header_id(const struct hoedown_buffer *text)
 }
 
 static void
-rndr_header(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int level, void *opaque)
+rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 
 	if (ob->size)
 		hoedown_buffer_putc(ob, '\n');
@@ -291,9 +291,9 @@ rndr_header(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int le
 }
 
 static int
-rndr_link(struct hoedown_buffer *ob, const struct hoedown_buffer *link, const struct hoedown_buffer *title, const struct hoedown_buffer *content, void *opaque)
+rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *content, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 
 	if (link != NULL && (options->flags & HOEDOWN_HTML_SAFELINK) != 0 && !hoedown_autolink_is_safe(link->data, link->size))
 		return 0;
@@ -322,7 +322,7 @@ rndr_link(struct hoedown_buffer *ob, const struct hoedown_buffer *link, const st
 }
 
 static void
-rndr_list(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int flags, void *opaque)
+rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
 {
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	hoedown_buffer_put(ob, flags & HOEDOWN_LIST_ORDERED ? "<ol>\n" : "<ul>\n", 5);
@@ -331,7 +331,7 @@ rndr_list(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int flag
 }
 
 static void
-rndr_listitem(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int flags, void *opaque)
+rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
 {
 	BUFPUTSL(ob, "<li>");
 	if (text) {
@@ -345,9 +345,9 @@ rndr_listitem(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int 
 }
 
 static void
-rndr_paragraph(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_paragraph(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 	size_t i = 0;
 
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
@@ -388,7 +388,7 @@ rndr_paragraph(struct hoedown_buffer *ob, const struct hoedown_buffer *text, voi
 }
 
 static void
-rndr_raw_block(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_raw_block(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	size_t org, sz;
 	if (!text) return;
@@ -403,7 +403,7 @@ rndr_raw_block(struct hoedown_buffer *ob, const struct hoedown_buffer *text, voi
 }
 
 static int
-rndr_triple_emphasis(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_triple_emphasis(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (!text || !text->size) return 0;
 	BUFPUTSL(ob, "<strong><em>");
@@ -413,17 +413,17 @@ rndr_triple_emphasis(struct hoedown_buffer *ob, const struct hoedown_buffer *tex
 }
 
 static void
-rndr_hrule(struct hoedown_buffer *ob, void *opaque)
+rndr_hrule(hoedown_buffer *ob, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	hoedown_buffer_puts(ob, USE_XHTML(options) ? "<hr/>\n" : "<hr>\n");
 }
 
 static int
-rndr_image(struct hoedown_buffer *ob, const struct hoedown_buffer *link, const struct hoedown_buffer *title, const struct hoedown_buffer *alt, void *opaque)
+rndr_image(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *alt, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 	if (!link || !link->size) return 0;
 
 	BUFPUTSL(ob, "<img src=\"");
@@ -442,9 +442,9 @@ rndr_image(struct hoedown_buffer *ob, const struct hoedown_buffer *link, const s
 }
 
 static int
-rndr_raw_html(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_raw_html(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 
 	/* HTML_ESCAPE overrides SKIP_HTML, SKIP_STYLE, SKIP_LINKS and SKIP_IMAGES
 	* It doens't see if there are any valid tags, just escape all of them. */
@@ -473,7 +473,7 @@ rndr_raw_html(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void
 }
 
 static void
-rndr_table(struct hoedown_buffer *ob, const struct hoedown_buffer *header, const struct hoedown_buffer *body, void *opaque)
+rndr_table(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, void *opaque)
 {
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	BUFPUTSL(ob, "<table><thead>\n");
@@ -486,7 +486,7 @@ rndr_table(struct hoedown_buffer *ob, const struct hoedown_buffer *header, const
 }
 
 static void
-rndr_tablerow(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_tablerow(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	BUFPUTSL(ob, "<tr>\n");
 	if (text)
@@ -495,7 +495,7 @@ rndr_tablerow(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void
 }
 
 static void
-rndr_tablecell(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int flags, void *opaque)
+rndr_tablecell(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
 {
 	if (flags & HOEDOWN_TABLE_HEADER) {
 		BUFPUTSL(ob, "<th");
@@ -531,7 +531,7 @@ rndr_tablecell(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int
 }
 
 static int
-rndr_superscript(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_superscript(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (!text || !text->size) return 0;
 	BUFPUTSL(ob, "<sup>");
@@ -541,16 +541,16 @@ rndr_superscript(struct hoedown_buffer *ob, const struct hoedown_buffer *text, v
 }
 
 static void
-rndr_normal_text(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_normal_text(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	if (text)
 		escape_html(ob, text->data, text->size);
 }
 
 static void
-rndr_footnotes(struct hoedown_buffer *ob, const struct hoedown_buffer *text, void *opaque)
+rndr_footnotes(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	BUFPUTSL(ob, "<div class=\"footnotes\">\n");
@@ -564,7 +564,7 @@ rndr_footnotes(struct hoedown_buffer *ob, const struct hoedown_buffer *text, voi
 }
 
 static void
-rndr_footnote_def(struct hoedown_buffer *ob, const struct hoedown_buffer *text, unsigned int num, void *opaque)
+rndr_footnote_def(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int num, void *opaque)
 {
 	size_t i = 0;
 	int pfound = 0;
@@ -594,16 +594,16 @@ rndr_footnote_def(struct hoedown_buffer *ob, const struct hoedown_buffer *text, 
 }
 
 static int
-rndr_footnote_ref(struct hoedown_buffer *ob, unsigned int num, void *opaque)
+rndr_footnote_ref(hoedown_buffer *ob, unsigned int num, void *opaque)
 {
 	hoedown_buffer_printf(ob, "<sup id=\"fnref%d\"><a href=\"#fn%d\" rel=\"footnote\">%d</a></sup>", num, num, num);
 	return 1;
 }
 
 static void
-toc_header(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int level, void *opaque)
+toc_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 
 	if (level <= options->toc_data.nesting_level) {
 		char* id;
@@ -641,7 +641,7 @@ toc_header(struct hoedown_buffer *ob, const struct hoedown_buffer *text, int lev
 }
 
 static int
-toc_link(struct hoedown_buffer *ob, const struct hoedown_buffer *link, const struct hoedown_buffer *title, const struct hoedown_buffer *content, void *opaque)
+toc_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *content, void *opaque)
 {
 	if (content && content->size)
 		hoedown_buffer_put(ob, content->data, content->size);
@@ -649,9 +649,9 @@ toc_link(struct hoedown_buffer *ob, const struct hoedown_buffer *link, const str
 }
 
 static void
-toc_finalize(struct hoedown_buffer *ob, void *opaque)
+toc_finalize(hoedown_buffer *ob, void *opaque)
 {
-	struct hoedown_html_renderopt *options = opaque;
+	hoedown_html_renderopt *options = opaque;
 
 	while (options->toc_data.current_level > 0) {
 		BUFPUTSL(ob, "</li>\n</ul>\n");
@@ -660,9 +660,9 @@ toc_finalize(struct hoedown_buffer *ob, void *opaque)
 }
 
 void
-hoedown_html_toc_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, int nesting_level)
+hoedown_html_toc_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *options, int nesting_level)
 {
-	static const struct hoedown_callbacks cb_default = {
+	static const hoedown_callbacks cb_default = {
 		NULL,
 		NULL,
 		NULL,
@@ -700,9 +700,9 @@ hoedown_html_toc_renderer(struct hoedown_callbacks *callbacks, struct hoedown_ht
 		toc_finalize,
 	};
 
-	memcpy(callbacks, &cb_default, sizeof(struct hoedown_callbacks));
+	memcpy(callbacks, &cb_default, sizeof(hoedown_callbacks));
 
-	memset(options, 0, sizeof(struct hoedown_html_renderopt));
+	memset(options, 0, sizeof(hoedown_html_renderopt));
 
 	if (nesting_level > 0) {
 		options->flags |= HOEDOWN_HTML_TOC;
@@ -711,9 +711,9 @@ hoedown_html_toc_renderer(struct hoedown_callbacks *callbacks, struct hoedown_ht
 }
 
 void
-hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level)
+hoedown_html_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level)
 {
-	static const struct hoedown_callbacks cb_default = {
+	static const hoedown_callbacks cb_default = {
 		rndr_blockcode,
 		rndr_blockquote,
 		rndr_raw_block,
@@ -752,7 +752,7 @@ hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_r
 	};
 
 	/* Prepare the options pointer */
-	memset(options, 0x0, sizeof(struct hoedown_html_renderopt));
+	memset(options, 0x0, sizeof(hoedown_html_renderopt));
 	options->flags = render_flags;
 
 	if (nesting_level > 0) {
@@ -761,7 +761,7 @@ hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_r
 	}
 
 	/* Prepare the callbacks */
-	memcpy(callbacks, &cb_default, sizeof(struct hoedown_callbacks));
+	memcpy(callbacks, &cb_default, sizeof(hoedown_callbacks));
 
 	if (render_flags & HOEDOWN_HTML_SKIP_IMAGES)
 		callbacks->image = NULL;

@@ -30,8 +30,8 @@ const char *hoedown_find_block_tag(const char *str, unsigned int len);
 struct link_ref {
 	unsigned int id;
 
-	struct hoedown_buffer *link;
-	struct hoedown_buffer *title;
+	hoedown_buffer *link;
+	hoedown_buffer *title;
 
 	struct link_ref *next;
 };
@@ -43,7 +43,7 @@ struct footnote_ref {
 	int is_used;
 	unsigned int num;
 	
-	struct hoedown_buffer *contents;
+	hoedown_buffer *contents;
 };
 
 /* footnote_item: an item in a footnote_list */
@@ -63,22 +63,21 @@ struct footnote_list {
 /*   returns the number of chars taken care of */
 /*   data is the pointer of the beginning of the span */
 /*   offset is the number of valid chars before data */
-struct hoedown_markdown;
 typedef size_t
-(*char_trigger)(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+(*char_trigger)(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
 
-static size_t char_emphasis(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_quote(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_linebreak(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_codespan(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_escape(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_entity(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_langle_tag(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_autolink_url(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_autolink_email(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_autolink_www(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_link(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
-static size_t char_superscript(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_emphasis(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_quote(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_linebreak(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_codespan(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_escape(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_entity(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_langle_tag(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_autolink_url(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_autolink_email(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_autolink_www(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
+static size_t char_superscript(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size);
 
 enum markdown_char_t {
 	MD_CHAR_NONE = 0,
@@ -114,7 +113,7 @@ static char_trigger markdown_char_ptrs[] = {
 
 /* render • structure containing one particular render */
 struct hoedown_markdown {
-	struct hoedown_callbacks	cb;
+	hoedown_callbacks	cb;
 	void *opaque;
 
 	struct link_ref *refs[REF_TABLE_SIZE];
@@ -131,11 +130,11 @@ struct hoedown_markdown {
  * HELPER FUNCTIONS *
  ***************************/
 
-static inline struct hoedown_buffer *
-rndr_newbuf(struct hoedown_markdown *rndr, int type)
+static inline hoedown_buffer *
+rndr_newbuf(hoedown_markdown *rndr, int type)
 {
 	static const size_t buf_size[2] = {256, 64};
-	struct hoedown_buffer *work = NULL;
+	hoedown_buffer *work = NULL;
 	struct hoedown_stack *pool = &rndr->work_bufs[type];
 
 	if (pool->size < pool->asize &&
@@ -151,13 +150,13 @@ rndr_newbuf(struct hoedown_markdown *rndr, int type)
 }
 
 static inline void
-rndr_popbuf(struct hoedown_markdown *rndr, int type)
+rndr_popbuf(hoedown_markdown *rndr, int type)
 {
 	rndr->work_bufs[type].size--;
 }
 
 static void
-unscape_text(struct hoedown_buffer *ob, struct hoedown_buffer *src)
+unscape_text(hoedown_buffer *ob, hoedown_buffer *src)
 {
 	size_t i = 0, org;
 	while (i < src->size) {
@@ -430,11 +429,11 @@ tag_length(uint8_t *data, size_t size, enum hoedown_autolink *autolink)
 
 /* parse_inline • parses inline markdown elements */
 static void
-parse_inline(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size)
+parse_inline(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size)
 {
 	size_t i = 0, end = 0;
 	uint8_t action = 0;
-	struct hoedown_buffer work = { 0, 0, 0, 0 };
+	hoedown_buffer work = { 0, 0, 0, 0 };
 
 	if (rndr->work_bufs[BUFFER_SPAN].size +
 		rndr->work_bufs[BUFFER_BLOCK].size > rndr->max_nesting)
@@ -561,10 +560,10 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 /* parse_emph1 • parsing single emphase */
 /* closed by a symbol not preceded by whitespace and not followed by symbol */
 static size_t
-parse_emph1(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size, uint8_t c)
+parse_emph1(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size, uint8_t c)
 {
 	size_t i = 0, len;
-	struct hoedown_buffer *work = 0;
+	hoedown_buffer *work = 0;
 	int r;
 
 	/* skipping one symbol if coming from emph3 */
@@ -601,10 +600,10 @@ parse_emph1(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *d
 
 /* parse_emph2 • parsing single emphase */
 static size_t
-parse_emph2(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size, uint8_t c)
+parse_emph2(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size, uint8_t c)
 {
 	size_t i = 0, len;
-	struct hoedown_buffer *work = 0;
+	hoedown_buffer *work = 0;
 	int r;
 
 	while (i < size) {
@@ -634,7 +633,7 @@ parse_emph2(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *d
 /* parse_emph3 • parsing single emphase */
 /* finds the first closing tag, and delegates to the other emph */
 static size_t
-parse_emph3(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size, uint8_t c)
+parse_emph3(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size, uint8_t c)
 {
 	size_t i = 0, len;
 	int r;
@@ -650,7 +649,7 @@ parse_emph3(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *d
 
 		if (i + 2 < size && data[i + 1] == c && data[i + 2] == c && rndr->cb.triple_emphasis) {
 			/* triple symbol found */
-			struct hoedown_buffer *work = rndr_newbuf(rndr, BUFFER_SPAN);
+			hoedown_buffer *work = rndr_newbuf(rndr, BUFFER_SPAN);
 
 			parse_inline(work, rndr, data, i);
 			r = rndr->cb.triple_emphasis(ob, work, rndr->opaque);
@@ -675,7 +674,7 @@ parse_emph3(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *d
 
 /* char_emphasis • single and double emphasis parsing */
 static size_t
-char_emphasis(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_emphasis(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
 	uint8_t c = data[0];
 	size_t ret;
@@ -714,7 +713,7 @@ char_emphasis(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t 
 
 /* char_linebreak • '\n' preceded by two spaces (assuming linebreak != 0) */
 static size_t
-char_linebreak(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_linebreak(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
 	if (offset < 2 || data[-1] != ' ' || data[-2] != ' ')
 		return 0;
@@ -729,7 +728,7 @@ char_linebreak(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t
 
 /* char_codespan • '`' parsing a code span (assuming codespan != 0) */
 static size_t
-char_codespan(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_codespan(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
 	size_t end, nb = 0, i, f_begin, f_end;
 
@@ -758,7 +757,7 @@ char_codespan(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t 
 
 	/* real code span */
 	if (f_begin < f_end) {
-		struct hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0 };
+		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0 };
 		if (!rndr->cb.codespan(ob, &work, rndr->opaque))
 			end = 0;
 	} else {
@@ -771,7 +770,7 @@ char_codespan(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t 
 
 /* char_quote • '"' parsing a quote */
 static size_t
-char_quote(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_quote(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {    
 	size_t end, nq = 0, i, f_begin, f_end;
 
@@ -800,7 +799,7 @@ char_quote(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *da
 
 	/* real quote */
 	if (f_begin < f_end) {
-		struct hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0 };
+		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0 };
 		if (!rndr->cb.quote(ob, &work, rndr->opaque))
 			end = 0;
 	} else {
@@ -814,10 +813,10 @@ char_quote(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *da
 
 /* char_escape • '\\' backslash escape */
 static size_t
-char_escape(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_escape(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
 	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~";
-	struct hoedown_buffer work = { 0, 0, 0, 0 };
+	hoedown_buffer work = { 0, 0, 0, 0 };
 
 	if (size > 1) {
 		if (strchr(escape_chars, data[1]) == NULL)
@@ -839,10 +838,10 @@ char_escape(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *d
 /* char_entity • '&' escaped when it doesn't belong to an entity */
 /* valid entities are assumed to be anything matching &#?[A-Za-z0-9]+; */
 static size_t
-char_entity(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_entity(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
 	size_t end = 1;
-	struct hoedown_buffer work = { 0, 0, 0, 0 };
+	hoedown_buffer work = { 0, 0, 0, 0 };
 
 	if (end < size && data[end] == '#')
 		end++;
@@ -867,16 +866,16 @@ char_entity(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *d
 
 /* char_langle_tag • '<' when tags or autolinks are allowed */
 static size_t
-char_langle_tag(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_langle_tag(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
 	enum hoedown_autolink altype = HOEDOWN_AUTOLINK_NONE;
 	size_t end = tag_length(data, size, &altype);
-	struct hoedown_buffer work = { data, end, 0, 0 };
+	hoedown_buffer work = { data, end, 0, 0 };
 	int ret = 0;
 
 	if (end > 2) {
 		if (rndr->cb.autolink && altype != HOEDOWN_AUTOLINK_NONE) {
-			struct hoedown_buffer *u_link = rndr_newbuf(rndr, BUFFER_SPAN);
+			hoedown_buffer *u_link = rndr_newbuf(rndr, BUFFER_SPAN);
 			work.data = data + 1;
 			work.size = end - 2;
 			unscape_text(u_link, &work);
@@ -892,9 +891,9 @@ char_langle_tag(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_
 }
 
 static size_t
-char_autolink_www(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_autolink_www(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
-	struct hoedown_buffer *link, *link_url, *link_text;
+	hoedown_buffer *link, *link_url, *link_text;
 	size_t link_len, rewind;
 
 	if (!rndr->cb.link || rndr->in_link_body)
@@ -924,9 +923,9 @@ char_autolink_www(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint
 }
 
 static size_t
-char_autolink_email(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_autolink_email(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
-	struct hoedown_buffer *link;
+	hoedown_buffer *link;
 	size_t link_len, rewind;
 
 	if (!rndr->cb.autolink || rndr->in_link_body)
@@ -944,9 +943,9 @@ char_autolink_email(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, ui
 }
 
 static size_t
-char_autolink_url(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_autolink_url(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
-	struct hoedown_buffer *link;
+	hoedown_buffer *link;
 	size_t link_len, rewind;
 
 	if (!rndr->cb.autolink || rndr->in_link_body)
@@ -965,14 +964,14 @@ char_autolink_url(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint
 
 /* char_link • '[': parsing a link or an image */
 static size_t
-char_link(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
 	int is_img = (offset && data[-1] == '!'), level;
 	size_t i = 1, txt_e, link_b = 0, link_e = 0, title_b = 0, title_e = 0;
-	struct hoedown_buffer *content = 0;
-	struct hoedown_buffer *link = 0;
-	struct hoedown_buffer *title = 0;
-	struct hoedown_buffer *u_link = 0;
+	hoedown_buffer *content = 0;
+	hoedown_buffer *link = 0;
+	hoedown_buffer *title = 0;
+	hoedown_buffer *u_link = 0;
 	size_t org_work_size = rndr->work_bufs[BUFFER_SPAN].size;
 	int text_has_nl = 0, ret = 0;
 	int in_title = 0, qtype = 0;
@@ -1007,7 +1006,7 @@ char_link(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *dat
 	
 	/* footnote link */
 	if (rndr->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^') {
-		struct hoedown_buffer id = { 0, 0, 0, 0 };
+		hoedown_buffer id = { 0, 0, 0, 0 };
 		struct footnote_ref *fr;
 
 		if (txt_e < 3)
@@ -1121,7 +1120,7 @@ char_link(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *dat
 
 	/* reference style link */
 	else if (i < size && data[i] == '[') {
-		struct hoedown_buffer id = { 0, 0, 0, 0 };
+		hoedown_buffer id = { 0, 0, 0, 0 };
 		struct link_ref *lr;
 
 		/* looking for the id */
@@ -1134,7 +1133,7 @@ char_link(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *dat
 		/* finding the link_ref */
 		if (link_b == link_e) {
 			if (text_has_nl) {
-				struct hoedown_buffer *b = rndr_newbuf(rndr, BUFFER_SPAN);
+				hoedown_buffer *b = rndr_newbuf(rndr, BUFFER_SPAN);
 				size_t j;
 
 				for (j = 1; j < txt_e; j++) {
@@ -1167,12 +1166,12 @@ char_link(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *dat
 
 	/* shortcut reference style link */
 	else {
-		struct hoedown_buffer id = { 0, 0, 0, 0 };
+		hoedown_buffer id = { 0, 0, 0, 0 };
 		struct link_ref *lr;
 
 		/* crafting the id */
 		if (text_has_nl) {
-			struct hoedown_buffer *b = rndr_newbuf(rndr, BUFFER_SPAN);
+			hoedown_buffer *b = rndr_newbuf(rndr, BUFFER_SPAN);
 			size_t j;
 
 			for (j = 1; j < txt_e; j++) {
@@ -1238,10 +1237,10 @@ cleanup:
 }
 
 static size_t
-char_superscript(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
+char_superscript(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offset, size_t size)
 {
 	size_t sup_start, sup_len;
-	struct hoedown_buffer *sup;
+	hoedown_buffer *sup;
 
 	if (!rndr->cb.superscript)
 		return 0;
@@ -1356,7 +1355,7 @@ prefix_codefence(uint8_t *data, size_t size)
 
 /* check if a line is a code fence; return its size if it is */
 static size_t
-is_codefence(uint8_t *data, size_t size, struct hoedown_buffer *syntax)
+is_codefence(uint8_t *data, size_t size, hoedown_buffer *syntax)
 {
 	size_t i = 0, syn_len = 0;
 	uint8_t *syn_start;
@@ -1413,7 +1412,7 @@ is_codefence(uint8_t *data, size_t size, struct hoedown_buffer *syntax)
 
 /* is_atxheader • returns whether the line is a hash-prefixed header */
 static int
-is_atxheader(struct hoedown_markdown *rndr, uint8_t *data, size_t size)
+is_atxheader(hoedown_markdown *rndr, uint8_t *data, size_t size)
 {
 	if (data[0] != '#')
 		return 0;
@@ -1543,17 +1542,17 @@ prefix_uli(uint8_t *data, size_t size)
 
 
 /* parse_block • parsing of one block, returning next uint8_t to parse */
-static void parse_block(struct hoedown_buffer *ob, struct hoedown_markdown *rndr,
+static void parse_block(hoedown_buffer *ob, hoedown_markdown *rndr,
 			uint8_t *data, size_t size);
 
 
 /* parse_blockquote • handles parsing of a blockquote fragment */
 static size_t
-parse_blockquote(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size)
+parse_blockquote(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size)
 {
 	size_t beg, end = 0, pre, work_size = 0;
 	uint8_t *work_data = 0;
-	struct hoedown_buffer *out = 0;
+	hoedown_buffer *out = 0;
 
 	out = rndr_newbuf(rndr, BUFFER_BLOCK);
 	beg = 0;
@@ -1590,15 +1589,15 @@ parse_blockquote(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8
 }
 
 static size_t
-parse_htmlblock(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size, int do_render);
+parse_htmlblock(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size, int do_render);
 
 /* parse_blockquote • handles parsing of a regular paragraph */
 static size_t
-parse_paragraph(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size)
+parse_paragraph(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size)
 {
 	size_t i = 0, end = 0;
 	int level = 0;
-	struct hoedown_buffer work = { data, 0, 0, 0 };
+	hoedown_buffer work = { data, 0, 0, 0 };
 
 	while (i < size) {
 		for (end = i + 1; end < size && data[end - 1] != '\n'; end++) /* empty */;
@@ -1655,13 +1654,13 @@ parse_paragraph(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_
 		work.size--;
 
 	if (!level) {
-		struct hoedown_buffer *tmp = rndr_newbuf(rndr, BUFFER_BLOCK);
+		hoedown_buffer *tmp = rndr_newbuf(rndr, BUFFER_BLOCK);
 		parse_inline(tmp, rndr, work.data, work.size);
 		if (rndr->cb.paragraph)
 			rndr->cb.paragraph(ob, tmp, rndr->opaque);
 		rndr_popbuf(rndr, BUFFER_BLOCK);
 	} else {
-		struct hoedown_buffer *header_work;
+		hoedown_buffer *header_work;
 
 		if (work.size) {
 			size_t beg;
@@ -1676,7 +1675,7 @@ parse_paragraph(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_
 				work.size -= 1;
 
 			if (work.size > 0) {
-				struct hoedown_buffer *tmp = rndr_newbuf(rndr, BUFFER_BLOCK);
+				hoedown_buffer *tmp = rndr_newbuf(rndr, BUFFER_BLOCK);
 				parse_inline(tmp, rndr, work.data, work.size);
 
 				if (rndr->cb.paragraph)
@@ -1703,11 +1702,11 @@ parse_paragraph(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_
 
 /* parse_fencedcode • handles parsing of a block-level code fragment */
 static size_t
-parse_fencedcode(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size)
+parse_fencedcode(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size)
 {
 	size_t beg, end;
-	struct hoedown_buffer *work = 0;
-	struct hoedown_buffer lang = { 0, 0, 0, 0 };
+	hoedown_buffer *work = 0;
+	hoedown_buffer lang = { 0, 0, 0, 0 };
 
 	beg = is_codefence(data, size, &lang);
 	if (beg == 0) return 0;
@@ -1716,7 +1715,7 @@ parse_fencedcode(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8
 
 	while (beg < size) {
 		size_t fence_end;
-		struct hoedown_buffer fence_trail = { 0, 0, 0, 0 };
+		hoedown_buffer fence_trail = { 0, 0, 0, 0 };
 
 		fence_end = is_codefence(data + beg, size - beg, &fence_trail);
 		if (fence_end != 0 && fence_trail.size == 0) {
@@ -1747,10 +1746,10 @@ parse_fencedcode(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8
 }
 
 static size_t
-parse_blockcode(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size)
+parse_blockcode(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size)
 {
 	size_t beg, end, pre;
-	struct hoedown_buffer *work = 0;
+	hoedown_buffer *work = 0;
 
 	work = rndr_newbuf(rndr, BUFFER_BLOCK);
 
@@ -1790,9 +1789,9 @@ parse_blockcode(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_
 /* parse_listitem • parsing of a single list item */
 /*	assuming initial prefix is already removed */
 static size_t
-parse_listitem(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size, int *flags)
+parse_listitem(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size, int *flags)
 {
-	struct hoedown_buffer *work = 0, *inter = 0;
+	hoedown_buffer *work = 0, *inter = 0;
 	size_t beg = 0, end, pre, sublist = 0, orgpre = 0, i;
 	int in_empty = 0, has_inside_empty = 0, in_fence = 0;
 
@@ -1927,9 +1926,9 @@ parse_listitem(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t
 
 /* parse_list • parsing ordered or unordered list block */
 static size_t
-parse_list(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size, int flags)
+parse_list(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size, int flags)
 {
-	struct hoedown_buffer *work = 0;
+	hoedown_buffer *work = 0;
 	size_t i = 0, j;
 
 	work = rndr_newbuf(rndr, BUFFER_BLOCK);
@@ -1950,7 +1949,7 @@ parse_list(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *da
 
 /* parse_atxheader • parsing of atx-style headers */
 static size_t
-parse_atxheader(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size)
+parse_atxheader(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size)
 {
 	size_t level = 0;
 	size_t i, end, skip;
@@ -1970,7 +1969,7 @@ parse_atxheader(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_
 		end--;
 
 	if (end > i) {
-		struct hoedown_buffer *work = rndr_newbuf(rndr, BUFFER_SPAN);
+		hoedown_buffer *work = rndr_newbuf(rndr, BUFFER_SPAN);
 
 		parse_inline(work, rndr, data + i, end - i);
 
@@ -1985,9 +1984,9 @@ parse_atxheader(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_
 
 /* parse_footnote_def • parse a single footnote definition */
 static void
-parse_footnote_def(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, unsigned int num, uint8_t *data, size_t size)
+parse_footnote_def(hoedown_buffer *ob, hoedown_markdown *rndr, unsigned int num, uint8_t *data, size_t size)
 {
-	struct hoedown_buffer *work = 0;
+	hoedown_buffer *work = 0;
 	work = rndr_newbuf(rndr, BUFFER_SPAN);
 	
 	parse_block(work, rndr, data, size);
@@ -1999,9 +1998,9 @@ parse_footnote_def(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uns
 
 /* parse_footnote_list • render the contents of the footnotes */
 static void
-parse_footnote_list(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, struct footnote_list *footnotes)
+parse_footnote_list(hoedown_buffer *ob, hoedown_markdown *rndr, struct footnote_list *footnotes)
 {
-	struct hoedown_buffer *work = 0;
+	hoedown_buffer *work = 0;
 	struct footnote_item *item;
 	struct footnote_ref *ref;
 	
@@ -2028,7 +2027,7 @@ static size_t
 htmlblock_end_tag(
 	const char *tag,
 	size_t tag_len,
-	struct hoedown_markdown *rndr,
+	hoedown_markdown *rndr,
 	uint8_t *data,
 	size_t size)
 {
@@ -2056,7 +2055,7 @@ htmlblock_end_tag(
 
 static size_t
 htmlblock_end(const char *curtag,
-	struct hoedown_markdown *rndr,
+	hoedown_markdown *rndr,
 	uint8_t *data,
 	size_t size,
 	int start_of_line)
@@ -2098,11 +2097,11 @@ htmlblock_end(const char *curtag,
 
 /* parse_htmlblock • parsing of inline HTML block */
 static size_t
-parse_htmlblock(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size, int do_render)
+parse_htmlblock(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size, int do_render)
 {
 	size_t i, j = 0, tag_end;
 	const char *curtag = NULL;
-	struct hoedown_buffer work = { data, 0, 0, 0 };
+	hoedown_buffer work = { data, 0, 0, 0 };
 
 	/* identification of the opening tag */
 	if (size < 2 || data[0] != '<')
@@ -2183,8 +2182,8 @@ parse_htmlblock(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_
 
 static void
 parse_table_row(
-	struct hoedown_buffer *ob,
-	struct hoedown_markdown *rndr,
+	hoedown_buffer *ob,
+	hoedown_markdown *rndr,
 	uint8_t *data,
 	size_t size,
 	size_t columns,
@@ -2192,7 +2191,7 @@ parse_table_row(
 	int header_flag)
 {
 	size_t i = 0, col;
-	struct hoedown_buffer *row_work = 0;
+	hoedown_buffer *row_work = 0;
 
 	if (!rndr->cb.table_cell || !rndr->cb.table_row)
 		return;
@@ -2204,7 +2203,7 @@ parse_table_row(
 
 	for (col = 0; col < columns && i < size; ++col) {
 		size_t cell_start, cell_end;
-		struct hoedown_buffer *cell_work;
+		hoedown_buffer *cell_work;
 
 		cell_work = rndr_newbuf(rndr, BUFFER_SPAN);
 
@@ -2229,7 +2228,7 @@ parse_table_row(
 	}
 
 	for (; col < columns; ++col) {
-		struct hoedown_buffer empty_cell = { 0, 0, 0, 0 };
+		hoedown_buffer empty_cell = { 0, 0, 0, 0 };
 		rndr->cb.table_cell(row_work, &empty_cell, col_data[col] | header_flag, rndr->opaque);
 	}
 
@@ -2240,8 +2239,8 @@ parse_table_row(
 
 static size_t
 parse_table_header(
-	struct hoedown_buffer *ob,
-	struct hoedown_markdown *rndr,
+	hoedown_buffer *ob,
+	hoedown_markdown *rndr,
 	uint8_t *data,
 	size_t size,
 	size_t *columns,
@@ -2332,15 +2331,15 @@ parse_table_header(
 
 static size_t
 parse_table(
-	struct hoedown_buffer *ob,
-	struct hoedown_markdown *rndr,
+	hoedown_buffer *ob,
+	hoedown_markdown *rndr,
 	uint8_t *data,
 	size_t size)
 {
 	size_t i;
 
-	struct hoedown_buffer *header_work = 0;
-	struct hoedown_buffer *body_work = 0;
+	hoedown_buffer *header_work = 0;
+	hoedown_buffer *body_work = 0;
 
 	size_t columns;
 	int *col_data = NULL;
@@ -2390,7 +2389,7 @@ parse_table(
 
 /* parse_block • parsing of one block, returning next uint8_t to parse */
 static void
-parse_block(struct hoedown_buffer *ob, struct hoedown_markdown *rndr, uint8_t *data, size_t size)
+parse_block(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t size)
 {
 	size_t beg, end, i;
 	uint8_t *txt_data;
@@ -2460,7 +2459,7 @@ static int
 is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct footnote_list *list)
 {
 	size_t i = 0;
-	struct hoedown_buffer *contents = 0;
+	hoedown_buffer *contents = 0;
 	size_t ind = 0;
 	int in_empty = 0;
 	size_t start = 0;
@@ -2674,7 +2673,7 @@ is_ref(const uint8_t *data, size_t beg, size_t end, size_t *last, struct link_re
 	return 1;
 }
 
-static void expand_tabs(struct hoedown_buffer *ob, const uint8_t *line, size_t size)
+static void expand_tabs(hoedown_buffer *ob, const uint8_t *line, size_t size)
 {
 	size_t  i = 0, tab = 0;
 
@@ -2703,22 +2702,22 @@ static void expand_tabs(struct hoedown_buffer *ob, const uint8_t *line, size_t s
  * EXPORTED FUNCTIONS *
  **********************/
 
-struct hoedown_markdown *
+hoedown_markdown *
 hoedown_markdown_new(
 	unsigned int extensions,
 	size_t max_nesting,
-	const struct hoedown_callbacks *callbacks,
+	const hoedown_callbacks *callbacks,
 	void *opaque)
 {
-	struct hoedown_markdown *md = NULL;
+	hoedown_markdown *md = NULL;
 
 	assert(max_nesting > 0 && callbacks);
 
-	md = malloc(sizeof(struct hoedown_markdown));
+	md = malloc(sizeof(hoedown_markdown));
 	if (!md)
 		return NULL;
 
-	memcpy(&md->cb, callbacks, sizeof(struct hoedown_callbacks));
+	memcpy(&md->cb, callbacks, sizeof(hoedown_callbacks));
 
 	hoedown_stack_new(&md->work_bufs[BUFFER_BLOCK], 4);
 	hoedown_stack_new(&md->work_bufs[BUFFER_SPAN], 8);
@@ -2769,11 +2768,11 @@ hoedown_markdown_new(
 }
 
 void
-hoedown_markdown_render(struct hoedown_buffer *ob, const uint8_t *document, size_t doc_size, struct hoedown_markdown *md)
+hoedown_markdown_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_size, hoedown_markdown *md)
 {
 	static const uint8_t UTF8_BOM[] = {0xEF, 0xBB, 0xBF};
 
-	struct hoedown_buffer *text;
+	hoedown_buffer *text;
 	size_t beg, end;
 
 	int footnotes_enabled;
@@ -2863,7 +2862,7 @@ hoedown_markdown_render(struct hoedown_buffer *ob, const uint8_t *document, size
 }
 
 void
-hoedown_markdown_free(struct hoedown_markdown *md)
+hoedown_markdown_free(hoedown_markdown *md)
 {
 	size_t i;
 

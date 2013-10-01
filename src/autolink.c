@@ -144,7 +144,7 @@ check_domain(uint8_t *data, size_t size, int allow_short)
 size_t
 hoedown_autolink__www(
 	size_t *rewind_p,
-	struct hoedown_buffer *link,
+	hoedown_buffer *link,
 	uint8_t *data,
 	size_t max_rewind,
 	size_t size,
@@ -180,7 +180,7 @@ hoedown_autolink__www(
 size_t
 hoedown_autolink__email(
 	size_t *rewind_p,
-	struct hoedown_buffer *link,
+	hoedown_buffer *link,
 	uint8_t *data,
 	size_t max_rewind,
 	size_t size,
@@ -236,7 +236,7 @@ hoedown_autolink__email(
 size_t
 hoedown_autolink__url(
 	size_t *rewind_p,
-	struct hoedown_buffer *link,
+	hoedown_buffer *link,
 	uint8_t *data,
 	size_t max_rewind,
 	size_t size,

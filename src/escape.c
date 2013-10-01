@@ -51,7 +51,7 @@ static const char HREF_SAFE[] = {
 };
 
 void
-hoedown_escape_href(struct hoedown_buffer *ob, const uint8_t *src, size_t size)
+hoedown_escape_href(hoedown_buffer *ob, const uint8_t *src, size_t size)
 {
 	static const char hex_chars[] = "0123456789ABCDEF";
 	size_t  i = 0, org;
@@ -157,7 +157,7 @@ static const char *HTML_ESCAPES[] = {
 };
 
 void
-hoedown_escape_html(struct hoedown_buffer *ob, const uint8_t *src, size_t size, int secure)
+hoedown_escape_html(hoedown_buffer *ob, const uint8_t *src, size_t size, int secure)
 {
 	size_t i = 0, org, esc = 0;
 

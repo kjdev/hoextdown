@@ -8,11 +8,11 @@
 #define BUFFER_MAX_ALLOC_SIZE (1024 * 1024 * 16) /* 16mb */
 
 /* hoedown_buffer_new: allocation of a new buffer */
-struct hoedown_buffer *
+hoedown_buffer *
 hoedown_buffer_new(size_t unit)
 {
-	struct hoedown_buffer *ret;
-	ret = malloc(sizeof (struct hoedown_buffer));
+	hoedown_buffer *ret;
+	ret = malloc(sizeof (hoedown_buffer));
 
 	if (ret) {
 		ret->data = 0;
@@ -24,7 +24,7 @@ hoedown_buffer_new(size_t unit)
 
 /* hoedown_buffer_free: decrease the reference count and free the buffer if needed */
 void
-hoedown_buffer_free(struct hoedown_buffer *buf)
+hoedown_buffer_free(hoedown_buffer *buf)
 {
 	if (!buf)
 		return;
@@ -35,7 +35,7 @@ hoedown_buffer_free(struct hoedown_buffer *buf)
 
 /* hoedown_buffer_reset: frees internal data of the buffer */
 void
-hoedown_buffer_reset(struct hoedown_buffer *buf)
+hoedown_buffer_reset(hoedown_buffer *buf)
 {
 	if (!buf)
 		return;
@@ -47,7 +47,7 @@ hoedown_buffer_reset(struct hoedown_buffer *buf)
 
 /* hoedown_buffer_grow: increasing the allocated size to the given value */
 int
-hoedown_buffer_grow(struct hoedown_buffer *buf, size_t neosz)
+hoedown_buffer_grow(hoedown_buffer *buf, size_t neosz)
 {
 	size_t neoasz;
 	void *neodata;
@@ -75,7 +75,7 @@ hoedown_buffer_grow(struct hoedown_buffer *buf, size_t neosz)
 
 /* hoedown_buffer_put: appends raw data to a buffer */
 void
-hoedown_buffer_put(struct hoedown_buffer *buf, const void *data, size_t len)
+hoedown_buffer_put(hoedown_buffer *buf, const void *data, size_t len)
 {
 	assert(buf && buf->unit);
 
@@ -88,7 +88,7 @@ hoedown_buffer_put(struct hoedown_buffer *buf, const void *data, size_t len)
 
 /* hoedown_buffer_puts: appends a NUL-terminated string to a buffer */
 void
-hoedown_buffer_puts(struct hoedown_buffer *buf, const char *str)
+hoedown_buffer_puts(hoedown_buffer *buf, const char *str)
 {
 	hoedown_buffer_put(buf, str, strlen(str));
 }
@@ -96,7 +96,7 @@ hoedown_buffer_puts(struct hoedown_buffer *buf, const char *str)
 
 /* hoedown_buffer_putc: appends a single uint8_t to a buffer */
 void
-hoedown_buffer_putc(struct hoedown_buffer *buf, int c)
+hoedown_buffer_putc(hoedown_buffer *buf, int c)
 {
 	assert(buf && buf->unit);
 
@@ -108,7 +108,7 @@ hoedown_buffer_putc(struct hoedown_buffer *buf, int c)
 }
 
 int
-hoedown_buffer_prefix(const struct hoedown_buffer *buf, const char *prefix)
+hoedown_buffer_prefix(const hoedown_buffer *buf, const char *prefix)
 {
 	size_t i;
 	assert(buf && buf->unit);
@@ -126,7 +126,7 @@ hoedown_buffer_prefix(const struct hoedown_buffer *buf, const char *prefix)
 
 /* hoedown_buffer_slurp: removes a given number of bytes from the head of the array */
 void
-hoedown_buffer_slurp(struct hoedown_buffer *buf, size_t len)
+hoedown_buffer_slurp(hoedown_buffer *buf, size_t len)
 {
 	assert(buf && buf->unit);
 
@@ -141,7 +141,7 @@ hoedown_buffer_slurp(struct hoedown_buffer *buf, size_t len)
 
 /* hoedown_buffer_cstr: NULL-termination of the string array */
 const char *
-hoedown_buffer_cstr(struct hoedown_buffer *buf)
+hoedown_buffer_cstr(hoedown_buffer *buf)
 {
 	assert(buf && buf->unit);
 
@@ -158,7 +158,7 @@ hoedown_buffer_cstr(struct hoedown_buffer *buf)
 
 /* hoedown_buffer_printf: formatted printing to a buffer */
 void
-hoedown_buffer_printf(struct hoedown_buffer *buf, const char *fmt, ...)
+hoedown_buffer_printf(hoedown_buffer *buf, const char *fmt, ...)
 {
 	va_list ap;
 	int n;

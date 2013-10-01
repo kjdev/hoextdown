@@ -41,20 +41,22 @@ struct hoedown_html_renderopt {
 	unsigned int flags;
 
 	/* extra callbacks */
-	void (*link_attributes)(struct hoedown_buffer *ob, const struct hoedown_buffer *url, void *self);
+	void (*link_attributes)(hoedown_buffer *ob, const hoedown_buffer *url, void *self);
 };
+
+typedef struct hoedown_html_renderopt hoedown_html_renderopt;
 
 int
 hoedown_html_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagname);
 
 extern void
-hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level);
+hoedown_html_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level);
 
 extern void
-hoedown_html_toc_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, int nesting_level);
+hoedown_html_toc_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *options, int nesting_level);
 
 extern void
-hoedown_html_smartypants(struct hoedown_buffer *ob, const uint8_t *text, size_t size);
+hoedown_html_smartypants(hoedown_buffer *ob, const uint8_t *text, size_t size);
 
 #ifdef __cplusplus
 }

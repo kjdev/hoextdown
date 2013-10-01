@@ -9,8 +9,8 @@
 extern "C" {
 #endif
 
-extern void hoedown_escape_html(struct hoedown_buffer *ob, const uint8_t *src, size_t size, int secure);
-extern void hoedown_escape_href(struct hoedown_buffer *ob, const uint8_t *src, size_t size);
+extern void hoedown_escape_html(hoedown_buffer *ob, const uint8_t *src, size_t size, int secure);
+extern void hoedown_escape_href(hoedown_buffer *ob, const uint8_t *src, size_t size);
 
 #ifdef __cplusplus
 }

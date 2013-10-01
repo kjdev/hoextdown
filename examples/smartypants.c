@@ -11,7 +11,7 @@
 int
 main(int argc, char **argv)
 {
-	struct hoedown_buffer *ib, *ob;
+	hoedown_buffer *ib, *ob;
 	FILE *in = stdin;
 
 	/* opening the file if given from the command line */
