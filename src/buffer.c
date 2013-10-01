@@ -172,8 +172,15 @@ hoedown_buffer_printf(struct hoedown_buffer *buf, const char *fmt, ...)
 	n = vsnprintf((char *)buf->data + buf->size, buf->asize - buf->size, fmt, ap);
 	va_end(ap);
 
-	if (n < 0)
+	if (n < 0) {
+#ifndef _MSC_VER
 		return;
+#else
+		va_start(ap, fmt);
+		n = _vscprintf(fmt, ap);
+		va_end(ap);
+#endif
+	}
 
 	if ((size_t)n >= buf->asize - buf->size) {
 		if (hoedown_buffer_grow(buf, buf->size + n + 1) < 0)
