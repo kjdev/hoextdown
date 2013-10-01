@@ -41,7 +41,7 @@ main(int argc, char **argv)
 	/* performing markdown parsing */
 	ob = hoedown_buffer_new(OUTPUT_UNIT);
 
-	hoedown_html_renderer(&callbacks, &options, 0);
+	hoedown_html_renderer(&callbacks, &options, 0, 0);
 	markdown = hoedown_markdown_new(0, 16, &callbacks, &options);
 
 	hoedown_markdown_render(ob, ib->data, ib->size, markdown);

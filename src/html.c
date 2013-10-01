@@ -677,7 +677,7 @@ hoedown_html_toc_renderer(struct hoedown_callbacks *callbacks, struct hoedown_ht
 }
 
 void
-hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, unsigned int render_flags)
+hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_renderopt *options, unsigned int render_flags, int toc_nesting_lvl)
 {
 	static const struct hoedown_callbacks cb_default = {
 		rndr_blockcode,
@@ -720,6 +720,11 @@ hoedown_html_renderer(struct hoedown_callbacks *callbacks, struct hoedown_html_r
 	/* Prepare the options pointer */
 	memset(options, 0x0, sizeof(struct hoedown_html_renderopt));
 	options->flags = render_flags;
+
+	if (toc_nesting_lvl > 0) {
+		options->flags |= HOEDOWN_HTML_TOC;
+		options->toc_data.nesting_level = toc_nesting_lvl;
+	}
 
 	/* Prepare the callbacks */
 	memcpy(callbacks, &cb_default, sizeof(struct hoedown_callbacks));
