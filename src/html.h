@@ -31,29 +31,14 @@ typedef enum {
 	HOEDOWN_HTML_TAG_CLOSE
 } hoedown_html_tag;
 
-struct hoedown_html_renderopt {
-	struct {
-		int current_level;
-		int level_offset;
-		int nesting_level;
-	} toc_data;
-
-	unsigned int flags;
-
-	/* extra callbacks */
-	void (*link_attributes)(hoedown_buffer *ob, const hoedown_buffer *url, void *self);
-};
-
-typedef struct hoedown_html_renderopt hoedown_html_renderopt;
-
 int
 hoedown_html_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagname);
 
-extern void
-hoedown_html_renderer(hoedown_renderer *callbacks, hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level);
+extern hoedown_renderer *
+hoedown_html_renderer(unsigned int render_flags, int nesting_level);
 
-extern void
-hoedown_html_toc_renderer(hoedown_renderer *callbacks, hoedown_html_renderopt *options, int nesting_level);
+extern hoedown_renderer *
+hoedown_html_toc_renderer(int nesting_level);
 
 extern void
 hoedown_html_smartypants(hoedown_buffer *ob, const uint8_t *text, size_t size);
