@@ -675,7 +675,7 @@ toc_finalize(hoedown_buffer *ob, void *opaque)
 }
 
 hoedown_renderer *
-hoedown_html_toc_renderer(int nesting_level)
+hoedown_html_toc_renderer_new(int nesting_level)
 {
 	static const hoedown_renderer cb_default = {
 		NULL,
@@ -740,7 +740,7 @@ hoedown_html_toc_renderer(int nesting_level)
 }
 
 hoedown_renderer *
-hoedown_html_renderer(unsigned int render_flags, int nesting_level)
+hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 {
 	static const hoedown_renderer cb_default = {
 		rndr_blockcode,
@@ -815,4 +815,11 @@ hoedown_html_renderer(unsigned int render_flags, int nesting_level)
 	
 	renderer->opaque = options;
 	return renderer;
+}
+
+extern void
+hoedown_html_renderer_free(hoedown_renderer *renderer)
+{
+  free(renderer->opaque);
+  free(renderer);
 }

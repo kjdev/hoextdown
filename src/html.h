@@ -35,10 +35,13 @@ int
 hoedown_html_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagname);
 
 extern hoedown_renderer *
-hoedown_html_renderer(unsigned int render_flags, int nesting_level);
+hoedown_html_renderer_new(unsigned int render_flags, int nesting_level);
 
 extern hoedown_renderer *
-hoedown_html_toc_renderer(int nesting_level);
+hoedown_html_toc_renderer_new(int nesting_level);
+
+extern void
+hoedown_html_renderer_free(hoedown_renderer *renderer);
 
 extern void
 hoedown_html_smartypants(hoedown_buffer *ob, const uint8_t *text, size_t size);
