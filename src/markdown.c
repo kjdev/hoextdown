@@ -113,7 +113,7 @@ static char_trigger markdown_char_ptrs[] = {
 
 /* render • structure containing one particular render */
 struct hoedown_markdown {
-	hoedown_callbacks	cb;
+	hoedown_renderer	cb;
 	void *opaque;
 
 	struct link_ref *refs[REF_TABLE_SIZE];
@@ -2706,7 +2706,7 @@ hoedown_markdown *
 hoedown_markdown_new(
 	unsigned int extensions,
 	size_t max_nesting,
-	const hoedown_callbacks *callbacks,
+	const hoedown_renderer *callbacks,
 	void *opaque)
 {
 	hoedown_markdown *md = NULL;
@@ -2717,7 +2717,7 @@ hoedown_markdown_new(
 	if (!md)
 		return NULL;
 
-	memcpy(&md->cb, callbacks, sizeof(hoedown_callbacks));
+	memcpy(&md->cb, callbacks, sizeof(hoedown_renderer));
 
 	hoedown_stack_new(&md->work_bufs[BUFFER_BLOCK], 4);
 	hoedown_stack_new(&md->work_bufs[BUFFER_SPAN], 8);

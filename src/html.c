@@ -660,9 +660,9 @@ toc_finalize(hoedown_buffer *ob, void *opaque)
 }
 
 void
-hoedown_html_toc_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *options, int nesting_level)
+hoedown_html_toc_renderer(hoedown_renderer *callbacks, hoedown_html_renderopt *options, int nesting_level)
 {
-	static const hoedown_callbacks cb_default = {
+	static const hoedown_renderer cb_default = {
 		NULL,
 		NULL,
 		NULL,
@@ -700,7 +700,7 @@ hoedown_html_toc_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *
 		toc_finalize,
 	};
 
-	memcpy(callbacks, &cb_default, sizeof(hoedown_callbacks));
+	memcpy(callbacks, &cb_default, sizeof(hoedown_renderer));
 
 	memset(options, 0, sizeof(hoedown_html_renderopt));
 
@@ -711,9 +711,9 @@ hoedown_html_toc_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *
 }
 
 void
-hoedown_html_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level)
+hoedown_html_renderer(hoedown_renderer *callbacks, hoedown_html_renderopt *options, unsigned int render_flags, int nesting_level)
 {
-	static const hoedown_callbacks cb_default = {
+	static const hoedown_renderer cb_default = {
 		rndr_blockcode,
 		rndr_blockquote,
 		rndr_raw_block,
@@ -761,7 +761,7 @@ hoedown_html_renderer(hoedown_callbacks *callbacks, hoedown_html_renderopt *opti
 	}
 
 	/* Prepare the callbacks */
-	memcpy(callbacks, &cb_default, sizeof(hoedown_callbacks));
+	memcpy(callbacks, &cb_default, sizeof(hoedown_renderer));
 
 	if (render_flags & HOEDOWN_HTML_SKIP_IMAGES)
 		callbacks->image = NULL;

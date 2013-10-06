@@ -15,7 +15,7 @@ main(int argc, char **argv)
 	hoedown_buffer *ib, *ob;
 	FILE *in = stdin;
 
-	hoedown_callbacks callbacks;
+	hoedown_renderer callbacks;
 	hoedown_html_renderopt options;
 	struct hoedown_markdown *markdown;
 
