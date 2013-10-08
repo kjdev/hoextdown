@@ -85,14 +85,14 @@ hoedown_escape_href(hoedown_buffer *ob, const uint8_t *src, size_t size)
 		/* amp appears all the time in URLs, but needs
 		 * HTML-entity escaping to be inside an href */
 		case '&': 
-			BUFPUTSL(ob, "&amp;");
+			HOEDOWN_BUFPUTSL(ob, "&amp;");
 			break;
 
 		/* the single quote is a valid URL character
 		 * according to the standard; it needs HTML
 		 * entity escaping too */
 		case '\'':
-			BUFPUTSL(ob, "&#x27;");
+			HOEDOWN_BUFPUTSL(ob, "&#x27;");
 			break;
 		
 		/* the space can be escaped to %20 or a plus
