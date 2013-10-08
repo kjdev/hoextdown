@@ -903,7 +903,7 @@ char_autolink_www(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, siz
 
 	if ((link_len = hoedown_autolink__www(&rewind, link, data, offset, size, HOEDOWN_AUTOLINK_SHORT_DOMAINS)) > 0) {
 		link_url = rndr_newbuf(rndr, BUFFER_SPAN);
-		BUFPUTSL(link_url, "http://");
+		HOEDOWN_BUFPUTSL(link_url, "http://");
 		hoedown_buffer_put(link_url, link->data, link->size);
 
 		ob->size -= rewind;

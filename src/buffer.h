@@ -31,8 +31,8 @@ struct hoedown_buffer {
 
 typedef struct hoedown_buffer hoedown_buffer;
 
-/* BUFPUTSL: optimized hoedown_buffer_puts of a string literal */
-#define BUFPUTSL(output, literal) \
+/* HOEDOWN_BUFPUTSL: optimized hoedown_buffer_puts of a string literal */
+#define HOEDOWN_BUFPUTSL(output, literal) \
 	hoedown_buffer_put(output, literal, sizeof(literal) - 1)
 
 /* hoedown_buffer_new: allocation of a new buffer */
