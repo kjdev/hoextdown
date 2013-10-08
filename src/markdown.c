@@ -111,9 +111,9 @@ static char_trigger markdown_char_ptrs[] = {
 	&char_quote
 };
 
-/* render • structure containing one particular render */
+/* render • structure containing state for a parser instance */
 struct hoedown_markdown {
-	hoedown_renderer	cb;
+	hoedown_renderer cb;
 
 	struct link_ref *refs[REF_TABLE_SIZE];
 	struct footnote_list footnotes_found;

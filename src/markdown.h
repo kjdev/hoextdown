@@ -92,7 +92,7 @@ struct hoedown_renderer {
 	void (*doc_header)(hoedown_buffer *ob, void *opaque);
 	void (*doc_footer)(hoedown_buffer *ob, void *opaque);
 
-	/* cookie */
+	/* state object */
 	void *opaque;
 };
 
