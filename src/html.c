@@ -247,29 +247,6 @@ rndr_linebreak(hoedown_buffer *ob, void *opaque)
 	return 1;
 }
 
-static char *
-header_id(const hoedown_buffer *text)
-{
-	char *str = malloc(text->size);
-
-	if (str) {
-		size_t i = 0;
-
-		while (i < text->size) {
-			if (isalnum(text->data[i])) {
-				str[i] = tolower(text->data[i]);
-			} else {
-				str[i] = '-';
-			}
-			i++;
-		}
-
-		str[i] = 0;
-	}
-
-	return str;
-}
-
 static void
 rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque)
 {
@@ -278,13 +255,10 @@ rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opa
 	if (ob->size)
 		hoedown_buffer_putc(ob, '\n');
 
-	if ((options->flags & HOEDOWN_HTML_TOC) && (level <= options->toc_data.nesting_level)) {
-		char *id = header_id(text);
-		hoedown_buffer_printf(ob, "<h%d id=\"%s\">", level, id);
-		free(id);
-	} else {
+	if ((options->flags & HOEDOWN_HTML_TOC) && (level <= options->toc_data.nesting_level))
+		hoedown_buffer_printf(ob, "<h%d id=\"toc_%d\">", level, options->toc_data.header_count++);
+	else
 		hoedown_buffer_printf(ob, "<h%d>", level);
-	}
 
 	if (text) hoedown_buffer_put(ob, text->data, text->size);
 	hoedown_buffer_printf(ob, "</h%d>\n", level);
@@ -606,8 +580,6 @@ toc_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaq
 	hoedown_html_renderopt *options = opaque;
 
 	if (level <= options->toc_data.nesting_level) {
-		char* id;
-
 		/* set the level offset if this is the first header
 		 * we're parsing for the document */
 		if (options->toc_data.current_level == 0)
@@ -631,10 +603,7 @@ toc_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaq
 			BUFPUTSL(ob,"</li>\n<li>\n");
 		}
 
-		id = header_id(text);
-		hoedown_buffer_printf(ob, "<a href=\"%s\">", id);
-		free(id);
-
+		hoedown_buffer_printf(ob, "<a href=\"#toc_%d\">", options->toc_data.header_count++);
 		if (text) escape_html(ob, text->data, text->size);
 		BUFPUTSL(ob, "</a>\n");
 	}

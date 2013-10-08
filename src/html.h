@@ -33,6 +33,7 @@ typedef enum {
 
 struct hoedown_html_renderopt {
 	struct {
+		int header_count;
 		int current_level;
 		int level_offset;
 		int nesting_level;
