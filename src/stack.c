@@ -3,7 +3,7 @@
 #include <string.h>
 
 int
-hoedown_stack_new(struct hoedown_stack *st, size_t initial_size)
+hoedown_stack_new(hoedown_stack *st, size_t initial_size)
 {
 	st->item = NULL;
 	st->size = 0;
@@ -16,7 +16,7 @@ hoedown_stack_new(struct hoedown_stack *st, size_t initial_size)
 }
 
 void
-hoedown_stack_free(struct hoedown_stack *st)
+hoedown_stack_free(hoedown_stack *st)
 {
 	if (!st)
 		return;
@@ -29,7 +29,7 @@ hoedown_stack_free(struct hoedown_stack *st)
 }
 
 int
-hoedown_stack_grow(struct hoedown_stack *st, size_t new_size)
+hoedown_stack_grow(hoedown_stack *st, size_t new_size)
 {
 	void **new_st;
 
@@ -53,7 +53,7 @@ hoedown_stack_grow(struct hoedown_stack *st, size_t new_size)
 }
 
 int
-hoedown_stack_push(struct hoedown_stack *st, void *item)
+hoedown_stack_push(hoedown_stack *st, void *item)
 {
 	if (hoedown_stack_grow(st, st->size * 2) < 0)
 		return -1;
@@ -63,7 +63,7 @@ hoedown_stack_push(struct hoedown_stack *st, void *item)
 }
 
 void *
-hoedown_stack_pop(struct hoedown_stack *st)
+hoedown_stack_pop(hoedown_stack *st)
 {
 	if (!st->size)
 		return NULL;
@@ -72,7 +72,7 @@ hoedown_stack_pop(struct hoedown_stack *st)
 }
 
 void *
-hoedown_stack_top(struct hoedown_stack *st)
+hoedown_stack_top(hoedown_stack *st)
 {
 	if (!st->size)
 		return NULL;

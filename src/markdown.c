@@ -120,7 +120,7 @@ struct hoedown_markdown {
 	struct footnote_list footnotes_found;
 	struct footnote_list footnotes_used;
 	uint8_t active_char[256];
-	struct hoedown_stack work_bufs[2];
+	hoedown_stack work_bufs[2];
 	unsigned int ext_flags;
 	size_t max_nesting;
 	int in_link_body;
@@ -135,7 +135,7 @@ rndr_newbuf(hoedown_markdown *rndr, int type)
 {
 	static const size_t buf_size[2] = {256, 64};
 	hoedown_buffer *work = NULL;
-	struct hoedown_stack *pool = &rndr->work_bufs[type];
+	hoedown_stack *pool = &rndr->work_bufs[type];
 
 	if (pool->size < pool->asize &&
 		pool->item[pool->size] != NULL) {
