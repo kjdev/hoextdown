@@ -2705,17 +2705,17 @@ hoedown_markdown *
 hoedown_markdown_new(
 	unsigned int extensions,
 	size_t max_nesting,
-	const hoedown_renderer *callbacks)
+	const hoedown_renderer *renderer)
 {
 	hoedown_markdown *md = NULL;
 
-	assert(max_nesting > 0 && callbacks);
+	assert(max_nesting > 0 && renderer);
 
 	md = malloc(sizeof(hoedown_markdown));
 	if (!md)
 		return NULL;
 
-	memcpy(&md->cb, callbacks, sizeof(hoedown_renderer));
+	memcpy(&md->cb, renderer, sizeof(hoedown_renderer));
 
 	hoedown_stack_new(&md->work_bufs[BUFFER_BLOCK], 4);
 	hoedown_stack_new(&md->work_bufs[BUFFER_SPAN], 8);
