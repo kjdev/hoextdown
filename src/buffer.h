@@ -23,7 +23,7 @@ typedef enum {
 
 /* hoedown_buffer: character array buffer */
 struct hoedown_buffer {
-	uint8_t *data;		/* actual character data */
+	uint8_t *data;	/* actual character data */
 	size_t size;	/* size of the string */
 	size_t asize;	/* allocated size (0 = volatile buffer) */
 	size_t unit;	/* reallocation unit size (0 = read-only buffer) */
@@ -54,7 +54,7 @@ void hoedown_buffer_put(hoedown_buffer *, const void *, size_t);
 void hoedown_buffer_puts(hoedown_buffer *, const char *);
 
 /* hoedown_buffer_putc: appends a single char to a buffer */
-void hoedown_buffer_putc(hoedown_buffer *, int);
+void hoedown_buffer_putc(hoedown_buffer *, uint8_t);
 
 /* hoedown_buffer_prefix: compare the beginning of a buffer with a string */
 int hoedown_buffer_prefix(const hoedown_buffer *buf, const char *prefix);
