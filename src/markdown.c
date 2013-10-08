@@ -113,7 +113,7 @@ static char_trigger markdown_char_ptrs[] = {
 
 /* render • structure containing state for a parser instance */
 struct hoedown_markdown {
-	hoedown_renderer cb;
+	hoedown_renderer rndr;
 
 	struct link_ref *refs[REF_TABLE_SIZE];
 	struct footnote_list footnotes_found;
@@ -130,7 +130,7 @@ struct hoedown_markdown {
  ***************************/
 
 static inline hoedown_buffer *
-rndr_newbuf(hoedown_markdown *rndr, int type)
+newbuf(hoedown_markdown *rndr, int type)
 {
 	static const size_t buf_size[2] = {256, 64};
 	hoedown_buffer *work = NULL;
@@ -149,7 +149,7 @@ rndr_newbuf(hoedown_markdown *rndr, int type)
 }
 
 static inline void
-rndr_popbuf(hoedown_markdown *rndr, int type)
+popbuf(hoedown_markdown *rndr, int type)
 {
 	rndr->work_bufs[type].size--;
 }
@@ -444,10 +444,10 @@ parse_inline(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t s
 			end++;
 		}
 
-		if (rndr->cb.normal_text) {
+		if (rndr->rndr.normal_text) {
 			work.data = data + i;
 			work.size = end - i;
-			rndr->cb.normal_text(ob, &work, rndr->cb.opaque);
+			rndr->rndr.normal_text(ob, &work, rndr->rndr.opaque);
 		}
 		else
 			hoedown_buffer_put(ob, data + i, end - i);
@@ -581,15 +581,15 @@ parse_emph1(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t si
 					continue;
 			}
 
-			work = rndr_newbuf(rndr, BUFFER_SPAN);
+			work = newbuf(rndr, BUFFER_SPAN);
 			parse_inline(work, rndr, data, i);
 
 			if (rndr->ext_flags & HOEDOWN_EXT_UNDERLINE && c == '_')
-				r = rndr->cb.underline(ob, work, rndr->cb.opaque);
+				r = rndr->rndr.underline(ob, work, rndr->rndr.opaque);
 			else
-				r = rndr->cb.emphasis(ob, work, rndr->cb.opaque);
+				r = rndr->rndr.emphasis(ob, work, rndr->rndr.opaque);
 
-			rndr_popbuf(rndr, BUFFER_SPAN);
+			popbuf(rndr, BUFFER_SPAN);
 			return r ? i + 1 : 0;
 		}
 	}
@@ -611,17 +611,17 @@ parse_emph2(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t si
 		i += len;
 
 		if (i + 1 < size && data[i] == c && data[i + 1] == c && i && !_isspace(data[i - 1])) {
-			work = rndr_newbuf(rndr, BUFFER_SPAN);
+			work = newbuf(rndr, BUFFER_SPAN);
 			parse_inline(work, rndr, data, i);
 
 			if (c == '~')
-				r = rndr->cb.strikethrough(ob, work, rndr->cb.opaque);
+				r = rndr->rndr.strikethrough(ob, work, rndr->rndr.opaque);
 			else if (c == '=')
-				r = rndr->cb.highlight(ob, work, rndr->cb.opaque);
+				r = rndr->rndr.highlight(ob, work, rndr->rndr.opaque);
 			else
-				r = rndr->cb.double_emphasis(ob, work, rndr->cb.opaque);
+				r = rndr->rndr.double_emphasis(ob, work, rndr->rndr.opaque);
 
-			rndr_popbuf(rndr, BUFFER_SPAN);
+			popbuf(rndr, BUFFER_SPAN);
 			return r ? i + 2 : 0;
 		}
 		i++;
@@ -646,13 +646,13 @@ parse_emph3(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t si
 		if (data[i] != c || _isspace(data[i - 1]))
 			continue;
 
-		if (i + 2 < size && data[i + 1] == c && data[i + 2] == c && rndr->cb.triple_emphasis) {
+		if (i + 2 < size && data[i + 1] == c && data[i + 2] == c && rndr->rndr.triple_emphasis) {
 			/* triple symbol found */
-			hoedown_buffer *work = rndr_newbuf(rndr, BUFFER_SPAN);
+			hoedown_buffer *work = newbuf(rndr, BUFFER_SPAN);
 
 			parse_inline(work, rndr, data, i);
-			r = rndr->cb.triple_emphasis(ob, work, rndr->cb.opaque);
-			rndr_popbuf(rndr, BUFFER_SPAN);
+			r = rndr->rndr.triple_emphasis(ob, work, rndr->rndr.opaque);
+			popbuf(rndr, BUFFER_SPAN);
 			return r ? i + 3 : 0;
 
 		} else if (i + 1 < size && data[i + 1] == c) {
@@ -721,7 +721,7 @@ char_linebreak(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t
 	while (ob->size && ob->data[ob->size - 1] == ' ')
 		ob->size--;
 
-	return rndr->cb.linebreak(ob, rndr->cb.opaque) ? 1 : 0;
+	return rndr->rndr.linebreak(ob, rndr->rndr.opaque) ? 1 : 0;
 }
 
 
@@ -757,10 +757,10 @@ char_codespan(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t 
 	/* real code span */
 	if (f_begin < f_end) {
 		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0 };
-		if (!rndr->cb.codespan(ob, &work, rndr->cb.opaque))
+		if (!rndr->rndr.codespan(ob, &work, rndr->rndr.opaque))
 			end = 0;
 	} else {
-		if (!rndr->cb.codespan(ob, 0, rndr->cb.opaque))
+		if (!rndr->rndr.codespan(ob, 0, rndr->rndr.opaque))
 			end = 0;
 	}
 
@@ -799,10 +799,10 @@ char_quote(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t off
 	/* real quote */
 	if (f_begin < f_end) {
 		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0 };
-		if (!rndr->cb.quote(ob, &work, rndr->cb.opaque))
+		if (!rndr->rndr.quote(ob, &work, rndr->rndr.opaque))
 			end = 0;
 	} else {
-		if (!rndr->cb.quote(ob, 0, rndr->cb.opaque))
+		if (!rndr->rndr.quote(ob, 0, rndr->rndr.opaque))
 			end = 0;
 	}
 
@@ -821,10 +821,10 @@ char_escape(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t of
 		if (strchr(escape_chars, data[1]) == NULL)
 			return 0;
 
-		if (rndr->cb.normal_text) {
+		if (rndr->rndr.normal_text) {
 			work.data = data + 1;
 			work.size = 1;
-			rndr->cb.normal_text(ob, &work, rndr->cb.opaque);
+			rndr->rndr.normal_text(ob, &work, rndr->rndr.opaque);
 		}
 		else hoedown_buffer_putc(ob, data[1]);
 	} else if (size == 1) {
@@ -853,10 +853,10 @@ char_entity(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t of
 	else
 		return 0; /* lone '&' */
 
-	if (rndr->cb.entity) {
+	if (rndr->rndr.entity) {
 		work.data = data;
 		work.size = end;
-		rndr->cb.entity(ob, &work, rndr->cb.opaque);
+		rndr->rndr.entity(ob, &work, rndr->rndr.opaque);
 	}
 	else hoedown_buffer_put(ob, data, end);
 
@@ -873,16 +873,16 @@ char_langle_tag(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 	int ret = 0;
 
 	if (end > 2) {
-		if (rndr->cb.autolink && altype != HOEDOWN_AUTOLINK_NONE) {
-			hoedown_buffer *u_link = rndr_newbuf(rndr, BUFFER_SPAN);
+		if (rndr->rndr.autolink && altype != HOEDOWN_AUTOLINK_NONE) {
+			hoedown_buffer *u_link = newbuf(rndr, BUFFER_SPAN);
 			work.data = data + 1;
 			work.size = end - 2;
 			unscape_text(u_link, &work);
-			ret = rndr->cb.autolink(ob, u_link, altype, rndr->cb.opaque);
-			rndr_popbuf(rndr, BUFFER_SPAN);
+			ret = rndr->rndr.autolink(ob, u_link, altype, rndr->rndr.opaque);
+			popbuf(rndr, BUFFER_SPAN);
 		}
-		else if (rndr->cb.raw_html_tag)
-			ret = rndr->cb.raw_html_tag(ob, &work, rndr->cb.opaque);
+		else if (rndr->rndr.raw_html_tag)
+			ret = rndr->rndr.raw_html_tag(ob, &work, rndr->rndr.opaque);
 	}
 
 	if (!ret) return 0;
@@ -895,29 +895,29 @@ char_autolink_www(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, siz
 	hoedown_buffer *link, *link_url, *link_text;
 	size_t link_len, rewind;
 
-	if (!rndr->cb.link || rndr->in_link_body)
+	if (!rndr->rndr.link || rndr->in_link_body)
 		return 0;
 
-	link = rndr_newbuf(rndr, BUFFER_SPAN);
+	link = newbuf(rndr, BUFFER_SPAN);
 
 	if ((link_len = hoedown_autolink__www(&rewind, link, data, offset, size, HOEDOWN_AUTOLINK_SHORT_DOMAINS)) > 0) {
-		link_url = rndr_newbuf(rndr, BUFFER_SPAN);
+		link_url = newbuf(rndr, BUFFER_SPAN);
 		HOEDOWN_BUFPUTSL(link_url, "http://");
 		hoedown_buffer_put(link_url, link->data, link->size);
 
 		ob->size -= rewind;
-		if (rndr->cb.normal_text) {
-			link_text = rndr_newbuf(rndr, BUFFER_SPAN);
-			rndr->cb.normal_text(link_text, link, rndr->cb.opaque);
-			rndr->cb.link(ob, link_url, NULL, link_text, rndr->cb.opaque);
-			rndr_popbuf(rndr, BUFFER_SPAN);
+		if (rndr->rndr.normal_text) {
+			link_text = newbuf(rndr, BUFFER_SPAN);
+			rndr->rndr.normal_text(link_text, link, rndr->rndr.opaque);
+			rndr->rndr.link(ob, link_url, NULL, link_text, rndr->rndr.opaque);
+			popbuf(rndr, BUFFER_SPAN);
 		} else {
-			rndr->cb.link(ob, link_url, NULL, link, rndr->cb.opaque);
+			rndr->rndr.link(ob, link_url, NULL, link, rndr->rndr.opaque);
 		}
-		rndr_popbuf(rndr, BUFFER_SPAN);
+		popbuf(rndr, BUFFER_SPAN);
 	}
 
-	rndr_popbuf(rndr, BUFFER_SPAN);
+	popbuf(rndr, BUFFER_SPAN);
 	return link_len;
 }
 
@@ -927,17 +927,17 @@ char_autolink_email(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, s
 	hoedown_buffer *link;
 	size_t link_len, rewind;
 
-	if (!rndr->cb.autolink || rndr->in_link_body)
+	if (!rndr->rndr.autolink || rndr->in_link_body)
 		return 0;
 
-	link = rndr_newbuf(rndr, BUFFER_SPAN);
+	link = newbuf(rndr, BUFFER_SPAN);
 
 	if ((link_len = hoedown_autolink__email(&rewind, link, data, offset, size, 0)) > 0) {
 		ob->size -= rewind;
-		rndr->cb.autolink(ob, link, HOEDOWN_AUTOLINK_EMAIL, rndr->cb.opaque);
+		rndr->rndr.autolink(ob, link, HOEDOWN_AUTOLINK_EMAIL, rndr->rndr.opaque);
 	}
 
-	rndr_popbuf(rndr, BUFFER_SPAN);
+	popbuf(rndr, BUFFER_SPAN);
 	return link_len;
 }
 
@@ -947,17 +947,17 @@ char_autolink_url(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, siz
 	hoedown_buffer *link;
 	size_t link_len, rewind;
 
-	if (!rndr->cb.autolink || rndr->in_link_body)
+	if (!rndr->rndr.autolink || rndr->in_link_body)
 		return 0;
 
-	link = rndr_newbuf(rndr, BUFFER_SPAN);
+	link = newbuf(rndr, BUFFER_SPAN);
 
 	if ((link_len = hoedown_autolink__url(&rewind, link, data, offset, size, 0)) > 0) {
 		ob->size -= rewind;
-		rndr->cb.autolink(ob, link, HOEDOWN_AUTOLINK_NORMAL, rndr->cb.opaque);
+		rndr->rndr.autolink(ob, link, HOEDOWN_AUTOLINK_NORMAL, rndr->rndr.opaque);
 	}
 
-	rndr_popbuf(rndr, BUFFER_SPAN);
+	popbuf(rndr, BUFFER_SPAN);
 	return link_len;
 }
 
@@ -976,7 +976,7 @@ char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offs
 	int in_title = 0, qtype = 0;
 
 	/* checking whether the correct renderer exists */
-	if ((is_img && !rndr->cb.image) || (!is_img && !rndr->cb.link))
+	if ((is_img && !rndr->rndr.image) || (!is_img && !rndr->rndr.link))
 		goto cleanup;
 
 	/* looking for the matching closing bracket */
@@ -1025,8 +1025,8 @@ char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offs
 		}
 		
 		/* render */
-		if (fr && rndr->cb.footnote_ref)
-				ret = rndr->cb.footnote_ref(ob, fr->num, rndr->cb.opaque);
+		if (fr && rndr->rndr.footnote_ref)
+				ret = rndr->rndr.footnote_ref(ob, fr->num, rndr->rndr.opaque);
 		
 		goto cleanup;
 	}
@@ -1105,12 +1105,12 @@ char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offs
 
 		/* building escaped link and title */
 		if (link_e > link_b) {
-			link = rndr_newbuf(rndr, BUFFER_SPAN);
+			link = newbuf(rndr, BUFFER_SPAN);
 			hoedown_buffer_put(link, data + link_b, link_e - link_b);
 		}
 
 		if (title_e > title_b) {
-			title = rndr_newbuf(rndr, BUFFER_SPAN);
+			title = newbuf(rndr, BUFFER_SPAN);
 			hoedown_buffer_put(title, data + title_b, title_e - title_b);
 		}
 
@@ -1132,7 +1132,7 @@ char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offs
 		/* finding the link_ref */
 		if (link_b == link_e) {
 			if (text_has_nl) {
-				hoedown_buffer *b = rndr_newbuf(rndr, BUFFER_SPAN);
+				hoedown_buffer *b = newbuf(rndr, BUFFER_SPAN);
 				size_t j;
 
 				for (j = 1; j < txt_e; j++) {
@@ -1170,7 +1170,7 @@ char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offs
 
 		/* crafting the id */
 		if (text_has_nl) {
-			hoedown_buffer *b = rndr_newbuf(rndr, BUFFER_SPAN);
+			hoedown_buffer *b = newbuf(rndr, BUFFER_SPAN);
 			size_t j;
 
 			for (j = 1; j < txt_e; j++) {
@@ -1202,7 +1202,7 @@ char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offs
 
 	/* building content: img alt is escaped, link content is parsed */
 	if (txt_e > 1) {
-		content = rndr_newbuf(rndr, BUFFER_SPAN);
+		content = newbuf(rndr, BUFFER_SPAN);
 		if (is_img) {
 			hoedown_buffer_put(content, data + 1, txt_e - 1);
 		} else {
@@ -1215,7 +1215,7 @@ char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offs
 	}
 
 	if (link) {
-		u_link = rndr_newbuf(rndr, BUFFER_SPAN);
+		u_link = newbuf(rndr, BUFFER_SPAN);
 		unscape_text(u_link, link);
 	}
 
@@ -1224,9 +1224,9 @@ char_link(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t offs
 		if (ob->size && ob->data[ob->size - 1] == '!')
 			ob->size -= 1;
 
-		ret = rndr->cb.image(ob, u_link, title, content, rndr->cb.opaque);
+		ret = rndr->rndr.image(ob, u_link, title, content, rndr->rndr.opaque);
 	} else {
-		ret = rndr->cb.link(ob, u_link, title, content, rndr->cb.opaque);
+		ret = rndr->rndr.link(ob, u_link, title, content, rndr->rndr.opaque);
 	}
 
 	/* cleanup */
@@ -1241,7 +1241,7 @@ char_superscript(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size
 	size_t sup_start, sup_len;
 	hoedown_buffer *sup;
 
-	if (!rndr->cb.superscript)
+	if (!rndr->rndr.superscript)
 		return 0;
 
 	if (size < 2)
@@ -1265,10 +1265,10 @@ char_superscript(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size
 	if (sup_len - sup_start == 0)
 		return (sup_start == 2) ? 3 : 0;
 
-	sup = rndr_newbuf(rndr, BUFFER_SPAN);
+	sup = newbuf(rndr, BUFFER_SPAN);
 	parse_inline(sup, rndr, data + sup_start, sup_len - sup_start);
-	rndr->cb.superscript(ob, sup, rndr->cb.opaque);
-	rndr_popbuf(rndr, BUFFER_SPAN);
+	rndr->rndr.superscript(ob, sup, rndr->rndr.opaque);
+	popbuf(rndr, BUFFER_SPAN);
 
 	return (sup_start == 2) ? sup_len + 1 : sup_len;
 }
@@ -1553,7 +1553,7 @@ parse_blockquote(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size
 	uint8_t *work_data = 0;
 	hoedown_buffer *out = 0;
 
-	out = rndr_newbuf(rndr, BUFFER_BLOCK);
+	out = newbuf(rndr, BUFFER_BLOCK);
 	beg = 0;
 	while (beg < size) {
 		for (end = beg + 1; end < size && data[end - 1] != '\n'; end++);
@@ -1581,9 +1581,9 @@ parse_blockquote(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size
 	}
 
 	parse_block(out, rndr, work_data, work_size);
-	if (rndr->cb.blockquote)
-		rndr->cb.blockquote(ob, out, rndr->cb.opaque);
-	rndr_popbuf(rndr, BUFFER_BLOCK);
+	if (rndr->rndr.blockquote)
+		rndr->rndr.blockquote(ob, out, rndr->rndr.opaque);
+	popbuf(rndr, BUFFER_BLOCK);
 	return end;
 }
 
@@ -1631,7 +1631,7 @@ parse_paragraph(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 			}
 
 			/* see if an html block starts here */
-			if (data[i] == '<' && rndr->cb.blockhtml &&
+			if (data[i] == '<' && rndr->rndr.blockhtml &&
 				parse_htmlblock(ob, rndr, data + i, size - i, 0)) {
 				end = i;
 				break;
@@ -1653,11 +1653,11 @@ parse_paragraph(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 		work.size--;
 
 	if (!level) {
-		hoedown_buffer *tmp = rndr_newbuf(rndr, BUFFER_BLOCK);
+		hoedown_buffer *tmp = newbuf(rndr, BUFFER_BLOCK);
 		parse_inline(tmp, rndr, work.data, work.size);
-		if (rndr->cb.paragraph)
-			rndr->cb.paragraph(ob, tmp, rndr->cb.opaque);
-		rndr_popbuf(rndr, BUFFER_BLOCK);
+		if (rndr->rndr.paragraph)
+			rndr->rndr.paragraph(ob, tmp, rndr->rndr.opaque);
+		popbuf(rndr, BUFFER_BLOCK);
 	} else {
 		hoedown_buffer *header_work;
 
@@ -1674,26 +1674,26 @@ parse_paragraph(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 				work.size -= 1;
 
 			if (work.size > 0) {
-				hoedown_buffer *tmp = rndr_newbuf(rndr, BUFFER_BLOCK);
+				hoedown_buffer *tmp = newbuf(rndr, BUFFER_BLOCK);
 				parse_inline(tmp, rndr, work.data, work.size);
 
-				if (rndr->cb.paragraph)
-					rndr->cb.paragraph(ob, tmp, rndr->cb.opaque);
+				if (rndr->rndr.paragraph)
+					rndr->rndr.paragraph(ob, tmp, rndr->rndr.opaque);
 
-				rndr_popbuf(rndr, BUFFER_BLOCK);
+				popbuf(rndr, BUFFER_BLOCK);
 				work.data += beg;
 				work.size = i - beg;
 			}
 			else work.size = i;
 		}
 
-		header_work = rndr_newbuf(rndr, BUFFER_SPAN);
+		header_work = newbuf(rndr, BUFFER_SPAN);
 		parse_inline(header_work, rndr, work.data, work.size);
 
-		if (rndr->cb.header)
-			rndr->cb.header(ob, header_work, (int)level, rndr->cb.opaque);
+		if (rndr->rndr.header)
+			rndr->rndr.header(ob, header_work, (int)level, rndr->rndr.opaque);
 
-		rndr_popbuf(rndr, BUFFER_SPAN);
+		popbuf(rndr, BUFFER_SPAN);
 	}
 
 	return end;
@@ -1710,7 +1710,7 @@ parse_fencedcode(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size
 	beg = is_codefence(data, size, &lang);
 	if (beg == 0) return 0;
 
-	work = rndr_newbuf(rndr, BUFFER_BLOCK);
+	work = newbuf(rndr, BUFFER_BLOCK);
 
 	while (beg < size) {
 		size_t fence_end;
@@ -1737,10 +1737,10 @@ parse_fencedcode(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size
 	if (work->size && work->data[work->size - 1] != '\n')
 		hoedown_buffer_putc(work, '\n');
 
-	if (rndr->cb.blockcode)
-		rndr->cb.blockcode(ob, work, lang.size ? &lang : NULL, rndr->cb.opaque);
+	if (rndr->rndr.blockcode)
+		rndr->rndr.blockcode(ob, work, lang.size ? &lang : NULL, rndr->rndr.opaque);
 
-	rndr_popbuf(rndr, BUFFER_BLOCK);
+	popbuf(rndr, BUFFER_BLOCK);
 	return beg;
 }
 
@@ -1750,7 +1750,7 @@ parse_blockcode(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 	size_t beg, end, pre;
 	hoedown_buffer *work = 0;
 
-	work = rndr_newbuf(rndr, BUFFER_BLOCK);
+	work = newbuf(rndr, BUFFER_BLOCK);
 
 	beg = 0;
 	while (beg < size) {
@@ -1778,10 +1778,10 @@ parse_blockcode(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 
 	hoedown_buffer_putc(work, '\n');
 
-	if (rndr->cb.blockcode)
-		rndr->cb.blockcode(ob, work, NULL, rndr->cb.opaque);
+	if (rndr->rndr.blockcode)
+		rndr->rndr.blockcode(ob, work, NULL, rndr->rndr.opaque);
 
-	rndr_popbuf(rndr, BUFFER_BLOCK);
+	popbuf(rndr, BUFFER_BLOCK);
 	return beg;
 }
 
@@ -1811,8 +1811,8 @@ parse_listitem(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t
 		end++;
 
 	/* getting working buffers */
-	work = rndr_newbuf(rndr, BUFFER_SPAN);
-	inter = rndr_newbuf(rndr, BUFFER_SPAN);
+	work = newbuf(rndr, BUFFER_SPAN);
+	inter = newbuf(rndr, BUFFER_SPAN);
 
 	/* putting the first line into the working buffer */
 	hoedown_buffer_put(work, data + beg, end - beg);
@@ -1914,11 +1914,11 @@ parse_listitem(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t
 	}
 
 	/* render of li itself */
-	if (rndr->cb.listitem)
-		rndr->cb.listitem(ob, inter, *flags, rndr->cb.opaque);
+	if (rndr->rndr.listitem)
+		rndr->rndr.listitem(ob, inter, *flags, rndr->rndr.opaque);
 
-	rndr_popbuf(rndr, BUFFER_SPAN);
-	rndr_popbuf(rndr, BUFFER_SPAN);
+	popbuf(rndr, BUFFER_SPAN);
+	popbuf(rndr, BUFFER_SPAN);
 	return beg;
 }
 
@@ -1930,7 +1930,7 @@ parse_list(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t siz
 	hoedown_buffer *work = 0;
 	size_t i = 0, j;
 
-	work = rndr_newbuf(rndr, BUFFER_BLOCK);
+	work = newbuf(rndr, BUFFER_BLOCK);
 
 	while (i < size) {
 		j = parse_listitem(work, rndr, data + i, size - i, &flags);
@@ -1940,9 +1940,9 @@ parse_list(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t siz
 			break;
 	}
 
-	if (rndr->cb.list)
-		rndr->cb.list(ob, work, flags, rndr->cb.opaque);
-	rndr_popbuf(rndr, BUFFER_BLOCK);
+	if (rndr->rndr.list)
+		rndr->rndr.list(ob, work, flags, rndr->rndr.opaque);
+	popbuf(rndr, BUFFER_BLOCK);
 	return i;
 }
 
@@ -1968,14 +1968,14 @@ parse_atxheader(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 		end--;
 
 	if (end > i) {
-		hoedown_buffer *work = rndr_newbuf(rndr, BUFFER_SPAN);
+		hoedown_buffer *work = newbuf(rndr, BUFFER_SPAN);
 
 		parse_inline(work, rndr, data + i, end - i);
 
-		if (rndr->cb.header)
-			rndr->cb.header(ob, work, (int)level, rndr->cb.opaque);
+		if (rndr->rndr.header)
+			rndr->rndr.header(ob, work, (int)level, rndr->rndr.opaque);
 
-		rndr_popbuf(rndr, BUFFER_SPAN);
+		popbuf(rndr, BUFFER_SPAN);
 	}
 
 	return skip;
@@ -1986,13 +1986,13 @@ static void
 parse_footnote_def(hoedown_buffer *ob, hoedown_markdown *rndr, unsigned int num, uint8_t *data, size_t size)
 {
 	hoedown_buffer *work = 0;
-	work = rndr_newbuf(rndr, BUFFER_SPAN);
+	work = newbuf(rndr, BUFFER_SPAN);
 	
 	parse_block(work, rndr, data, size);
 	
-	if (rndr->cb.footnote_def)
-	rndr->cb.footnote_def(ob, work, num, rndr->cb.opaque);
-	rndr_popbuf(rndr, BUFFER_SPAN);
+	if (rndr->rndr.footnote_def)
+	rndr->rndr.footnote_def(ob, work, num, rndr->rndr.opaque);
+	popbuf(rndr, BUFFER_SPAN);
 }
 
 /* parse_footnote_list • render the contents of the footnotes */
@@ -2006,7 +2006,7 @@ parse_footnote_list(hoedown_buffer *ob, hoedown_markdown *rndr, struct footnote_
 	if (footnotes->count == 0)
 		return;
 	
-	work = rndr_newbuf(rndr, BUFFER_BLOCK);
+	work = newbuf(rndr, BUFFER_BLOCK);
 	
 	item = footnotes->head;
 	while (item) {
@@ -2015,9 +2015,9 @@ parse_footnote_list(hoedown_buffer *ob, hoedown_markdown *rndr, struct footnote_
 		item = item->next;
 	}
 	
-	if (rndr->cb.footnotes)
-		rndr->cb.footnotes(ob, work, rndr->cb.opaque);
-	rndr_popbuf(rndr, BUFFER_BLOCK);
+	if (rndr->rndr.footnotes)
+		rndr->rndr.footnotes(ob, work, rndr->rndr.opaque);
+	popbuf(rndr, BUFFER_BLOCK);
 }
 
 /* htmlblock_end • checking end of HTML block : </tag>[ \t]*\n[ \t*]\n */
@@ -2130,8 +2130,8 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 
 			if (j) {
 				work.size = i + j;
-				if (do_render && rndr->cb.blockhtml)
-					rndr->cb.blockhtml(ob, &work, rndr->cb.opaque);
+				if (do_render && rndr->rndr.blockhtml)
+					rndr->rndr.blockhtml(ob, &work, rndr->rndr.opaque);
 				return work.size;
 			}
 		}
@@ -2147,8 +2147,8 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 				j = is_empty(data + i, size - i);
 				if (j) {
 					work.size = i + j;
-					if (do_render && rndr->cb.blockhtml)
-						rndr->cb.blockhtml(ob, &work, rndr->cb.opaque);
+					if (do_render && rndr->rndr.blockhtml)
+						rndr->rndr.blockhtml(ob, &work, rndr->rndr.opaque);
 					return work.size;
 				}
 			}
@@ -2173,8 +2173,8 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_
 
 	/* the end of the block has been found */
 	work.size = tag_end;
-	if (do_render && rndr->cb.blockhtml)
-		rndr->cb.blockhtml(ob, &work, rndr->cb.opaque);
+	if (do_render && rndr->rndr.blockhtml)
+		rndr->rndr.blockhtml(ob, &work, rndr->rndr.opaque);
 
 	return tag_end;
 }
@@ -2192,10 +2192,10 @@ parse_table_row(
 	size_t i = 0, col;
 	hoedown_buffer *row_work = 0;
 
-	if (!rndr->cb.table_cell || !rndr->cb.table_row)
+	if (!rndr->rndr.table_cell || !rndr->rndr.table_row)
 		return;
 
-	row_work = rndr_newbuf(rndr, BUFFER_SPAN);
+	row_work = newbuf(rndr, BUFFER_SPAN);
 
 	if (i < size && data[i] == '|')
 		i++;
@@ -2204,7 +2204,7 @@ parse_table_row(
 		size_t cell_start, cell_end;
 		hoedown_buffer *cell_work;
 
-		cell_work = rndr_newbuf(rndr, BUFFER_SPAN);
+		cell_work = newbuf(rndr, BUFFER_SPAN);
 
 		while (i < size && _isspace(data[i]))
 			i++;
@@ -2220,20 +2220,20 @@ parse_table_row(
 			cell_end--;
 
 		parse_inline(cell_work, rndr, data + cell_start, 1 + cell_end - cell_start);
-		rndr->cb.table_cell(row_work, cell_work, col_data[col] | header_flag, rndr->cb.opaque);
+		rndr->rndr.table_cell(row_work, cell_work, col_data[col] | header_flag, rndr->rndr.opaque);
 
-		rndr_popbuf(rndr, BUFFER_SPAN);
+		popbuf(rndr, BUFFER_SPAN);
 		i++;
 	}
 
 	for (; col < columns; ++col) {
 		hoedown_buffer empty_cell = { 0, 0, 0, 0 };
-		rndr->cb.table_cell(row_work, &empty_cell, col_data[col] | header_flag, rndr->cb.opaque);
+		rndr->rndr.table_cell(row_work, &empty_cell, col_data[col] | header_flag, rndr->rndr.opaque);
 	}
 
-	rndr->cb.table_row(ob, row_work, rndr->cb.opaque);
+	rndr->rndr.table_row(ob, row_work, rndr->rndr.opaque);
 
-	rndr_popbuf(rndr, BUFFER_SPAN);
+	popbuf(rndr, BUFFER_SPAN);
 }
 
 static size_t
@@ -2343,8 +2343,8 @@ parse_table(
 	size_t columns;
 	int *col_data = NULL;
 
-	header_work = rndr_newbuf(rndr, BUFFER_SPAN);
-	body_work = rndr_newbuf(rndr, BUFFER_BLOCK);
+	header_work = newbuf(rndr, BUFFER_SPAN);
+	body_work = newbuf(rndr, BUFFER_BLOCK);
 
 	i = parse_table_header(header_work, rndr, data, size, &columns, &col_data);
 	if (i > 0) {
@@ -2376,13 +2376,13 @@ parse_table(
 			i++;
 		}
 
-		if (rndr->cb.table)
-			rndr->cb.table(ob, header_work, body_work, rndr->cb.opaque);
+		if (rndr->rndr.table)
+			rndr->rndr.table(ob, header_work, body_work, rndr->rndr.opaque);
 	}
 
 	free(col_data);
-	rndr_popbuf(rndr, BUFFER_SPAN);
-	rndr_popbuf(rndr, BUFFER_BLOCK);
+	popbuf(rndr, BUFFER_SPAN);
+	popbuf(rndr, BUFFER_BLOCK);
 	return i;
 }
 
@@ -2405,7 +2405,7 @@ parse_block(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t si
 		if (is_atxheader(rndr, txt_data, end))
 			beg += parse_atxheader(ob, rndr, txt_data, end);
 
-		else if (data[beg] == '<' && rndr->cb.blockhtml &&
+		else if (data[beg] == '<' && rndr->rndr.blockhtml &&
 				(i = parse_htmlblock(ob, rndr, txt_data, end, 1)) != 0)
 			beg += i;
 
@@ -2413,8 +2413,8 @@ parse_block(hoedown_buffer *ob, hoedown_markdown *rndr, uint8_t *data, size_t si
 			beg += i;
 
 		else if (is_hrule(txt_data, end)) {
-			if (rndr->cb.hrule)
-				rndr->cb.hrule(ob, rndr->cb.opaque);
+			if (rndr->rndr.hrule)
+				rndr->rndr.hrule(ob, rndr->rndr.opaque);
 
 			while (beg < size && data[beg] != '\n')
 				beg++;
@@ -2715,14 +2715,14 @@ hoedown_markdown_new(
 	if (!md)
 		return NULL;
 
-	memcpy(&md->cb, renderer, sizeof(hoedown_renderer));
+	memcpy(&md->rndr, renderer, sizeof(hoedown_renderer));
 
 	hoedown_stack_new(&md->work_bufs[BUFFER_BLOCK], 4);
 	hoedown_stack_new(&md->work_bufs[BUFFER_SPAN], 8);
 
 	memset(md->active_char, 0x0, 256);
 
-	if (md->cb.emphasis || md->cb.double_emphasis || md->cb.triple_emphasis) {
+	if (md->rndr.emphasis || md->rndr.double_emphasis || md->rndr.triple_emphasis) {
 		md->active_char['*'] = MD_CHAR_EMPHASIS;
 		md->active_char['_'] = MD_CHAR_EMPHASIS;
 		if (extensions & HOEDOWN_EXT_STRIKETHROUGH)
@@ -2731,13 +2731,13 @@ hoedown_markdown_new(
 			md->active_char['='] = MD_CHAR_EMPHASIS;
 	}
 
-	if (md->cb.codespan)
+	if (md->rndr.codespan)
 		md->active_char['`'] = MD_CHAR_CODESPAN;
 
-	if (md->cb.linebreak)
+	if (md->rndr.linebreak)
 		md->active_char['\n'] = MD_CHAR_LINEBREAK;
 
-	if (md->cb.image || md->cb.link)
+	if (md->rndr.image || md->rndr.link)
 		md->active_char['['] = MD_CHAR_LINK;
 
 	md->active_char['<'] = MD_CHAR_LANGLE;
@@ -2828,8 +2828,8 @@ hoedown_markdown_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_
 	hoedown_buffer_grow(ob, text->size + (text->size >> 1));
 
 	/* second pass: actual rendering */
-	if (md->cb.doc_header)
-		md->cb.doc_header(ob, md->cb.opaque);
+	if (md->rndr.doc_header)
+		md->rndr.doc_header(ob, md->rndr.opaque);
 
 	if (text->size) {
 		/* adding a final newline if not already present */
@@ -2843,8 +2843,8 @@ hoedown_markdown_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_
 	if (footnotes_enabled)
 		parse_footnote_list(ob, md, &md->footnotes_used);
 
-	if (md->cb.doc_footer)
-		md->cb.doc_footer(ob, md->cb.opaque);
+	if (md->rndr.doc_footer)
+		md->rndr.doc_footer(ob, md->rndr.opaque);
 
 	/* clean-up */
 	hoedown_buffer_free(text);
