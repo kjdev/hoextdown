@@ -9,7 +9,7 @@
 
 #define USE_XHTML(opt) (opt->flags & HOEDOWN_HTML_USE_XHTML)
 
-struct hoedown_html_renderopt {
+struct rndr_state {
 	struct {
 		int header_count;
 		int current_level;
@@ -23,7 +23,7 @@ struct hoedown_html_renderopt {
 	void (*link_attributes)(hoedown_buffer *ob, const hoedown_buffer *url, void *self);
 };
 
-typedef struct hoedown_html_renderopt hoedown_html_renderopt;
+typedef struct rndr_state rndr_state;
 
 int
 hoedown_html_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagname)
@@ -74,7 +74,7 @@ static inline void escape_href(hoedown_buffer *ob, const uint8_t *source, size_t
 static int
 rndr_autolink(hoedown_buffer *ob, const hoedown_buffer *link, enum hoedown_autolink type, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 
 	if (!link || !link->size)
 		return 0;
@@ -116,7 +116,7 @@ rndr_autolink(hoedown_buffer *ob, const hoedown_buffer *link, enum hoedown_autol
 static void
 rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 
@@ -171,7 +171,7 @@ rndr_blockquote(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 static int
 rndr_codespan(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 	if (state->flags & HOEDOWN_HTML_PRETTIFY)
 		HOEDOWN_BUFPUTSL(ob, "<code class=\"prettyprint\">");
 	else
@@ -258,7 +258,7 @@ rndr_quote(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 static int
 rndr_linebreak(hoedown_buffer *ob, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 	hoedown_buffer_puts(ob, USE_XHTML(state) ? "<br/>\n" : "<br>\n");
 	return 1;
 }
@@ -266,7 +266,7 @@ rndr_linebreak(hoedown_buffer *ob, void *opaque)
 static void
 rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 
 	if (ob->size)
 		hoedown_buffer_putc(ob, '\n');
@@ -283,7 +283,7 @@ rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opa
 static int
 rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *content, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 
 	if (link != NULL && (state->flags & HOEDOWN_HTML_SAFELINK) != 0 && !hoedown_autolink_is_safe(link->data, link->size))
 		return 0;
@@ -337,7 +337,7 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *o
 static void
 rndr_paragraph(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 	size_t i = 0;
 
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
@@ -405,7 +405,7 @@ rndr_triple_emphasis(hoedown_buffer *ob, const hoedown_buffer *text, void *opaqu
 static void
 rndr_hrule(hoedown_buffer *ob, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	hoedown_buffer_puts(ob, USE_XHTML(state) ? "<hr/>\n" : "<hr>\n");
 }
@@ -413,7 +413,7 @@ rndr_hrule(hoedown_buffer *ob, void *opaque)
 static int
 rndr_image(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *alt, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 	if (!link || !link->size) return 0;
 
 	HOEDOWN_BUFPUTSL(ob, "<img src=\"");
@@ -434,7 +434,7 @@ rndr_image(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer 
 static int
 rndr_raw_html(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 
 	/* HTML_ESCAPE overrides SKIP_HTML, SKIP_STYLE, SKIP_LINKS and SKIP_IMAGES
 	* It doens't see if there are any valid tags, just escape all of them. */
@@ -540,7 +540,7 @@ rndr_normal_text(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 static void
 rndr_footnotes(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	HOEDOWN_BUFPUTSL(ob, "<div class=\"footnotes\">\n");
@@ -593,7 +593,7 @@ rndr_footnote_ref(hoedown_buffer *ob, unsigned int num, void *opaque)
 static void
 toc_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 
 	if (level <= state->toc_data.nesting_level) {
 		/* set the level offset if this is the first header
@@ -636,7 +636,7 @@ toc_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *t
 static void
 toc_finalize(hoedown_buffer *ob, void *opaque)
 {
-	hoedown_html_renderopt *state = opaque;
+	rndr_state *state = opaque;
 
 	while (state->toc_data.current_level > 0) {
 		HOEDOWN_BUFPUTSL(ob, "</li>\n</ul>\n");
@@ -687,13 +687,13 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		NULL
 	};
 
-	hoedown_html_renderopt *state;
-	hoedown_renderer       *renderer;
+	rndr_state       *state;
+	hoedown_renderer *renderer;
 
 	/* Prepare the state pointer */
-	state = malloc(sizeof(hoedown_html_renderopt));
+	state = malloc(sizeof(rndr_state));
 	if (!state) return NULL;
-	memset(state, 0x0, sizeof(hoedown_html_renderopt));
+	memset(state, 0x0, sizeof(rndr_state));
 
 	if (nesting_level > 0) {
 		state->flags |= HOEDOWN_HTML_TOC;
@@ -752,13 +752,13 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 		NULL
 	};
 
-	hoedown_html_renderopt *state;
-	hoedown_renderer       *renderer;
+	rndr_state       *state;
+	hoedown_renderer *renderer;
 
 	/* Prepare the state pointer */
-	state = malloc(sizeof(hoedown_html_renderopt));
+	state = malloc(sizeof(rndr_state));
 	if (!state) return NULL;
-	memset(state, 0x0, sizeof(hoedown_html_renderopt));
+	memset(state, 0x0, sizeof(rndr_state));
 
 	state->flags = render_flags;
 
