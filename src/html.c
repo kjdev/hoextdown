@@ -104,35 +104,10 @@ rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buf
 
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 
-	if (lang && lang->size) {
-		size_t i, cls = 0;
-		if (state->flags & HOEDOWN_HTML_PRETTIFY) {
-			HOEDOWN_BUFPUTSL(ob, "<pre><code class=\"prettyprint");
-			cls++;
-		} else {
-			HOEDOWN_BUFPUTSL(ob, "<pre><code class=\"");
-		}
-
-		for (i = 0; i < lang->size; ++i, ++cls) {
-			while (i < lang->size && isspace(lang->data[i]))
-				i++;
-
-			if (i < lang->size) {
-				size_t org = i;
-				while (i < lang->size && !isspace(lang->data[i]))
-					i++;
-
-				if (lang->data[org] == '.')
-					org++;
-
-				if (cls) hoedown_buffer_putc(ob, ' ');
-				escape_html(ob, lang->data + org, i - org);
-			}
-		}
-
+	if (lang) {
+		HOEDOWN_BUFPUTSL(ob, "<pre><code class=\"language-");
+		escape_html(ob, lang->data, lang->size);
 		HOEDOWN_BUFPUTSL(ob, "\">");
-	} else if (state->flags & HOEDOWN_HTML_PRETTIFY) {
-		HOEDOWN_BUFPUTSL(ob, "<pre><code class=\"prettyprint\">");
 	} else {
 		HOEDOWN_BUFPUTSL(ob, "<pre><code>");
 	}
@@ -156,10 +131,7 @@ static int
 rndr_codespan(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	hoedown_html_renderer_state *state = opaque;
-	if (state->flags & HOEDOWN_HTML_PRETTIFY)
-		HOEDOWN_BUFPUTSL(ob, "<code class=\"prettyprint\">");
-	else
-		HOEDOWN_BUFPUTSL(ob, "<code>");
+	HOEDOWN_BUFPUTSL(ob, "<code>");
 	if (text) escape_html(ob, text->data, text->size);
 	HOEDOWN_BUFPUTSL(ob, "</code>");
 	return 1;
