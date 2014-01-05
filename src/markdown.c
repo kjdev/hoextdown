@@ -1354,59 +1354,33 @@ prefix_codefence(uint8_t *data, size_t size)
 
 /* check if a line is a code fence; return its size if it is */
 static size_t
-is_codefence(uint8_t *data, size_t size, hoedown_buffer *syntax)
+is_codefence(uint8_t *data, size_t size, hoedown_buffer *lang)
 {
-	size_t i = 0, syn_len = 0;
-	uint8_t *syn_start;
+	size_t i = 0, lang_start;
+
+	// restrict to the current line (including \n)
+	size--;
+	while (i < size && data[i++] != '\n');
+	size = i;
 
 	i = prefix_codefence(data, size);
 	if (i == 0)
 		return 0;
 
-	while (i < size && data[i] == ' ')
-		i++;
+	if (lang) {
+		while (i < size && _isspace(data[i]))
+			i++;
 
-	syn_start = data + i;
+		lang_start = i;
 
-	if (i < size && data[i] == '{') {
-		i++; syn_start++;
+		while (i < size && !_isspace(data[i]))
+			i++;
 
-		while (i < size && data[i] != '}' && data[i] != '\n') {
-			syn_len++; i++;
-		}
-
-		if (i == size || data[i] != '}')
-			return 0;
-
-		/* strip all whitespace at the beginning and the end
-		 * of the {} block */
-		while (syn_len > 0 && _isspace(syn_start[0])) {
-			syn_start++; syn_len--;
-		}
-
-		while (syn_len > 0 && _isspace(syn_start[syn_len - 1]))
-			syn_len--;
-
-		i++;
-	} else {
-		while (i < size && !_isspace(data[i])) {
-			syn_len++; i++;
-		}
+		lang->data = data + lang_start;
+		lang->size = i - lang_start;
 	}
 
-	if (syntax) {
-		syntax->data = syn_start;
-		syntax->size = syn_len;
-	}
-
-	while (i < size && data[i] != '\n') {
-		if (!_isspace(data[i]))
-			return 0;
-
-		i++;
-	}
-
-	return i + 1;
+	return size;
 }
 
 /* is_atxheader • returns whether the line is a hash-prefixed header */
