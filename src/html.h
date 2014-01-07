@@ -31,6 +31,22 @@ typedef enum {
 	HOEDOWN_HTML_TAG_CLOSE
 } hoedown_html_tag;
 
+struct hoedown_html_renderer_state {
+	struct {
+		int header_count;
+		int current_level;
+		int level_offset;
+		int nesting_level;
+	} toc_data;
+
+	unsigned int flags;
+
+	/* extra callbacks */
+	void (*link_attributes)(hoedown_buffer *ob, const hoedown_buffer *url, void *self);
+};
+
+typedef struct hoedown_html_renderer_state hoedown_html_renderer_state;
+
 int
 hoedown_html_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagname);
 
