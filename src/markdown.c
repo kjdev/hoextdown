@@ -1322,9 +1322,10 @@ is_hrule(uint8_t *data, size_t size)
 }
 
 /* check if a line is a code fence; return the
- * width of the code fence */
+ * width of the code fence. if passed, width of
+ * the fence rule and character will be returned */
 static size_t
-is_codefence(uint8_t *data, size_t size)
+is_codefence(uint8_t *data, size_t size, size_t *width, uint8_t *chr)
 {
 	size_t i = 0, n = 0;
 	uint8_t c;
@@ -1349,16 +1350,18 @@ is_codefence(uint8_t *data, size_t size)
 	if (n < 3)
 		return 0;
 
+	if (width) *width = n;
+	if (chr) *chr = c;
 	return i;
 }
 
 /* expects single line, checks if it's a codefence and extracts language */
 static int
-parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang)
+parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang, size_t *width, uint8_t *chr)
 {
-	size_t i, lang_start;
+	size_t i, w, lang_start;
 
-	i = is_codefence(data, size);
+	i = w = is_codefence(data, size, width, chr);
 	if (i == 0)
 		return 0;
 
@@ -1373,7 +1376,7 @@ parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang)
 	lang->data = data + lang_start;
 	lang->size = i - lang_start;
 
-	return 1;
+	return w;
 }
 
 /* is_atxheader • returns whether the line is a hash-prefixed header */
@@ -1606,7 +1609,7 @@ parse_paragraph(hoedown_buffer *ob, hoedown_markdown *md, uint8_t *data, size_t 
 
 			/* see if a code fence starts here */
 			if ((md->ext_flags & HOEDOWN_EXT_FENCED_CODE) != 0 &&
-				is_codefence(data + i, size - i)) {
+				is_codefence(data + i, size - i, NULL, NULL)) {
 				end = i;
 				break;
 			}
@@ -1670,13 +1673,17 @@ parse_paragraph(hoedown_buffer *ob, hoedown_markdown *md, uint8_t *data, size_t 
 static size_t
 parse_fencedcode(hoedown_buffer *ob, hoedown_markdown *md, uint8_t *data, size_t size)
 {
-	size_t i = 0, text_start, line_start, w;
+	size_t i = 0, text_start, line_start;
+	size_t w, w2;
+	size_t width, width2;
+	uint8_t chr, chr2;
 	hoedown_buffer text = { 0, 0, 0, 0 };
 	hoedown_buffer lang = { 0, 0, 0, 0 };
 
 	// parse codefence line
 	while (i < size && data[i] != '\n') i++;
-	if (!parse_codefence(data, i, &lang)) return 0;
+	w = parse_codefence(data, i, &lang, &width, &chr);
+	if (!w) return 0;
 
 	// search for end
 	i++;
@@ -1685,8 +1692,9 @@ parse_fencedcode(hoedown_buffer *ob, hoedown_markdown *md, uint8_t *data, size_t
 		line_start = i;
 		while (i < size && data[i] != '\n') i++;
 
-		w = is_codefence(data + line_start, i - line_start);
-		if (w && is_empty(data + (line_start+w), i - (line_start+w))) {
+		w2 = is_codefence(data + line_start, i - line_start, &width2, &chr2);
+		if (w == w2 && width == width2 && chr == chr2 &&
+		    is_empty(data + (line_start+w), i - (line_start+w))) {
 			text.data = data + text_start;
 			text.size = line_start - text_start;
 			break;
@@ -1799,7 +1807,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_markdown *md, uint8_t *data, size_t s
 		pre = i;
 
 		if (md->ext_flags & HOEDOWN_EXT_FENCED_CODE) {
-			if (is_codefence(data + beg + i, end - beg - i))
+			if (is_codefence(data + beg + i, end - beg - i, NULL, NULL))
 				in_fence = !in_fence;
 		}
 
