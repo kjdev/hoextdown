@@ -211,7 +211,7 @@ smartypants_cb__dash(hoedown_buffer *ob, struct smartypants_data *smrt, uint8_t 
 static size_t
 smartypants_cb__amp(hoedown_buffer *ob, struct smartypants_data *smrt, uint8_t previous_char, const uint8_t *text, size_t size)
 {
-	int len;
+	size_t len;
 	if (size >= 6 && memcmp(text, "&quot;", 6) == 0) {
 		if (smartypants_quotes(ob, previous_char, size >= 7 ? text[6] : 0, 'd', &smrt->in_dquote))
 			return 5;
