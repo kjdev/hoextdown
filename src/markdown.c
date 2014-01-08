@@ -1688,18 +1688,16 @@ parse_fencedcode(hoedown_buffer *ob, hoedown_markdown *md, uint8_t *data, size_t
 	// search for end
 	i++;
 	text_start = i;
-	for (; i < size; i++) {
-		line_start = i;
+	for (; (line_start = i) < size; i++) {
 		while (i < size && data[i] != '\n') i++;
 
 		w2 = is_codefence(data + line_start, i - line_start, &width2, &chr2);
 		if (w == w2 && width == width2 && chr == chr2 &&
-		    is_empty(data + (line_start+w), i - (line_start+w))) {
-			text.data = data + text_start;
-			text.size = line_start - text_start;
+		    is_empty(data + (line_start+w), i - (line_start+w)))
 			break;
-		}
 	}
+	text.data = data + text_start;
+	text.size = line_start - text_start;
 
 	// call callback
 	if (md->md.blockcode)
