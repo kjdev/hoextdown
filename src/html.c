@@ -100,8 +100,6 @@ rndr_autolink(hoedown_buffer *ob, const hoedown_buffer *link, enum hoedown_autol
 static void
 rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, void *opaque)
 {
-	hoedown_html_renderer_state *state = opaque;
-
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 
 	if (lang) {
@@ -130,7 +128,6 @@ rndr_blockquote(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 static int
 rndr_codespan(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
-	hoedown_html_renderer_state *state = opaque;
 	HOEDOWN_BUFPUTSL(ob, "<code>");
 	if (text) escape_html(ob, text->data, text->size);
 	HOEDOWN_BUFPUTSL(ob, "</code>");
