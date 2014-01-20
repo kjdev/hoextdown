@@ -66,8 +66,10 @@ Help us
 -------
 
 `Hoedown` is all about security. If you find a (potential) security vulnerability in the
-library, or a way to make it crash through malicious input, please report it to us,
-by leaving an [Issue](https://github.com/hoedown/hoedown/issues/new).
+library, or a way to make it crash through malicious input, please report it to us by
+emailing the private [Hoedown Security](mailto:hoedown-security@googlegroups.com)
+mailing list. The `Hoedown` security team will review the vulnerability and work with you
+to reproduce and resolve it.
 
 Unicode character handling
 --------------------------
