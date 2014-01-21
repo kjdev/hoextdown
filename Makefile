@@ -1,4 +1,4 @@
-CFLAGS = -c -g -O3 -Wall -Wextra -Wno-unused-parameter -Isrc
+CFLAGS = -g -O3 -Wall -Wextra -Wno-unused-parameter -Isrc
 
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
@@ -57,5 +57,5 @@ clean:
 
 # Generic object compilations
 
-%.o: src/%.c examples/%.c
-	$(CC) $(CFLAGS) -o $@ $<
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
