@@ -29,6 +29,7 @@ for TEXT in "$TESTDIR"/*.text; do
     # name to pass to mkfifo and "mktemp -u" is not portable.
     PIPE=$(mktemp .testpipe-XXXXXXXX)
     test -f "$PIPE" -a -n "$PIPE" || abort "mktemp failed"
+    trap 'rm -f "$PIPE"' EXIT INT TERM HUP
     rm -f "$PIPE"
     mkfifo "$PIPE" || abort "unable to create named pipe"
 
