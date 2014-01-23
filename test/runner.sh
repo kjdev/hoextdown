@@ -38,3 +38,4 @@ for TEXT in "$TESTDIR"/*.text; do
 done
 
 printf "\n\n$PASSED passed; $FAILED failed.\n"
+test "$FAILED" = 0 || exit 1
