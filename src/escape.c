@@ -31,7 +31,7 @@
  * All other characters will be escaped to %XX.
  *
  */
-static const uint8_t HREF_SAFE[] = {
+static const uint8_t HREF_SAFE[UINT8_MAX+1] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 
@@ -127,7 +127,7 @@ hoedown_escape_href(hoedown_buffer *ob, const uint8_t *src, size_t size)
  * / --> &#x2F;     forward slash is included as it helps end an HTML entity
  *
  */
-static const uint8_t HTML_ESCAPE_TABLE[] = {
+static const uint8_t HTML_ESCAPE_TABLE[UINT8_MAX+1] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 1, 0, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 4, 
