@@ -23,9 +23,17 @@ for TEXT in "$TESTDIR"/*.text; do
     test -f "$TEXT" || abort "empty or invalid test directory"
     printf "$(basename "$TEXT" .text) ... "
     HTML=$(echo "$TEXT" | sed 's/\.text$/.html/')
-    mkfifo .pipe
-    $SCRIPT "$TEXT" | $TIDY > .pipe &
-    DIFF=$($TIDY "$HTML" | diff .pipe -)
+
+    # We use mktemp to create an unpredictable, temporary filename.
+    # The created file is immediately deleted, since we only want a
+    # name to pass to mkfifo and "mktemp -u" is not portable.
+    PIPE=$(mktemp .testpipe-XXXXXXXX)
+    test -f "$PIPE" -a -n "$PIPE" || abort "mktemp failed"
+    rm -f "$PIPE"
+    mkfifo "$PIPE" || abort "unable to create named pipe"
+
+    $SCRIPT "$TEXT" | $TIDY > "$PIPE" &
+    DIFF=$($TIDY "$HTML" | diff "$PIPE" -)
     if test "$?" = 0; then
         PASSED=$(expr $PASSED + 1)
         echo OK
@@ -34,7 +42,7 @@ for TEXT in "$TESTDIR"/*.text; do
         echo FAILED
         printf "\n$DIFF\n\n"
     fi
-    rm .pipe
+    rm -f "$PIPE"
 done
 
 printf "\n\n$PASSED passed; $FAILED failed.\n"
