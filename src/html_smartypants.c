@@ -41,7 +41,7 @@ static size_t (*smartypants_cb_ptrs[])
 	smartypants_cb__escape, /* 10 */
 };
 
-static const uint8_t smartypants_cb_chars[] = {
+static const uint8_t smartypants_cb_chars[UINT8_MAX+1] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 4, 0, 0, 0, 5, 3, 2, 0, 0, 0, 0, 1, 6, 0,
