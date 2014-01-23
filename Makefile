@@ -45,7 +45,7 @@ src/html_blocks.c: html_block_names.gperf
 # Testing
 
 test: hoedown
-	test/runner.bash ./hoedown test/MarkdownTest_1.0.3/Tests
+	test/runner.sh ./hoedown test/MarkdownTest_1.0.3/Tests
 
 test-pl: hoedown
 	perl test/MarkdownTest_1.0.3/MarkdownTest.pl \
