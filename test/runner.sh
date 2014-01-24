@@ -31,7 +31,7 @@ for TEXT in "$TESTDIR"/*.text; do
     test -f "$PIPE" -a -n "$PIPE" || abort "mktemp failed"
     trap 'rm -f "$PIPE"' EXIT INT TERM HUP
     rm -f "$PIPE"
-    mkfifo "$PIPE" || abort "unable to create named pipe"
+    mkfifo -m 0600 "$PIPE" || abort "unable to create named pipe"
 
     $SCRIPT "$TEXT" | $TIDY > "$PIPE" &
     DIFF=$($TIDY "$HTML" | diff "$PIPE" -)
