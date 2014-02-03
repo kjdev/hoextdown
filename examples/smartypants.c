@@ -32,7 +32,7 @@ main(int argc, char **argv)
 
 	while (!feof(in)) {
 		if (ferror(in)) {
-			fprintf(stderr, "I/O error found while reading input file.\n");
+			fprintf(stderr, "I/O error found while reading input.\n");
 			return 1;
 		}
 		if (hoedown_buffer_grow(ib, ib->size + READ_UNIT) != HOEDOWN_BUF_OK) {
@@ -61,5 +61,10 @@ main(int argc, char **argv)
 	hoedown_buffer_free(ib);
 	hoedown_buffer_free(ob);
 
-	return ferror(stdout);
+	if (ferror(stdout)) {
+		fprintf(stderr, "I/O errors found while writing output.\n");
+		return 1;
+	}
+
+	return 0;
 }
