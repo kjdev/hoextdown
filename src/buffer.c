@@ -5,8 +5,6 @@
 #include <string.h>
 #include <assert.h>
 
-#define BUFFER_MAX_ALLOC_SIZE (1024 * 1024 * 16) /* 16mb */
-
 /* hoedown_buffer_new: allocation of a new buffer */
 hoedown_buffer *
 hoedown_buffer_new(size_t unit)
@@ -53,9 +51,6 @@ hoedown_buffer_grow(hoedown_buffer *buf, size_t neosz)
 	void *neodata;
 
 	assert(buf && buf->unit);
-
-	if (neosz > BUFFER_MAX_ALLOC_SIZE)
-		return HOEDOWN_BUF_ENOMEM;
 
 	if (buf->asize >= neosz)
 		return HOEDOWN_BUF_OK;
