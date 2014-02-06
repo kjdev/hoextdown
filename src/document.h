@@ -1,7 +1,7 @@
-/* markdown.h - generic markdown parser */
+/* document.h - generic markdown parser */
 
-#ifndef HOEDOWN_MARKDOWN_H
-#define HOEDOWN_MARKDOWN_H
+#ifndef HOEDOWN_DOCUMENT_H
+#define HOEDOWN_DOCUMENT_H
 
 #include "buffer.h"
 #include "autolink.h"
@@ -133,4 +133,4 @@ hoedown_version(int *major, int *minor, int *revision);
 }
 #endif
 
-#endif /** HOEDOWN_MARKDOWN_H **/
+#endif /** HOEDOWN_DOCUMENT_H **/

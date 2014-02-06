@@ -7,11 +7,11 @@ endif
 HOEDOWN_SRC=\
 	src/autolink.o \
 	src/buffer.o \
+	src/document.o \
 	src/escape.o \
 	src/html.o \
 	src/html_blocks.o \
 	src/html_smartypants.o \
-	src/markdown.o \
 	src/stack.o
 
 .PHONY:		all test test-pl clean

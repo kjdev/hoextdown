@@ -1,4 +1,4 @@
-#include "markdown.h"
+#include "document.h"
 #include "html.h"
 
 #include <errno.h>

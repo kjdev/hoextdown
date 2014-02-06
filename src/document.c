@@ -1,6 +1,6 @@
-/* markdown.c - generic markdown parser */
+/* document.c - generic markdown parser */
 
-#include "markdown.h"
+#include "document.h"
 
 #include <assert.h>
 #include <string.h>

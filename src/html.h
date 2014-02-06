@@ -3,7 +3,7 @@
 #ifndef HOEDOWN_HTML_H
 #define HOEDOWN_HTML_H
 
-#include "markdown.h"
+#include "document.h"
 #include "buffer.h"
 #include <stdlib.h>
 
