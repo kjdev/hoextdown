@@ -98,9 +98,9 @@ struct hoedown_renderer {
 
 typedef struct hoedown_renderer hoedown_renderer;
 
-struct hoedown_markdown;
+struct hoedown_document;
 
-typedef struct hoedown_markdown hoedown_markdown;
+typedef struct hoedown_document hoedown_document;
 
 /*********
  * FLAGS *
@@ -114,17 +114,17 @@ typedef struct hoedown_markdown hoedown_markdown;
  * EXPORTED FUNCTIONS *
  **********************/
 
-extern hoedown_markdown *
-hoedown_markdown_new(
+extern hoedown_document *
+hoedown_document_new(
 	unsigned int extensions,
 	size_t max_nesting,
 	const hoedown_renderer *renderer);
 
 extern void
-hoedown_markdown_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_size, hoedown_markdown *md);
+hoedown_document_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_size, hoedown_document *doc);
 
 extern void
-hoedown_markdown_free(hoedown_markdown *md);
+hoedown_document_free(hoedown_document *doc);
 
 extern void
 hoedown_version(int *major, int *minor, int *revision);
