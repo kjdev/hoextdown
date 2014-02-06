@@ -10,11 +10,6 @@
 extern "C" {
 #endif
 
-#define HOEDOWN_VERSION "2.0.0"
-#define HOEDOWN_VERSION_MAJOR 2
-#define HOEDOWN_VERSION_MINOR 0
-#define HOEDOWN_VERSION_REVISION 0
-
 /********************
  * TYPE DEFINITIONS *
  ********************/
@@ -125,9 +120,6 @@ hoedown_document_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_
 
 extern void
 hoedown_document_free(hoedown_document *doc);
-
-extern void
-hoedown_version(int *major, int *minor, int *revision);
 
 #ifdef __cplusplus
 }
