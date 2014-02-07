@@ -51,8 +51,8 @@ Features
 
 *	**Zero-dependency**
 
-	`Hoedown` is a zero-dependency library composed of 4 `.c` files and their headers.
-	No dependencies, no bullshit. Only standard C99 that builds everywhere.
+	`Hoedown` is a zero-dependency library composed of some `.c` files and their
+	headers. No dependencies, no bullshit. Only standard C99 that builds everywhere.
 
 Bindings
 --------
@@ -87,12 +87,8 @@ features:
 Install
 -------
 
-There is nothing to install. `Hoedown` is composed of 4 `.c` files (`markdown.c`,
-`buffer.c`, `stack.c`, and `autolink.c`) and their headers, so just throw them in your
-project. Zero-dependency means zero-dependency. You might want to include `html.c`,
-`html_smartypants.c` and `escape.c` if you want to use the included XHTML renderer, or
-write your own renderer. Either way, it's all fun and joy.
+Just typing `make` will build `Hoedown` into a dynamic library and create the `hoedown`
+and `smartypants` executables, which are command-line tools to render Markdown to HTML
+and perform SmartyPants, respectively.
 
-If you are hardcore, you can use the included `Makefile` to build `Hoedown` into a dynamic
-library, or to build the sample `hoedown` executable, which is just a commandline
-Markdown to XHTML parser.
+Or, if you prefer, you can just throw the files at `src` into your project.
