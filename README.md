@@ -54,6 +54,11 @@ Features
 	`Hoedown` is a zero-dependency library composed of some `.c` files and their
 	headers. No dependencies, no bullshit. Only standard C99 that builds everywhere.
 
+*	**Additional features**
+
+	`Hoedown` comes with a fully functional implementation of SmartyPants,
+	a separate autolinker, escaping utilities, buffers and stacks.
+
 Bindings
 --------
 
