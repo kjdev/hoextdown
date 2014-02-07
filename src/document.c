@@ -2728,7 +2728,7 @@ hoedown_document_new(
 }
 
 void
-hoedown_document_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_size, hoedown_document *doc)
+hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size)
 {
 	static const uint8_t UTF8_BOM[] = {0xEF, 0xBB, 0xBF};
 

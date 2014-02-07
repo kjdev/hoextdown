@@ -116,7 +116,7 @@ hoedown_document_new(
 	const hoedown_renderer *renderer);
 
 extern void
-hoedown_document_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_size, hoedown_document *doc);
+hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size);
 
 extern void
 hoedown_document_free(hoedown_document *doc);

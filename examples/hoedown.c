@@ -59,7 +59,7 @@ main(int argc, char **argv)
 	renderer = hoedown_html_renderer_new(0, 0);
 	document = hoedown_document_new(0, 16, renderer);
 
-	hoedown_document_render(ob, ib->data, ib->size, document);
+	hoedown_document_render(document, ob, ib->data, ib->size);
 
 	hoedown_document_free(document);
 	hoedown_html_renderer_free(renderer);
