@@ -14,37 +14,6 @@ extern "C" {
  * TYPE DEFINITIONS *
  ********************/
 
-/* hoedown_autolink - type of autolink */
-enum hoedown_autolink {
-	HOEDOWN_AUTOLINK_NONE,		/* used internally when it is not an autolink*/
-	HOEDOWN_AUTOLINK_NORMAL,	/* normal http/http/ftp/mailto/etc link */
-	HOEDOWN_AUTOLINK_EMAIL		/* e-mail link without explit mailto: */
-};
-
-enum hoedown_tableflags {
-	HOEDOWN_TABLE_ALIGN_L = 1,
-	HOEDOWN_TABLE_ALIGN_R = 2,
-	HOEDOWN_TABLE_ALIGN_CENTER = 3,
-	HOEDOWN_TABLE_ALIGNMASK = 3,
-	HOEDOWN_TABLE_HEADER = 4
-};
-
-enum hoedown_extensions {
-	HOEDOWN_EXT_NO_INTRA_EMPHASIS = (1 << 0),
-	HOEDOWN_EXT_TABLES = (1 << 1),
-	HOEDOWN_EXT_FENCED_CODE = (1 << 2),
-	HOEDOWN_EXT_AUTOLINK = (1 << 3),
-	HOEDOWN_EXT_STRIKETHROUGH = (1 << 4),
-	HOEDOWN_EXT_UNDERLINE = (1 << 5),
-	HOEDOWN_EXT_SPACE_HEADERS = (1 << 6),
-	HOEDOWN_EXT_SUPERSCRIPT = (1 << 7),
-	HOEDOWN_EXT_LAX_SPACING = (1 << 8),
-	HOEDOWN_EXT_DISABLE_INDENTED_CODE = (1 << 9),
-	HOEDOWN_EXT_HIGHLIGHT = (1 << 10),
-	HOEDOWN_EXT_FOOTNOTES = (1 << 11),
-	HOEDOWN_EXT_QUOTE = (1 << 12)
-};
-
 /* hoedown_renderer - functions for rendering parsed data */
 struct hoedown_renderer {
 	/* block level callbacks - NULL skips the block */
@@ -101,9 +70,42 @@ typedef struct hoedown_document hoedown_document;
  * FLAGS *
  *********/
 
+enum hoedown_extensions {
+	HOEDOWN_EXT_NO_INTRA_EMPHASIS = (1 << 0),
+	HOEDOWN_EXT_TABLES = (1 << 1),
+	HOEDOWN_EXT_FENCED_CODE = (1 << 2),
+	HOEDOWN_EXT_AUTOLINK = (1 << 3),
+	HOEDOWN_EXT_STRIKETHROUGH = (1 << 4),
+	HOEDOWN_EXT_UNDERLINE = (1 << 5),
+	HOEDOWN_EXT_SPACE_HEADERS = (1 << 6),
+	HOEDOWN_EXT_SUPERSCRIPT = (1 << 7),
+	HOEDOWN_EXT_LAX_SPACING = (1 << 8),
+	HOEDOWN_EXT_DISABLE_INDENTED_CODE = (1 << 9),
+	HOEDOWN_EXT_HIGHLIGHT = (1 << 10),
+	HOEDOWN_EXT_FOOTNOTES = (1 << 11),
+	HOEDOWN_EXT_QUOTE = (1 << 12)
+};
+
 /* list/listitem flags */
-#define HOEDOWN_LIST_ORDERED	1
-#define HOEDOWN_LI_BLOCK		2	/* <li> containing block data */
+enum hoedown_listflags {
+	HOEDOWN_LIST_ORDERED = (1 << 0),
+	HOEDOWN_LI_BLOCK = (1 << 1),	/* <li> containing block data */
+};
+
+enum hoedown_tableflags {
+	HOEDOWN_TABLE_ALIGN_L = 1,
+	HOEDOWN_TABLE_ALIGN_R = 2,
+	HOEDOWN_TABLE_ALIGN_CENTER = 3,
+	HOEDOWN_TABLE_ALIGNMASK = 3,
+	HOEDOWN_TABLE_HEADER = 4
+};
+
+/* hoedown_autolink - type of autolink */
+enum hoedown_autolink {
+	HOEDOWN_AUTOLINK_NONE,		/* used internally when it is not an autolink*/
+	HOEDOWN_AUTOLINK_NORMAL,	/* normal http/http/ftp/mailto/etc link */
+	HOEDOWN_AUTOLINK_EMAIL		/* e-mail link without explit mailto: */
+};
 
 /**********************
  * EXPORTED FUNCTIONS *
