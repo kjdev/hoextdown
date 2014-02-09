@@ -265,7 +265,7 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *
 }
 
 static void
-rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
+rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque)
 {
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	hoedown_buffer_put(ob, flags & HOEDOWN_LIST_ORDERED ? "<ol>\n" : "<ul>\n", 5);
@@ -274,7 +274,7 @@ rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaqu
 }
 
 static void
-rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
+rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque)
 {
 	HOEDOWN_BUFPUTSL(ob, "<li>");
 	if (text) {
@@ -438,7 +438,7 @@ rndr_tablerow(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 }
 
 static void
-rndr_tablecell(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
+rndr_tablecell(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque)
 {
 	if (flags & HOEDOWN_TABLE_HEADER) {
 		HOEDOWN_BUFPUTSL(ob, "<th");

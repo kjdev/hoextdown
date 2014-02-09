@@ -63,12 +63,12 @@ struct hoedown_renderer {
 	void (*blockhtml)(hoedown_buffer *ob,const  hoedown_buffer *text, void *opaque);
 	void (*header)(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque);
 	void (*hrule)(hoedown_buffer *ob, void *opaque);
-	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
-	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
+	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
+	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
 	void (*paragraph)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*table)(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, void *opaque);
 	void (*table_row)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
-	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
+	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
 	void (*footnotes)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*footnote_def)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int num, void *opaque);
 
