@@ -57,6 +57,9 @@ enum hoedown_autolink {
 
 /* hoedown_renderer - functions for rendering parsed data */
 struct hoedown_renderer {
+	/* state object */
+	void *opaque;
+
 	/* block level callbacks - NULL skips the block */
 	void (*blockcode)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, void *opaque);
 	void (*blockquote)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
@@ -96,9 +99,6 @@ struct hoedown_renderer {
 	/* header and footer */
 	void (*doc_header)(hoedown_buffer *ob, void *opaque);
 	void (*doc_footer)(hoedown_buffer *ob, void *opaque);
-
-	/* state object */
-	void *opaque;
 };
 
 typedef struct hoedown_renderer hoedown_renderer;

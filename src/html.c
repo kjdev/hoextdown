@@ -602,6 +602,8 @@ hoedown_html_toc_renderer_new(int nesting_level)
 {
 	static const hoedown_renderer cb_default = {
 		NULL,
+
+		NULL,
 		NULL,
 		NULL,
 		toc_header,
@@ -635,9 +637,7 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		NULL,
 
 		NULL,
-		toc_finalize,
-		
-		NULL
+		toc_finalize
 	};
 
 	hoedown_html_renderer_state *state;
@@ -671,7 +671,9 @@ hoedown_html_toc_renderer_new(int nesting_level)
 hoedown_renderer *
 hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 {
-	static const hoedown_renderer cb_default = {
+	static const hoedown_renderer cb_default = {		
+		NULL,
+
 		rndr_blockcode,
 		rndr_blockquote,
 		rndr_raw_block,
@@ -706,8 +708,6 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 		rndr_normal_text,
 
 		NULL,
-		NULL,
-		
 		NULL
 	};
 
