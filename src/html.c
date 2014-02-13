@@ -451,11 +451,11 @@ rndr_tablecell(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flag
 		HOEDOWN_BUFPUTSL(ob, " style=\"text-align: center\">");
 		break;
 
-	case HOEDOWN_TABLE_ALIGN_L:
+	case HOEDOWN_TABLE_ALIGN_LEFT:
 		HOEDOWN_BUFPUTSL(ob, " style=\"text-align: left\">");
 		break;
 
-	case HOEDOWN_TABLE_ALIGN_R:
+	case HOEDOWN_TABLE_ALIGN_RIGHT:
 		HOEDOWN_BUFPUTSL(ob, " style=\"text-align: right\">");
 		break;
 
