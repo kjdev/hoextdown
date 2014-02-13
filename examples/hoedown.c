@@ -1,4 +1,4 @@
-#include "markdown.h"
+#include "document.h"
 #include "html.h"
 
 #include <errno.h>
@@ -16,7 +16,7 @@ main(int argc, char **argv)
 	FILE *in = stdin;
 
 	hoedown_renderer *renderer;
-	hoedown_markdown *markdown;
+	hoedown_document *document;
 
 	/* opening the file if given from the command line */
 	if (argc > 1) {
@@ -57,11 +57,11 @@ main(int argc, char **argv)
 	}
 
 	renderer = hoedown_html_renderer_new(0, 0);
-	markdown = hoedown_markdown_new(0, 16, renderer);
+	document = hoedown_document_new(renderer, 0, 16);
 
-	hoedown_markdown_render(ob, ib->data, ib->size, markdown);
+	hoedown_document_render(document, ob, ib->data, ib->size);
 
-	hoedown_markdown_free(markdown);
+	hoedown_document_free(document);
 	hoedown_html_renderer_free(renderer);
 
 	/* writing the result to stdout */

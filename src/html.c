@@ -265,7 +265,7 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *
 }
 
 static void
-rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
+rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque)
 {
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 	hoedown_buffer_put(ob, flags & HOEDOWN_LIST_ORDERED ? "<ol>\n" : "<ul>\n", 5);
@@ -274,7 +274,7 @@ rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaqu
 }
 
 static void
-rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
+rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque)
 {
 	HOEDOWN_BUFPUTSL(ob, "<li>");
 	if (text) {
@@ -438,7 +438,7 @@ rndr_tablerow(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 }
 
 static void
-rndr_tablecell(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque)
+rndr_tablecell(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque)
 {
 	if (flags & HOEDOWN_TABLE_HEADER) {
 		HOEDOWN_BUFPUTSL(ob, "<th");
@@ -602,6 +602,8 @@ hoedown_html_toc_renderer_new(int nesting_level)
 {
 	static const hoedown_renderer cb_default = {
 		NULL,
+
+		NULL,
 		NULL,
 		NULL,
 		toc_header,
@@ -635,9 +637,7 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		NULL,
 
 		NULL,
-		toc_finalize,
-		
-		NULL
+		toc_finalize
 	};
 
 	hoedown_html_renderer_state *state;
@@ -671,7 +671,9 @@ hoedown_html_toc_renderer_new(int nesting_level)
 hoedown_renderer *
 hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 {
-	static const hoedown_renderer cb_default = {
+	static const hoedown_renderer cb_default = {		
+		NULL,
+
 		rndr_blockcode,
 		rndr_blockquote,
 		rndr_raw_block,
@@ -706,8 +708,6 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 		rndr_normal_text,
 
 		NULL,
-		NULL,
-		
 		NULL
 	};
 

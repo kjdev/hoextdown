@@ -4,12 +4,13 @@ CFLAGS = /O2 /sdl /Isrc /D_CRT_SECURE_NO_WARNINGS
 HOEDOWN_SRC = \
 	src\autolink.obj \
 	src\buffer.obj \
+	src\document.obj \
 	src\escape.obj \
 	src\html.obj \
 	src\html_blocks.obj \
 	src\html_smartypants.obj \
-	src\markdown.obj \
-	src\stack.obj
+	src\stack.obj \
+	src\version.obj
 
 all: hoedown.dll hoedown.exe smartypants.exe
 

@@ -3,7 +3,7 @@
 #ifndef HOEDOWN_HTML_H
 #define HOEDOWN_HTML_H
 
-#include "markdown.h"
+#include "document.h"
 #include "buffer.h"
 #include <stdlib.h>
 
@@ -31,6 +31,8 @@ typedef enum {
 } hoedown_html_tag;
 
 struct hoedown_html_renderer_state {
+	void *opaque;
+
 	struct {
 		int header_count;
 		int current_level;

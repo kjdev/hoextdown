@@ -1,7 +1,7 @@
-/* markdown.h - generic markdown parser */
+/* document.h - generic markdown parser */
 
-#ifndef HOEDOWN_MARKDOWN_H
-#define HOEDOWN_MARKDOWN_H
+#ifndef HOEDOWN_DOCUMENT_H
+#define HOEDOWN_DOCUMENT_H
 
 #include "buffer.h"
 #include "autolink.h"
@@ -10,29 +10,9 @@
 extern "C" {
 #endif
 
-#define HOEDOWN_VERSION "2.0.0"
-#define HOEDOWN_VERSION_MAJOR 2
-#define HOEDOWN_VERSION_MINOR 0
-#define HOEDOWN_VERSION_REVISION 0
-
-/********************
- * TYPE DEFINITIONS *
- ********************/
-
-/* hoedown_autolink - type of autolink */
-enum hoedown_autolink {
-	HOEDOWN_AUTOLINK_NONE,		/* used internally when it is not an autolink*/
-	HOEDOWN_AUTOLINK_NORMAL,	/* normal http/http/ftp/mailto/etc link */
-	HOEDOWN_AUTOLINK_EMAIL		/* e-mail link without explit mailto: */
-};
-
-enum hoedown_tableflags {
-	HOEDOWN_TABLE_ALIGN_L = 1,
-	HOEDOWN_TABLE_ALIGN_R = 2,
-	HOEDOWN_TABLE_ALIGN_CENTER = 3,
-	HOEDOWN_TABLE_ALIGNMASK = 3,
-	HOEDOWN_TABLE_HEADER = 4
-};
+/*********
+ * FLAGS *
+ *********/
 
 enum hoedown_extensions {
 	HOEDOWN_EXT_NO_INTRA_EMPHASIS = (1 << 0),
@@ -50,20 +30,48 @@ enum hoedown_extensions {
 	HOEDOWN_EXT_QUOTE = (1 << 12)
 };
 
+/* list/listitem flags */
+enum hoedown_listflags {
+	HOEDOWN_LIST_ORDERED = (1 << 0),
+	HOEDOWN_LI_BLOCK = (1 << 1),	/* <li> containing block data */
+};
+
+enum hoedown_tableflags {
+	HOEDOWN_TABLE_ALIGN_L = 1,
+	HOEDOWN_TABLE_ALIGN_R = 2,
+	HOEDOWN_TABLE_ALIGN_CENTER = 3,
+	HOEDOWN_TABLE_ALIGNMASK = 3,
+	HOEDOWN_TABLE_HEADER = 4
+};
+
+/* hoedown_autolink - type of autolink */
+enum hoedown_autolink {
+	HOEDOWN_AUTOLINK_NONE,		/* used internally when it is not an autolink*/
+	HOEDOWN_AUTOLINK_NORMAL,	/* normal http/http/ftp/mailto/etc link */
+	HOEDOWN_AUTOLINK_EMAIL		/* e-mail link without explit mailto: */
+};
+
+/********************
+ * TYPE DEFINITIONS *
+ ********************/
+
 /* hoedown_renderer - functions for rendering parsed data */
 struct hoedown_renderer {
+	/* state object */
+	void *opaque;
+
 	/* block level callbacks - NULL skips the block */
 	void (*blockcode)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, void *opaque);
 	void (*blockquote)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*blockhtml)(hoedown_buffer *ob,const  hoedown_buffer *text, void *opaque);
 	void (*header)(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque);
 	void (*hrule)(hoedown_buffer *ob, void *opaque);
-	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
-	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
+	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
+	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
 	void (*paragraph)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*table)(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, void *opaque);
 	void (*table_row)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
-	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, int flags, void *opaque);
+	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
 	void (*footnotes)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*footnote_def)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int num, void *opaque);
 
@@ -91,46 +99,32 @@ struct hoedown_renderer {
 	/* header and footer */
 	void (*doc_header)(hoedown_buffer *ob, void *opaque);
 	void (*doc_footer)(hoedown_buffer *ob, void *opaque);
-
-	/* state object */
-	void *opaque;
 };
 
 typedef struct hoedown_renderer hoedown_renderer;
 
-struct hoedown_markdown;
+struct hoedown_document;
 
-typedef struct hoedown_markdown hoedown_markdown;
-
-/*********
- * FLAGS *
- *********/
-
-/* list/listitem flags */
-#define HOEDOWN_LIST_ORDERED	1
-#define HOEDOWN_LI_BLOCK		2	/* <li> containing block data */
+typedef struct hoedown_document hoedown_document;
 
 /**********************
  * EXPORTED FUNCTIONS *
  **********************/
 
-extern hoedown_markdown *
-hoedown_markdown_new(
+extern hoedown_document *
+hoedown_document_new(
+	const hoedown_renderer *renderer,
 	unsigned int extensions,
-	size_t max_nesting,
-	const hoedown_renderer *renderer);
+	size_t max_nesting);
 
 extern void
-hoedown_markdown_render(hoedown_buffer *ob, const uint8_t *document, size_t doc_size, hoedown_markdown *md);
+hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size);
 
 extern void
-hoedown_markdown_free(hoedown_markdown *md);
-
-extern void
-hoedown_version(int *major, int *minor, int *revision);
+hoedown_document_free(hoedown_document *doc);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /** HOEDOWN_MARKDOWN_H **/
+#endif /** HOEDOWN_DOCUMENT_H **/
