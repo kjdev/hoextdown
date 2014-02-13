@@ -2666,9 +2666,9 @@ static void expand_tabs(hoedown_buffer *ob, const uint8_t *line, size_t size)
 
 hoedown_document *
 hoedown_document_new(
+	const hoedown_renderer *renderer,
 	unsigned int extensions,
-	size_t max_nesting,
-	const hoedown_renderer *renderer)
+	size_t max_nesting)
 {
 	hoedown_document *doc = NULL;
 

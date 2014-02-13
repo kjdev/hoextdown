@@ -113,9 +113,9 @@ typedef struct hoedown_document hoedown_document;
 
 extern hoedown_document *
 hoedown_document_new(
+	const hoedown_renderer *renderer,
 	unsigned int extensions,
-	size_t max_nesting,
-	const hoedown_renderer *renderer);
+	size_t max_nesting);
 
 extern void
 hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size);
