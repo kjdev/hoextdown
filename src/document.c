@@ -2252,7 +2252,7 @@ parse_table_header(
 			i++;
 
 		if (data[i] == ':') {
-			i++; (*column_data)[col] |= HOEDOWN_TABLE_ALIGN_L;
+			i++; (*column_data)[col] |= HOEDOWN_TABLE_ALIGN_LEFT;
 			dashes++;
 		}
 
@@ -2261,7 +2261,7 @@ parse_table_header(
 		}
 
 		if (i < under_end && data[i] == ':') {
-			i++; (*column_data)[col] |= HOEDOWN_TABLE_ALIGN_R;
+			i++; (*column_data)[col] |= HOEDOWN_TABLE_ALIGN_RIGHT;
 			dashes++;
 		}
 
