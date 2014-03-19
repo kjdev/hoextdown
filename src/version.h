@@ -12,6 +12,8 @@ extern "C" {
 #define HOEDOWN_VERSION_MINOR 0
 #define HOEDOWN_VERSION_REVISION 0
 
+#define HOEDOWN_VERSION_EXTRAS 1
+
 extern void
 hoedown_version(int *major, int *minor, int *revision);
 
