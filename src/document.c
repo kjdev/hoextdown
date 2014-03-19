@@ -1989,7 +1989,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 				parse_attributes(inter, attr, 0);
 			}
 		}
-		doc->md.listitem(ob, inter, attr, *flags, doc->md.opaque);
+		doc->md.listitem(ob, inter, attr, (unsigned int *)flags, doc->md.opaque);
 	}
 
 	popbuf(doc, BUFFER_SPAN);

@@ -66,6 +66,7 @@ enum hoedown_extensions {
 enum hoedown_listflags {
 	HOEDOWN_LIST_ORDERED = (1 << 0),
 	HOEDOWN_LI_BLOCK = (1 << 1),	/* <li> containing block data */
+	HOEDOWN_LI_TASK = (1 << 2),
 };
 
 enum hoedown_tableflags {
@@ -99,7 +100,7 @@ struct hoedown_renderer {
 	void (*header)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, int level, void *opaque);
 	void (*hrule)(hoedown_buffer *ob, void *opaque);
 	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
-	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, unsigned int flags, void *opaque);
+	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, unsigned int *flags, void *opaque);
 	void (*paragraph)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*table)(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, const hoedown_buffer *attr, void *opaque);
 	void (*table_row)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);

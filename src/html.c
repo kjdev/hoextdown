@@ -8,6 +8,7 @@
 #include "escape.h"
 
 #define USE_XHTML(opt) (opt->flags & HOEDOWN_HTML_USE_XHTML)
+#define USE_TASK_LIST(opt) (opt->flags & HOEDOWN_HTML_USE_TASK_LIST)
 
 int
 hoedown_html_is_tag(const uint8_t *tag_data, size_t tag_size, const char *tagname)
@@ -354,16 +355,36 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *
 static void
 rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque)
 {
+	hoedown_html_renderer_state *state = opaque;
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
-	hoedown_buffer_put(ob, flags & HOEDOWN_LIST_ORDERED ? "<ol>\n" : "<ul>\n", 5);
+
+	if (flags & HOEDOWN_LIST_ORDERED) {
+		if ((flags & HOEDOWN_LI_TASK) && state->class_data.task) {
+			hoedown_buffer_printf(ob, "<ol class=\"%s\">\n", state->class_data.task);
+		} else if (state->class_data.ol) {
+			hoedown_buffer_printf(ob, "<ol class=\"%s\">\n", state->class_data.ol);
+		} else {
+			hoedown_buffer_put(ob, "<ol>\n", 5);
+		}
+	} else {
+		if ((flags & HOEDOWN_LI_TASK) && state->class_data.task) {
+			hoedown_buffer_printf(ob, "<ul class=\"%s\">\n", state->class_data.task);
+		} else if (state->class_data.ul) {
+			hoedown_buffer_printf(ob, "<ul class=\"%s\">\n", state->class_data.ul);
+		} else {
+			hoedown_buffer_put(ob, "<ul>\n", 5);
+		}
+	}
+
 	if (text) hoedown_buffer_put(ob, text->data, text->size);
 	hoedown_buffer_put(ob, flags & HOEDOWN_LIST_ORDERED ? "</ol>\n" : "</ul>\n", 6);
 }
 
 static void
-rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, unsigned int flags, void *opaque)
+rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, unsigned int *flags, void *opaque)
 {
 	if (text) {
+		hoedown_html_renderer_state *state = opaque;
 		size_t prefix = 0;
 		size_t size = text->size;
 		while (size && text->data[size - 1] == '\n')
@@ -374,7 +395,29 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buff
 			rndr_attributes(ob, attr->data, attr->size, NULL, opaque);
 		}
 		hoedown_buffer_putc(ob, '>');
-		hoedown_buffer_put(ob, text->data+prefix, size);
+
+		if (USE_TASK_LIST(state) && size >= 3) {
+			if (*flags & HOEDOWN_LI_BLOCK) {
+				prefix = 3;
+			}
+			if (strncmp((char *)text->data + prefix, "[ ]", 3) == 0) {
+				hoedown_buffer_put(ob, text->data, prefix);
+				HOEDOWN_BUFPUTSL(ob, "<input type=\"checkbox\"");
+				hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
+				prefix += 3;
+				*flags |= HOEDOWN_LI_TASK;
+			} else if (strncasecmp((char *)text->data + prefix, "[x]", 3) == 0) {
+				hoedown_buffer_put(ob, text->data, prefix);
+				HOEDOWN_BUFPUTSL(ob, "<input checked=\"\" type=\"checkbox\"");
+				hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
+				prefix += 3;
+				*flags |= HOEDOWN_LI_TASK;
+			} else {
+				prefix = 0;
+			}
+		}
+
+		hoedown_buffer_put(ob, text->data+prefix, size-prefix);
 	} else {
 		HOEDOWN_BUFPUTSL(ob, "<li>");
 	}

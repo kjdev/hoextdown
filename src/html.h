@@ -21,7 +21,8 @@ typedef enum {
 	HOEDOWN_HTML_TOC = (1 << 6),
 	HOEDOWN_HTML_HARD_WRAP = (1 << 7),
 	HOEDOWN_HTML_USE_XHTML = (1 << 8),
-	HOEDOWN_HTML_ESCAPE = (1 << 9)
+	HOEDOWN_HTML_ESCAPE = (1 << 9),
+	HOEDOWN_HTML_USE_TASK_LIST = (1 << 10)
 } hoedown_html_render_mode;
 
 typedef enum {
@@ -39,6 +40,12 @@ struct hoedown_html_renderer_state {
 		int level_offset;
 		int nesting_level;
 	} toc_data;
+
+    struct {
+        char *ol;
+        char *ul;
+        char *task;
+    } class_data;
 
 	unsigned int flags;
 

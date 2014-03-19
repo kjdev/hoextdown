@@ -34,6 +34,7 @@ main(int argc, char **argv)
 		{ "hard_wrap", 0, NULL, 7 },
 		{ "use_xhtml", 0, NULL, 8 },
 		{ "escape", 0, NULL, 9 },
+		{ "task", 0, NULL, 10 },
 		/* extensions */
 		{ "space_headers", 0, NULL, 100 },
 		{ "tables", 0, NULL, 101 },

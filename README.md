@@ -5,10 +5,11 @@
 Extended the following functions.
 
 * [Special Attributes](#special-attributes)
+* [Task Lists](#task-lists)
 
 ## Special Attributes
 
-Sdd the `HOEDOWN_EXT_SPECIAL_ATTRIBUTE` to Hoedown document flags.
+Add the `HOEDOWN_EXT_SPECIAL_ATTRIBUTE` to Hoedown document flags.
 
 Set the id and class attribute on certain elements using an attribute block.
 
@@ -72,4 +73,19 @@ definition line like this:
 ![img][linkref]
 
 [linkref]: url "optional title" {#id .class}
+```
+
+## Task Lists
+
+Add the `HOEDOWN_HTML_USE_TASK_LIST` to Hoedown html flags.
+
+Add to support task lists, Task lists are lists with items marked as either [ ]
+or [x] (incomplete or complete), like this
+
+```
+- [ ] a task list item
+- [ ] list syntax required
+- [ ] normal **formatting**, @mentions, #1234 refs
+- [ ] incomplete
+- [x] completed
 ```
