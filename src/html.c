@@ -356,7 +356,6 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *
 			link->size > 4 && strncasecmp((char *)link->data, "#toc_", 5) == 0) {
 			hoedown_buffer_puts(ob, "#toc_");
 			rndr_toc_id(ob, link->data + 5, link->size - 5);
-			hoedown_buffer_puts(ob, "\">");
 		} else {
 			escape_href(ob, link->data, link->size);
 		}
