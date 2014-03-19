@@ -19,7 +19,7 @@ main(int argc, char **argv)
 	hoedown_renderer *renderer;
 	hoedown_document *document;
 
-	int html = 0, extensions = 0;
+	int html = 0, extensions = 0, toc_render = 0;
 
 	int opt;
 	const struct option long_options[] = {
@@ -50,14 +50,22 @@ main(int argc, char **argv)
 		{ "no_intra_emphasis", 0, NULL, 111 },
 		{ "disable_indented_code", 0, NULL, 112 },
 		{ "special_attribute", 0, NULL, 113 },
+        /* others */
+		{ "toc_render", 0, NULL, 200 },
 		{ NULL, 0, NULL, 0 }
 	};
 
 	while ((opt = getopt_long_only(argc, argv, "", long_options, NULL)) != -1) {
 		if (opt > 0 && opt < 100) {
 			html |= (1 << opt);
-		} else if (opt >= 100) {
+		} else if (opt >= 100 && opt < 200) {
 			extensions |= (1 << (opt - 100));
+		} else {
+			switch (opt) {
+				case 200:
+					toc_render = 1;
+					break;
+			}
 		}
 	}
 
@@ -99,7 +107,26 @@ main(int argc, char **argv)
 		return 1;
 	}
 
-	renderer = hoedown_html_renderer_new(0, 0);
+	if (html & HOEDOWN_HTML_TOC) {
+		hoedown_html_renderer_state *state;
+
+		if (toc_render) {
+			renderer = hoedown_html_toc_renderer_new(0);
+		} else {
+			renderer = hoedown_html_renderer_new(0, 0);
+		}
+
+		state = (hoedown_html_renderer_state *)renderer->opaque;
+		state->toc_data.current_level = 0;
+		state->toc_data.level_offset = 0;
+		state->toc_data.nesting_level = 6;
+		state->toc_data.unescape = 1;
+		state->toc_data.header = "<div class=\"toc\">";
+		state->toc_data.footer = "</div>";
+	} else {
+		renderer = hoedown_html_renderer_new(0, 0);
+	}
+
 	if (html > 0) {
 		hoedown_html_renderer_state *state;
 		state = (hoedown_html_renderer_state *)renderer->opaque;

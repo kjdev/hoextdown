@@ -35,17 +35,19 @@ struct hoedown_html_renderer_state {
 	void *opaque;
 
 	struct {
-		int header_count;
 		int current_level;
 		int level_offset;
 		int nesting_level;
+		int unescape;
+		char *header;
+		char *footer;
 	} toc_data;
 
-    struct {
-        char *ol;
-        char *ul;
-        char *task;
-    } class_data;
+	struct {
+		char *ol;
+		char *ul;
+		char *task;
+	} class_data;
 
 	unsigned int flags;
 

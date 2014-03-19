@@ -48,6 +48,10 @@ src/html_blocks.c: html_block_names.gperf
 test: hoedown
 	test/runner.sh "./hoedown --special_attribute --tables --fenced_code --task" test/MarkdownTest_1.0.3/Tests
 
+test-toc: hoedown
+	test/runner.sh "./hoedown --special_attribute --toc" test/MarkdownTest_1.0.3/Tests/Toc
+	test/runner.sh "./hoedown --special_attribute --toc --toc_render" test/MarkdownTest_1.0.3/Tests/Toc_Render
+
 test-pl: hoedown
 	perl test/MarkdownTest_1.0.3/MarkdownTest.pl \
 		--script=./hoedown --testdir=test/MarkdownTest_1.0.3/Tests --tidy

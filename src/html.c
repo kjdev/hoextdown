@@ -296,6 +296,22 @@ rndr_linebreak(hoedown_buffer *ob, void *opaque)
 }
 
 static void
+rndr_toc_id(hoedown_buffer *ob, const uint8_t *source, size_t length)
+{
+	size_t i = 0;
+	while (i < length) {
+		if (isalnum(source[i])) {
+			hoedown_buffer_putc(ob, tolower(source[i]));
+		} else if (isascii(source[i])) {
+			hoedown_buffer_putc(ob, '-');
+		} else {
+			hoedown_buffer_printf(ob, "%02X", source[i]);
+		}
+		++i;
+	}
+}
+
+static void
 rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, int level, void *opaque)
 {
 	hoedown_html_renderer_state *state = opaque;
@@ -303,12 +319,20 @@ rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer
 	if (ob->size)
 		hoedown_buffer_putc(ob, '\n');
 
-	if (attr && attr->size) {
+	if ((state->flags & HOEDOWN_HTML_TOC) && (level <= state->toc_data.nesting_level)) {
+		if (attr && attr->size) {
+			hoedown_buffer_printf(ob, "<h%d", level);
+			rndr_attributes(ob, attr->data, attr->size, NULL, opaque);
+			hoedown_buffer_putc(ob, '>');
+		} else {
+			hoedown_buffer_printf(ob, "<h%d id=\"toc_", level);
+			rndr_toc_id(ob, text->data, text->size);
+			hoedown_buffer_puts(ob, "\">");
+		}
+	} else if (attr && attr->size) {
 		hoedown_buffer_printf(ob, "<h%d", level);
 		rndr_attributes(ob, attr->data, attr->size, NULL, opaque);
 		hoedown_buffer_putc(ob, '>');
-	} else if ((state->flags & HOEDOWN_HTML_TOC) && (level <= state->toc_data.nesting_level)) {
-		hoedown_buffer_printf(ob, "<h%d id=\"toc_%d\">", level, state->toc_data.header_count++);
 	} else {
 		hoedown_buffer_printf(ob, "<h%d>", level);
 	}
@@ -327,8 +351,16 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *
 
 	HOEDOWN_BUFPUTSL(ob, "<a href=\"");
 
-	if (link && link->size)
-		escape_href(ob, link->data, link->size);
+	if (link && link->size) {
+		if ((state->flags & HOEDOWN_HTML_TOC) &&
+			link->size > 4 && strncasecmp((char *)link->data, "#toc_", 5) == 0) {
+			hoedown_buffer_puts(ob, "#toc_");
+			rndr_toc_id(ob, link->data + 5, link->size - 5);
+			hoedown_buffer_puts(ob, "\">");
+		} else {
+			escape_href(ob, link->data, link->size);
+		}
+	}
 
 	if (title && title->size) {
 		HOEDOWN_BUFPUTSL(ob, "\" title=\"");
@@ -733,10 +765,18 @@ toc_header(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer 
 				HOEDOWN_BUFPUTSL(ob, "\">");
 			}
 		} else {
-			hoedown_buffer_printf(ob, "<a href=\"#toc_%d\">", state->toc_data.header_count++);
+			hoedown_buffer_puts(ob, "<a href=\"#toc_");
+			rndr_toc_id(ob, text->data, text->size);
+			hoedown_buffer_puts(ob, "\">");
 		}
 
-		if (text) escape_html(ob, text->data, text->size);
+		if (text) {
+			if (state->toc_data.unescape) {
+				hoedown_buffer_put(ob, text->data, text->size);
+			} else {
+				escape_html(ob, text->data, text->size);
+			}
+		}
 		HOEDOWN_BUFPUTSL(ob, "</a>\n");
 	}
 }
@@ -750,6 +790,15 @@ toc_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *t
 }
 
 static void
+toc_initialize(hoedown_buffer *ob, void *opaque)
+{
+	hoedown_html_renderer_state *state = opaque;
+	if (state->toc_data.header) {
+		hoedown_buffer_printf(ob, "%s\n", state->toc_data.header);
+	}
+}
+
+static void
 toc_finalize(hoedown_buffer *ob, void *opaque)
 {
 	hoedown_html_renderer_state *state = opaque;
@@ -757,6 +806,10 @@ toc_finalize(hoedown_buffer *ob, void *opaque)
 	while (state->toc_data.current_level > 0) {
 		HOEDOWN_BUFPUTSL(ob, "</li>\n</ul>\n");
 		state->toc_data.current_level--;
+	}
+
+	if (state->toc_data.footer) {
+		hoedown_buffer_printf(ob, "%s\n", state->toc_data.footer);
 	}
 }
 
@@ -799,7 +852,7 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		NULL,
 		NULL,
 
-		NULL,
+		toc_initialize,
 		toc_finalize
 	};
 

@@ -6,6 +6,7 @@ Extended the following functions.
 
 * [Special Attributes](#special-attributes)
 * [Task Lists](#task-lists)
+* [Name-based TOC ID](#named-based-toc-id)
 
 ## Special Attributes
 
@@ -88,4 +89,18 @@ or [x] (incomplete or complete), like this
 - [ ] normal **formatting**, @mentions, #1234 refs
 - [ ] incomplete
 - [x] completed
+```
+
+## Name-based TOC ID
+
+Changed to be the name based on the ID of the table of contents.
+
+```
+# Header 1
+```
+
+prefix will be 'toc\_', like this
+
+```
+[toc to header](#toc_header-1)
 ```
