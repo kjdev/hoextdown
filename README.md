@@ -6,7 +6,7 @@ Extended the following functions.
 
 * [Special Attributes](#special-attributes)
 * [Task Lists](#task-lists)
-* [Name-based TOC ID](#named-based-toc-id)
+* [Name-based TOC ID](#name-based-toc-id)
 
 ## Special Attributes
 
