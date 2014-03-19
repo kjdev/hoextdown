@@ -1,99 +1,75 @@
-Hoedown
-=======
+# Hoextdown
 
-[![Build Status](https://travis-ci.org/hoedown/hoedown.png?branch=master)](https://travis-ci.org/hoedown/hoedown)
+`Hoextdown` is an extension to [Hoedown](https://github.com/hoedown/hoedown).
 
-`Hoedown` is a revived fork of [Sundown](https://github.com/vmg/sundown),
-the Markdown parser based on the original code of the
-[Upskirt library](http://fossil.instinctive.eu/libupskirt/index)
-by Natacha Porté.
+Extended the following functions.
 
-Features
---------
+* [Special Attributes](#special-attributes)
 
-*	**Fully standards compliant**
+## Special Attributes
 
-	`Hoedown` passes out of the box the official Markdown v1.0.0 and v1.0.3
-	test suites, and has been extensively tested with additional corner cases
-	to make sure its output is as sane as possible at all times.
+Sdd the `HOEDOWN_EXT_SPECIAL_ATTRIBUTE` to Hoedown document flags.
 
-*	**Massive extension support**
+Set the id and class attribute on certain elements using an attribute block.
 
-	`Hoedown` has optional support for several (unofficial) Markdown extensions,
-	such as non-strict emphasis, fenced code blocks, tables, autolinks,
-	strikethrough and more.
+For instance, put the desired id prefixed by a hash inside curly brackets after
+the header at the end of the line, like this
 
-*	**UTF-8 aware**
+```
+Header 1            {#header1}
+========
 
-	`Hoedown` is fully UTF-8 aware, both when parsing the source document and when
-	generating the resulting (X)HTML code.
+## Header 2 ##      {#header2}
+```
 
-*	**Tested & Ready to be used on production**
+Then you can create links to different parts of the same document like this:
 
-	`Hoedown` has been extensively security audited, and includes protection against
-	all possible DOS attacks (stack overflows, out of memory situations, malformed
-	Markdown syntax...) and against client attacks through malicious embedded HTML.
+```
+[Link back to header 1](#header1)
+```
 
-	We've worked very hard to make `Hoedown` never crash or run out of memory
-	under *any* input.
+To add a class name, which can be used as a hook for a style sheet, use a dot
+like this:
 
-*	**Customizable renderers**
+```
+## The Site ##    {.main}
+```
 
-	`Hoedown` is not stuck with XHTML output: the Markdown parser of the library
-	is decoupled from the renderer, so it's trivial to extend the library with
-	custom renderers. A fully functional (X)HTML renderer is included.
+The id and multiple class names can be combined by putting them all into the
+same special attribute block:
 
-*	**Optimized for speed**
+```
+## The Site ##    {.main .shine #the-site}
+```
 
-	`Hoedown` is written in C, with a special emphasis on performance. When wrapped
-	on a dynamic language such as Python or Ruby, it has shown to be up to 40
-	times faster than other native alternatives.
+To add a other than id and class names, use a colon like this:
 
-*	**Zero-dependency**
+```
+## The Site ##    {.main .shine #the-site :color=red}
+```
 
-	`Hoedown` is a zero-dependency library composed of some `.c` files and their
-	headers. No dependencies, no bullshit. Only standard C99 that builds everywhere.
+At this time, special attribute blocks can be used with
 
-*	**Additional features**
+* headers
+* fenced code blocks
+* links
+* images
+* tables
 
-	`Hoedown` comes with a fully functional implementation of SmartyPants,
-	a separate autolinker, escaping utilities, buffers and stacks.
+For image and links, put the special attribute block immediately after the
+parenthesis containing the address:
 
-Bindings
---------
+```
+[link](url){#id .class}
+![img](url){#id .class}
+```
 
-You can see a community-maintained list of `Hoedown` bindings at
-[the wiki](https://github.com/hoedown/hoedown/wiki/Bindings). There is also a
-[migration guide](https://github.com/hoedown/hoedown/wiki/Migration-Guide)
-available for authors of Sundown bindings.
+Or if using reference-style links and images, put it at the end of the
+definition line like this:
 
-Help us
--------
+```
+[link][linkref] or [linkref]
+![img][linkref]
 
-`Hoedown` is all about security. If you find a (potential) security vulnerability in the
-library, or a way to make it crash through malicious input, please report it to us by
-emailing the private [Hoedown Security](mailto:hoedown-security@googlegroups.com)
-mailing list. The `Hoedown` security team will review the vulnerability and work with you
-to reproduce and resolve it.
-
-Unicode character handling
---------------------------
-
-Given that the Markdown spec makes no provision for Unicode character handling, `Hoedown`
-takes a conservative approach towards deciding which extended characters trigger Markdown
-features:
-
-*	Punctuation characters outside of the U+007F codepoint are not handled as punctuation.
-	They are considered as normal, in-word characters for word-boundary checks.
-
-*	Whitespace characters outside of the U+007F codepoint are not considered as
-	whitespace. They are considered as normal, in-word characters for word-boundary checks.
-
-Install
--------
-
-Just typing `make` will build `Hoedown` into a dynamic library and create the `hoedown`
-and `smartypants` executables, which are command-line tools to render Markdown to HTML
-and perform SmartyPants, respectively.
-
-Or, if you prefer, you can just throw the files at `src` into your project.
+[linkref]: url "optional title" {#id .class}
+```

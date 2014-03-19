@@ -17,6 +17,7 @@
 
 #define BUFFER_BLOCK 0
 #define BUFFER_SPAN 1
+#define BUFFER_ATTRIBUTE 2
 
 #define HOEDOWN_LI_END 8	/* internal list flag */
 
@@ -32,6 +33,7 @@ struct link_ref {
 
 	hoedown_buffer *link;
 	hoedown_buffer *title;
+	hoedown_buffer *attr;
 
 	struct link_ref *next;
 };
@@ -119,7 +121,7 @@ struct hoedown_document {
 	struct footnote_list footnotes_found;
 	struct footnote_list footnotes_used;
 	uint8_t active_char[256];
-	hoedown_stack work_bufs[2];
+	hoedown_stack work_bufs[3];
 	unsigned int ext_flags;
 	size_t max_nesting;
 	int in_link_body;
@@ -132,7 +134,7 @@ struct hoedown_document {
 static inline hoedown_buffer *
 newbuf(hoedown_document *doc, int type)
 {
-	static const size_t buf_size[2] = {256, 64};
+	static const size_t buf_size[3] = {256, 64, 64};
 	hoedown_buffer *work = NULL;
 	hoedown_stack *pool = &doc->work_bufs[type];
 
@@ -234,6 +236,7 @@ free_link_refs(struct link_ref **references)
 			next = r->next;
 			hoedown_buffer_free(r->link);
 			hoedown_buffer_free(r->title);
+			hoedown_buffer_free(r->attr);
 			free(r);
 			r = next;
 		}
@@ -462,6 +465,35 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 			i += end;
 			end = i;
 		}
+	}
+}
+
+static void parse_attributes(struct hoedown_buffer *text, struct hoedown_buffer *
+attr, int is_header)
+{
+	size_t size = text->size, begin = 0, end = 0;
+
+	if (size && text->data[size-1] == '}') {
+		do {
+			size--;
+		} while (size && text->data[size] != '{');
+
+		begin = size + 1;
+		end = text->size - 1;
+
+		while (size && text->data[size-1] == ' ')
+			size--;
+	}
+	if (is_header && size && text->data[size-1] == '#') {
+		while (size && text->data[size-1] == '#')
+			size--;
+		while (size && text->data[size-1] == ' ')
+			size--;
+	}
+
+	if (begin && end) {
+		hoedown_buffer_put(attr, text->data + begin, end - begin);
+		text->size = size;
 	}
 }
 
@@ -770,7 +802,7 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 /* char_quote • '"' parsing a quote */
 static size_t
 char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
-{    
+{
 	size_t end, nq = 0, i, f_begin, f_end;
 
 	/* counting the number of quotes in the delimiter */
@@ -909,10 +941,10 @@ char_autolink_www(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size
 		if (doc->md.normal_text) {
 			link_text = newbuf(doc, BUFFER_SPAN);
 			doc->md.normal_text(link_text, link, doc->md.opaque);
-			doc->md.link(ob, link_url, NULL, link_text, doc->md.opaque);
+			doc->md.link(ob, link_url, NULL, link_text, NULL, doc->md.opaque);
 			popbuf(doc, BUFFER_SPAN);
 		} else {
-			doc->md.link(ob, link_url, NULL, link, doc->md.opaque);
+			doc->md.link(ob, link_url, NULL, link, NULL, doc->md.opaque);
 		}
 		popbuf(doc, BUFFER_SPAN);
 	}
@@ -967,10 +999,12 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 {
 	int is_img = (offset && data[-1] == '!'), level;
 	size_t i = 1, txt_e, link_b = 0, link_e = 0, title_b = 0, title_e = 0;
+	size_t attr_b = 0, attr_e = 0;
 	hoedown_buffer *content = 0;
 	hoedown_buffer *link = 0;
 	hoedown_buffer *title = 0;
 	hoedown_buffer *u_link = 0;
+	hoedown_buffer *attr = 0;
 	size_t org_work_size = doc->work_bufs[BUFFER_SPAN].size;
 	int text_has_nl = 0, ret = 0;
 	int in_title = 0, qtype = 0;
@@ -1160,6 +1194,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		/* keeping link and title from link_ref */
 		link = lr->link;
 		title = lr->title;
+		attr = lr->attr;
 		i++;
 	}
 
@@ -1195,6 +1230,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		/* keeping link and title from link_ref */
 		link = lr->link;
 		title = lr->title;
+		attr = lr->attr;
 
 		/* rewinding the whitespace */
 		i = txt_e + 1;
@@ -1219,14 +1255,56 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		unscape_text(u_link, link);
 	}
 
+	if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+		if (i < size && data[i] == '{') {
+			/* skipping initial whitespace */
+			i++;
+
+			while (i < size && _isspace(data[i]))
+				i++;
+
+			attr_b = i;
+
+			while (i < size) {
+				if (data[i] == '\\') i += 2;
+				else if (data[i] == '}') break;
+				else if (i >= 1 && _isspace(data[i-1]) && (data[i] == '\'' || data[i] == '"')) break;
+				else i++;
+			}
+
+			if (i >= size) goto cleanup;
+			attr_e = i;
+
+			/* remove whitespace at the end of the attributes */
+			while (attr_e > attr_b && _isspace(data[attr_e - 1]))
+				attr_e--;
+
+			/* remove optional angle brackets around the attributes */
+			if (data[attr_b] == '<') attr_b++;
+			if (data[attr_e - 1] == '>') attr_e--;
+
+			/* building escaped attributes */
+			if (attr_e > attr_b) {
+				if (attr) {
+					hoedown_buffer_putc(attr, ' ');
+				} else {
+					attr = newbuf(doc, BUFFER_SPAN);
+				}
+				hoedown_buffer_put(attr, data + attr_b, attr_e - attr_b);
+			}
+
+			i++;
+		}
+	}
+
 	/* calling the relevant rendering function */
 	if (is_img) {
 		if (ob->size && ob->data[ob->size - 1] == '!')
 			ob->size -= 1;
 
-		ret = doc->md.image(ob, u_link, title, content, doc->md.opaque);
+		ret = doc->md.image(ob, u_link, title, content, attr, doc->md.opaque);
 	} else {
-		ret = doc->md.link(ob, u_link, title, content, doc->md.opaque);
+		ret = doc->md.link(ob, u_link, title, content, attr, doc->md.opaque);
 	}
 
 	/* cleanup */
@@ -1372,6 +1450,12 @@ parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang, size_t *width,
 
 	while (i < size && !_isspace(data[i]))
 		i++;
+
+	if ((i+1) < size &&
+		(data[i+1] == '{' || memchr(&data[lang_start], '{', i - lang_start))) {
+		while (i < size && data[i] != '}')
+			i++;
+	}
 
 	lang->data = data + lang_start;
 	lang->size = i - lang_start;
@@ -1630,6 +1714,7 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		popbuf(doc, BUFFER_BLOCK);
 	} else {
 		hoedown_buffer *header_work;
+		hoedown_buffer *attr_work;
 
 		if (work.size) {
 			size_t beg;
@@ -1658,12 +1743,17 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		}
 
 		header_work = newbuf(doc, BUFFER_SPAN);
+		attr_work = newbuf(doc, BUFFER_ATTRIBUTE);
 		parse_inline(header_work, doc, work.data, work.size);
 
-		if (doc->md.header)
-			doc->md.header(ob, header_work, (int)level, doc->md.opaque);
-
+		if (doc->md.header) {
+			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+				parse_attributes(header_work, attr_work, 1);
+			}
+			doc->md.header(ob, header_work, attr_work, (int)level, doc->md.opaque);
+		}
 		popbuf(doc, BUFFER_SPAN);
+		popbuf(doc, BUFFER_ATTRIBUTE);
 	}
 
 	return end;
@@ -1693,7 +1783,7 @@ parse_fencedcode(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 
 		w2 = is_codefence(data + line_start, i - line_start, &width2, &chr2);
 		if (w == w2 && width == width2 && chr == chr2 &&
-		    is_empty(data + (line_start+w), i - (line_start+w)))
+			is_empty(data + (line_start+w), i - (line_start+w)))
 			break;
 	}
 	text.data = data + text_start;
@@ -1754,6 +1844,7 @@ static size_t
 parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, int *flags)
 {
 	hoedown_buffer *work = 0, *inter = 0;
+	hoedown_buffer *attr = 0;
 	size_t beg = 0, end, pre, sublist = 0, orgpre = 0, i;
 	int in_empty = 0, has_inside_empty = 0, in_fence = 0;
 
@@ -1780,6 +1871,17 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 	/* putting the first line into the working buffer */
 	hoedown_buffer_put(work, data + beg, end - beg);
 	beg = end;
+
+	attr = newbuf(doc, BUFFER_ATTRIBUTE);
+	if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+		if (work->data[work->size-1] == '\n') {
+			work->size--;
+			parse_attributes(work, attr, 0);
+			hoedown_buffer_putc(work, '\n');
+		} else {
+			parse_attributes(work, attr, 0);
+		}
+	}
 
 	/* process the following lines */
 	while (beg < size) {
@@ -1877,11 +1979,22 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 	}
 
 	/* render of li itself */
-	if (doc->md.listitem)
-		doc->md.listitem(ob, inter, *flags, doc->md.opaque);
+	if (doc->md.listitem) {
+		if ((doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) && !attr->size) {
+			if (inter->data[inter->size-1] == '\n') {
+				inter->size--;
+				parse_attributes(inter, attr, 0);
+				hoedown_buffer_putc(inter, '\n');
+			} else {
+				parse_attributes(inter, attr, 0);
+			}
+		}
+		doc->md.listitem(ob, inter, attr, *flags, doc->md.opaque);
+	}
 
 	popbuf(doc, BUFFER_SPAN);
 	popbuf(doc, BUFFER_SPAN);
+	popbuf(doc, BUFFER_ATTRIBUTE);
 	return beg;
 }
 
@@ -1932,13 +2045,19 @@ parse_atxheader(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 
 	if (end > i) {
 		hoedown_buffer *work = newbuf(doc, BUFFER_SPAN);
+		hoedown_buffer *attr = newbuf(doc, BUFFER_ATTRIBUTE);
 
 		parse_inline(work, doc, data + i, end - i);
 
-		if (doc->md.header)
-			doc->md.header(ob, work, (int)level, doc->md.opaque);
+		if (doc->md.header) {
+			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+				parse_attributes(work, attr, 1);
+			}
+			doc->md.header(ob, work, attr, (int)level, doc->md.opaque);
+		}
 
 		popbuf(doc, BUFFER_SPAN);
+		popbuf(doc, BUFFER_ATTRIBUTE);
 	}
 
 	return skip;
@@ -2202,6 +2321,7 @@ parse_table_row(
 static size_t
 parse_table_header(
 	hoedown_buffer *ob,
+	hoedown_buffer *attr,
 	hoedown_document *doc,
 	uint8_t *data,
 	size_t size,
@@ -2229,6 +2349,24 @@ parse_table_header(
 
 	if (header_end && data[header_end - 1] == '|')
 		pipes--;
+
+	if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+		if (header_end && data[header_end - 1] == '}') {
+			size_t n = header_end - 1;
+			while (n > 0 && data[n] != '{')
+				n--;
+
+			hoedown_buffer_put(attr, &data[n+1], header_end - n - 2);
+
+			while (n > 0 && _isspace(data[n-1]))
+				n--;
+
+			if (n && data[n - 1] == '|')
+				pipes--;
+
+			header_end = n + 1;
+		}
+	}
 
 	if (pipes < 0)
 		return 0;
@@ -2302,14 +2440,16 @@ parse_table(
 
 	hoedown_buffer *header_work = 0;
 	hoedown_buffer *body_work = 0;
+	hoedown_buffer *attr_work = 0;
 
 	size_t columns;
 	int *col_data = NULL;
 
 	header_work = newbuf(doc, BUFFER_SPAN);
 	body_work = newbuf(doc, BUFFER_BLOCK);
+	attr_work = newbuf(doc, BUFFER_ATTRIBUTE);
 
-	i = parse_table_header(header_work, doc, data, size, &columns, &col_data);
+	i = parse_table_header(header_work, attr_work, doc, data, size, &columns, &col_data);
 	if (i > 0) {
 
 		while (i < size) {
@@ -2340,12 +2480,13 @@ parse_table(
 		}
 
 		if (doc->md.table)
-			doc->md.table(ob, header_work, body_work, doc->md.opaque);
+			doc->md.table(ob, header_work, body_work, attr_work, doc->md.opaque);
 	}
 
 	free(col_data);
 	popbuf(doc, BUFFER_SPAN);
 	popbuf(doc, BUFFER_BLOCK);
+	popbuf(doc, BUFFER_ATTRIBUTE);
 	return i;
 }
 
@@ -2531,6 +2672,7 @@ is_ref(const uint8_t *data, size_t beg, size_t end, size_t *last, struct link_re
 	size_t link_offset, link_end;
 	size_t title_offset, title_end;
 	size_t line_end;
+	size_t attr_offset = 0, attr_end = 0;
 
 	/* up to 3 optional leading spaces */
 	if (beg + 3 >= end) return 0;
@@ -2593,21 +2735,67 @@ is_ref(const uint8_t *data, size_t beg, size_t end, size_t *last, struct link_re
 	title_offset = title_end = 0;
 	if (i + 1 < end
 	&& (data[i] == '\'' || data[i] == '"' || data[i] == '(')) {
-		i++;
+		char d = data[i++];
 		title_offset = i;
-		/* looking for EOL */
-		while (i < end && data[i] != '\n' && data[i] != '\r') i++;
-		if (i + 1 < end && data[i] == '\n' && data[i + 1] == '\r')
-			title_end = i + 1;
-		else	title_end = i;
-		/* stepping back */
-		i -= 1;
-		while (i > title_offset && data[i] == ' ')
+
+		/* looking for end of tile */
+		while (i < end && data[i] != d && data[i] != '\n' && data[i] != '\r') {
+			++i;
+		}
+
+		if (i + 1 < end && data[i] == d) {
+			title_end = i++;
+			attr_offset = i;
+
+			/* looking for EOL */
+			while (i < end && data[i] != '\n' && data[i] != '\r') {
+				i++;
+			}
+
+			/* looking for attribute */
+			if (data[i-1] == '}' &&
+				memchr(&data[attr_offset], '{', i - attr_offset)) {
+				while (attr_offset < i && data[attr_offset] != '{') {
+					++attr_offset;
+				}
+				++attr_offset;
+				attr_end = i - 1;
+			} else {
+				if (data[i-1] == d) {
+					title_end = i - 1;
+				} else {
+					title_end = i;
+				}
+				attr_offset = 0;
+				attr_end = 0;
+			}
+			if (i + 1 < end && data[i] == '\r' && data[i + 1] == '\n') {
+				++i;
+			}
+
+			line_end = i;
+		} else {
+			/* looking for EOL */
+			while (i < end && data[i] != '\n' && data[i] != '\r') {
+				i++;
+			}
+			if (i + 1 < end && data[i] == '\n' && data[i + 1] == '\r') {
+				title_end = i + 1;
+			} else {
+				title_end = i;
+			}
+			/* stepping back */
 			i -= 1;
-		if (i > title_offset
-		&& (data[i] == '\'' || data[i] == '"' || data[i] == ')')) {
-			line_end = title_end;
-			title_end = i; } }
+			while (i > title_offset && data[i] == ' ') {
+				i -= 1;
+			}
+			if (i > title_offset &&
+				(data[i] == '\'' || data[i] == '"' || data[i] == ')')) {
+				line_end = title_end;
+				title_end = i;
+			}
+		}
+	}
 
 	if (!line_end || link_end == link_offset)
 		return 0; /* garbage after the link empty link */
@@ -2629,6 +2817,10 @@ is_ref(const uint8_t *data, size_t beg, size_t end, size_t *last, struct link_re
 		if (title_end > title_offset) {
 			ref->title = hoedown_buffer_new(title_end - title_offset);
 			hoedown_buffer_put(ref->title, data + title_offset, title_end - title_offset);
+		}
+		if (attr_end > attr_offset) {
+			ref->attr = hoedown_buffer_new(attr_end - attr_offset);
+			hoedown_buffer_put(ref->attr, data + attr_offset, attr_end - attr_offset);
 		}
 	}
 
@@ -2682,6 +2874,7 @@ hoedown_document_new(
 
 	hoedown_stack_new(&doc->work_bufs[BUFFER_BLOCK], 4);
 	hoedown_stack_new(&doc->work_bufs[BUFFER_SPAN], 8);
+	hoedown_stack_new(&doc->work_bufs[BUFFER_ATTRIBUTE], 8);
 
 	memset(doc->active_char, 0x0, 256);
 
@@ -2819,6 +3012,7 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 
 	assert(doc->work_bufs[BUFFER_SPAN].size == 0);
 	assert(doc->work_bufs[BUFFER_BLOCK].size == 0);
+	assert(doc->work_bufs[BUFFER_ATTRIBUTE].size == 0);
 }
 
 void
@@ -2832,8 +3026,12 @@ hoedown_document_free(hoedown_document *doc)
 	for (i = 0; i < (size_t)doc->work_bufs[BUFFER_BLOCK].asize; ++i)
 		hoedown_buffer_free(doc->work_bufs[BUFFER_BLOCK].item[i]);
 
+	for (i = 0; i < (size_t)doc->work_bufs[BUFFER_ATTRIBUTE].asize; ++i)
+		hoedown_buffer_free(doc->work_bufs[BUFFER_ATTRIBUTE].item[i]);
+
 	hoedown_stack_free(&doc->work_bufs[BUFFER_SPAN]);
 	hoedown_stack_free(&doc->work_bufs[BUFFER_BLOCK]);
+	hoedown_stack_free(&doc->work_bufs[BUFFER_ATTRIBUTE]);
 
 	free(doc);
 }
