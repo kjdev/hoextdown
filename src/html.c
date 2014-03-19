@@ -493,6 +493,31 @@ rndr_paragraph(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 			rndr_linebreak(ob, opaque);
 			i++;
 		}
+	} else if (state->flags & HOEDOWN_HTML_LINE_CONTINUE) {
+		size_t org;
+		while (i < text->size) {
+			org = i;
+			while (i < text->size && text->data[i] != '\n') {
+				++i;
+			}
+			if (i > org) {
+				hoedown_buffer_put(ob, text->data + org, i - org);
+			}
+
+			if (i >= text->size - 1) {
+				break;
+			}
+
+			if (text->data[i] == '\n' &&
+				(isascii(text->data[i-1]) || isascii(text->data[i+1]))) {
+				if (i < 5 ||
+					strncmp((char *)text->data+i-5, "<br/>", 5) != 0 ||
+					strncmp((char *)text->data+i-4, "<br>", 4) != 0) {
+					HOEDOWN_BUFPUTSL(ob, " ");
+				}
+			}
+			++i;
+		}
 	} else {
 		hoedown_buffer_put(ob, &text->data[i], text->size - i);
 	}

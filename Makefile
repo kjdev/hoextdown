@@ -46,7 +46,7 @@ src/html_blocks.c: html_block_names.gperf
 # Testing
 
 test: hoedown
-	test/runner.sh "./hoedown --special_attribute --tables --fenced_code --task" test/MarkdownTest_1.0.3/Tests
+	test/runner.sh "./hoedown --special_attribute --tables --fenced_code --task --line_continue" test/MarkdownTest_1.0.3/Tests
 
 test-toc: hoedown
 	test/runner.sh "./hoedown --special_attribute --toc" test/MarkdownTest_1.0.3/Tests/Toc

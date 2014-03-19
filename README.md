@@ -7,6 +7,7 @@ Extended the following functions.
 * [Special Attributes](#special-attributes)
 * [Task Lists](#task-lists)
 * [Name-based TOC ID](#name-based-toc-id)
+* [Line Continue](#line-continue)
 
 ## Special Attributes
 
@@ -104,3 +105,9 @@ prefix will be 'toc\_', like this
 ```
 [toc to header](#toc_header-1)
 ```
+
+## Line Continue
+
+Add the `HOEDOWN_HTML_LINE_CONTINUE` to Hoedown html flags.
+
+Remove the line breaks at the end of the line.

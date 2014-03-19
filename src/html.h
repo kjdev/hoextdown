@@ -22,7 +22,8 @@ typedef enum {
 	HOEDOWN_HTML_HARD_WRAP = (1 << 7),
 	HOEDOWN_HTML_USE_XHTML = (1 << 8),
 	HOEDOWN_HTML_ESCAPE = (1 << 9),
-	HOEDOWN_HTML_USE_TASK_LIST = (1 << 10)
+	HOEDOWN_HTML_USE_TASK_LIST = (1 << 10),
+	HOEDOWN_HTML_LINE_CONTINUE = (1 << 11)
 } hoedown_html_render_mode;
 
 typedef enum {
