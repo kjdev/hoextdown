@@ -1,6 +1,5 @@
 #include "document.h"
 #include "html.h"
-#include "version.h"
 
 #include "common.h"
 //#include <time.h>
