@@ -453,7 +453,7 @@ main(int argc, char **argv)
 	}
 
 
-	/* performing markdown parsing */
+	/* performing markdown rendering */
 	ob = hoedown_buffer_new(ounit);
 	if (!ob) {
 		fprintf(stderr, "Couldn't allocate output buffer.\n");
