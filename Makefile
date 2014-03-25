@@ -32,10 +32,10 @@ libhoedown.a: $(HOEDOWN_SRC)
 
 # Executables
 
-hoedown: examples/hoedown.o $(HOEDOWN_SRC)
+hoedown: bin/hoedown.o $(HOEDOWN_SRC)
 	$(CC) $(LDFLAGS) $^ -o $@
 
-smartypants: examples/smartypants.o $(HOEDOWN_SRC)
+smartypants: bin/smartypants.o $(HOEDOWN_SRC)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 # Perfect hashing
@@ -46,11 +46,11 @@ src/html_blocks.c: html_block_names.gperf
 # Testing
 
 test: hoedown
-	test/runner.sh "./hoedown --special_attribute --tables --fenced_code --task --line_continue" test/MarkdownTest_1.0.3/Tests
+	test/runner.sh "./hoedown --special-attribute --tables --fenced-code --task --line-continue" test/MarkdownTest_1.0.3/Tests
 
 test-toc: hoedown
-	test/runner.sh "./hoedown --special_attribute --toc" test/MarkdownTest_1.0.3/Tests/Toc
-	test/runner.sh "./hoedown --special_attribute --toc --toc_render" test/MarkdownTest_1.0.3/Tests/Toc_Render
+	test/runner.sh "./hoedown --special-attribute --toc -t 6" test/MarkdownTest_1.0.3/Tests/Toc
+	test/runner.sh "./hoedown --special-attribute --toc -t 6 --html-toc" test/MarkdownTest_1.0.3/Tests/Toc_Render
 
 test-pl: hoedown
 	perl test/MarkdownTest_1.0.3/MarkdownTest.pl \
@@ -59,7 +59,7 @@ test-pl: hoedown
 # Housekeeping
 
 clean:
-	$(RM) src/*.o examples/*.o
+	$(RM) src/*.o bin/*.o
 	$(RM) libhoedown.so libhoedown.so.1 libhoedown.a
 	$(RM) hoedown smartypants hoedown.exe smartypants.exe
 
