@@ -32,10 +32,10 @@ libhoedown.a: $(HOEDOWN_SRC)
 
 # Executables
 
-hoedown: examples/hoedown.o $(HOEDOWN_SRC)
+hoedown: bin/hoedown.o $(HOEDOWN_SRC)
 	$(CC) $(LDFLAGS) $^ -o $@
 
-smartypants: examples/smartypants.o $(HOEDOWN_SRC)
+smartypants: bin/smartypants.o $(HOEDOWN_SRC)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 # Perfect hashing
@@ -55,7 +55,7 @@ test-pl: hoedown
 # Housekeeping
 
 clean:
-	$(RM) src/*.o examples/*.o
+	$(RM) src/*.o bin/*.o
 	$(RM) libhoedown.so libhoedown.so.1 libhoedown.a
 	$(RM) hoedown smartypants hoedown.exe smartypants.exe
 
