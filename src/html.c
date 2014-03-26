@@ -750,12 +750,10 @@ toc_header(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer 
 	hoedown_html_renderer_state *state = opaque;
 
 	if (level <= state->toc_data.nesting_level) {
-		/* set the level offset if this is the first header
-		 * we're parsing for the document */
-		if (state->toc_data.current_level == 0)
-			state->toc_data.level_offset = level - 1;
-
-		level -= state->toc_data.level_offset;
+		if (level < state->toc_data.level_offset) {
+			state->toc_data.current_level++;
+			return;
+		}
 
 		if (level > state->toc_data.current_level) {
 			while (level > state->toc_data.current_level) {
@@ -830,6 +828,9 @@ toc_finalize(hoedown_buffer *ob, void *opaque)
 	while (state->toc_data.current_level > 0) {
 		HOEDOWN_BUFPUTSL(ob, "</li>\n</ul>\n");
 		state->toc_data.current_level--;
+		if (state->toc_data.current_level < state->toc_data.level_offset) {
+			break;
+		}
 	}
 
 	if (state->toc_data.footer) {
