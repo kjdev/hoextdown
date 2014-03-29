@@ -96,4 +96,6 @@ Just typing `make` will build `Hoedown` into a dynamic library and create the `h
 and `smartypants` executables, which are command-line tools to render Markdown to HTML
 and perform SmartyPants, respectively.
 
+If you are using [CocoaPods](http://cocoapods.org), just add the line `pod 'hoedown'` to your Podfile and call `pod install`.
+
 Or, if you prefer, you can just throw the files at `src` into your project.
