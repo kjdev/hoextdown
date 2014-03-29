@@ -34,8 +34,7 @@ Features
 	all possible DOS attacks (stack overflows, out of memory situations, malformed
 	Markdown syntax...) and against client attacks through malicious embedded HTML.
 
-	We've worked very hard to make `Hoedown` never crash or run out of memory
-	under *any* input.
+	We've worked very hard to make `Hoedown` never leak or crash under *any* input.
 
 *	**Customizable renderers**
 
