@@ -224,7 +224,7 @@ rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opa
 	if (ob->size)
 		hoedown_buffer_putc(ob, '\n');
 
-	if ((state->flags & HOEDOWN_HTML_TOC) && (level <= state->toc_data.nesting_level))
+	if (level <= state->toc_data.nesting_level)
 		hoedown_buffer_printf(ob, "<h%d id=\"toc_%d\">", level, state->toc_data.header_count++);
 	else
 		hoedown_buffer_printf(ob, "<h%d>", level);
@@ -650,10 +650,7 @@ hoedown_html_toc_renderer_new(int nesting_level)
 
 	memset(state, 0x0, sizeof(hoedown_html_renderer_state));
 
-	if (nesting_level > 0) {
-		state->flags |= HOEDOWN_HTML_TOC;
-		state->toc_data.nesting_level = nesting_level;
-	}
+	state->toc_data.nesting_level = nesting_level;
 
 	/* Prepare the renderer */
 	renderer = malloc(sizeof(hoedown_renderer));
@@ -722,11 +719,7 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 	memset(state, 0x0, sizeof(hoedown_html_renderer_state));
 
 	state->flags = render_flags;
-
-	if (nesting_level > 0) {
-		state->flags |= HOEDOWN_HTML_TOC;
-		state->toc_data.nesting_level = nesting_level;
-	}
+	state->toc_data.nesting_level = nesting_level;
 
 	/* Prepare the renderer */
 	renderer = malloc(sizeof(hoedown_renderer));

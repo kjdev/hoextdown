@@ -79,7 +79,6 @@ static struct html_flag_info html_flags_info[] = {
 	{HOEDOWN_HTML_SKIP_LINKS, "skip-links", "Don't render links."},
 	{HOEDOWN_HTML_EXPAND_TABS, "expand-tabs", "Expand tabs to spaces."},
 	{HOEDOWN_HTML_SAFELINK, "safelink", "Only allow links to safe protocols."},
-	{HOEDOWN_HTML_TOC, "toc", "Produce links to the Table of Contents."},
 	{HOEDOWN_HTML_HARD_WRAP, "hard-wrap", "Render each linebreak as <br>."},
 	{HOEDOWN_HTML_USE_XHTML, "xhtml", "Render XHTML."},
 	{HOEDOWN_HTML_ESCAPE, "escape", "Escape all HTML."},
@@ -107,7 +106,7 @@ print_help(const char *basename) {
 	/* main options */
 	printf("Main options:\n");
 	print_option('n', "max-nesting=N", "Maximum level of block nesting parsed. Default is " str(DEF_MAX_NESTING) ".");
-	print_option('t', "toc-level=N", "Maximum level for headers included in the TOC. Implies '--toc'.");
+	print_option('t', "toc-level=N", "Maximum level for headers included in the TOC. Zero disables TOC (the default).");
 	print_option(  0, "html", "Render (X)HTML. The default.");
 	print_option(  0, "html-toc", "Render the Table of Contents in (X)HTML.");
 	print_option(  0, "null", "Use a special \"null\" renderer that has no callbacks.");
