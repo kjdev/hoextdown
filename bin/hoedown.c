@@ -58,7 +58,7 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_FENCED_CODE, "fenced-code", "Parse fenced code blocks."},
 	{HOEDOWN_EXT_FOOTNOTES, "footnotes", "Parse footnotes."},
 
-	{HOEDOWN_EXT_AUTOLINK, "autolink", "Automatically turn URLs into links."},
+	{HOEDOWN_EXT_AUTOLINK, "autolink", "Automatically turn safe URLs into links."},
 	{HOEDOWN_EXT_STRIKETHROUGH, "strikethrough", "Parse ~~stikethrough~~ spans."},
 	{HOEDOWN_EXT_UNDERLINE, "underline", "Parse _underline_ instead of emphasis."},
 	{HOEDOWN_EXT_HIGHLIGHT, "highlight", "Parse ==highlight== spans."},

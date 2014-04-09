@@ -1322,30 +1322,30 @@ is_hrule(uint8_t *data, size_t size)
 }
 
 /* check if a line is a code fence; return the
- * width of the code fence. if passed, width of
+ * end of the code fence. if passed, width of
  * the fence rule and character will be returned */
 static size_t
 is_codefence(uint8_t *data, size_t size, size_t *width, uint8_t *chr)
 {
-	size_t i = 0, n = 0;
+	size_t i = 0, n = 1;
 	uint8_t c;
 
 	/* skipping initial spaces */
-	if (size < 3) return 0;
+	if (size < 3)
+		return 0;
+
 	if (data[0] == ' ') { i++;
 	if (data[1] == ' ') { i++;
 	if (data[2] == ' ') { i++; } } }
 
 	/* looking at the hrule uint8_t */
-	if (i + 2 >= size || !(data[i] == '~' || data[i] == '`'))
+	c = data[i];
+	if (i + 2 >= size || !(c=='~' || c=='`'))
 		return 0;
 
-	c = data[i];
-
-	/* the whole line must be the uint8_t or whitespace */
-	while (i < size && data[i] == c) {
-		n++; i++;
-	}
+	/* the fence must be that same character */
+	while (++i < size && data[i] == c)
+		++n;
 
 	if (n < 3)
 		return 0;
@@ -1688,22 +1688,22 @@ parse_fencedcode(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 	// search for end
 	i++;
 	text_start = i;
-	for (; (line_start = i) < size; i++) {
+	while ((line_start = i) < size) {
 		while (i < size && data[i] != '\n') i++;
 
 		w2 = is_codefence(data + line_start, i - line_start, &width2, &chr2);
 		if (w == w2 && width == width2 && chr == chr2 &&
 		    is_empty(data + (line_start+w), i - (line_start+w)))
 			break;
+
+		i++;
 	}
 	text.data = data + text_start;
 	text.size = line_start - text_start;
 
-	// call callback
 	if (doc->md.blockcode)
 		doc->md.blockcode(ob, text.size ? &text : NULL, lang.size ? &lang : NULL, doc->md.opaque);
 
-	if (data[i] == '\n') i++;
 	return i;
 }
 
