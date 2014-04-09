@@ -32,9 +32,13 @@ Features
 
 	`Hoedown` has been extensively security audited, and includes protection against
 	all possible DOS attacks (stack overflows, out of memory situations, malformed
-	Markdown syntax...) and against client attacks through malicious embedded HTML.
+	Markdown syntax...).
 
 	We've worked very hard to make `Hoedown` never leak or crash under *any* input.
+
+	**Warning**: `Hoedown` doesn't validate or post-process the HTML in Markdown documents.
+	Unless you use `HTML_ESCAPE` or `HTML_SKIP`, you should strongly consider using a
+	good post-processor in conjunction with Hoedown to prevent client-side attacks.
 
 *	**Customizable renderers**
 
@@ -94,5 +98,7 @@ Install
 Just typing `make` will build `Hoedown` into a dynamic library and create the `hoedown`
 and `smartypants` executables, which are command-line tools to render Markdown to HTML
 and perform SmartyPants, respectively.
+
+If you are using [CocoaPods](http://cocoapods.org), just add the line `pod 'hoedown'` to your Podfile and call `pod install`.
 
 Or, if you prefer, you can just throw the files at `src` into your project.
