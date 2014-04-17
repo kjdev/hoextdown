@@ -74,14 +74,11 @@ static struct extension_info extensions_info[] = {
 
 static struct html_flag_info html_flags_info[] = {
 	{HOEDOWN_HTML_SKIP_HTML, "skip-html", "Strip all HTML tags."},
-	{HOEDOWN_HTML_SKIP_STYLE, "skip-style", "Strip <style> tags."},
-	{HOEDOWN_HTML_SKIP_IMAGES, "skip-images", "Don't render images."},
-	{HOEDOWN_HTML_SKIP_LINKS, "skip-links", "Don't render links."},
+	{HOEDOWN_HTML_ESCAPE, "escape", "Escape all HTML."},
 	{HOEDOWN_HTML_EXPAND_TABS, "expand-tabs", "Expand tabs to spaces."},
 	{HOEDOWN_HTML_SAFELINK, "safelink", "Only allow links to safe protocols."},
 	{HOEDOWN_HTML_HARD_WRAP, "hard-wrap", "Render each linebreak as <br>."},
 	{HOEDOWN_HTML_USE_XHTML, "xhtml", "Render XHTML."},
-	{HOEDOWN_HTML_ESCAPE, "escape", "Escape all HTML."},
 };
 
 static const char *category_prefix = "all-";
