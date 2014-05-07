@@ -10,7 +10,7 @@ This is the [simple case]{#link}
 
 This is the [simple case]{#about .abount}
 
-This is the [simple case]{:target="_blank"}
+This is the [simple case]{target="_blank"}
 
 [simple case]: /simple
 
@@ -18,6 +18,6 @@ This is the [simple case]{:target="_blank"}
 
 [link]{ .class-link }
 
-[link]{ :target="_blank" }
+[link]{ target="_blank" }
 
 [link]: url "optional title" { #id .class }

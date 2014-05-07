@@ -13,6 +13,7 @@ HOEDOWN_SRC=\
 	src/html_blocks.o \
 	src/html_smartypants.o \
 	src/stack.o \
+	src/hash.o \
 	src/version.o
 
 .PHONY:		all test test-pl clean

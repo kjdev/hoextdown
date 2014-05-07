@@ -87,6 +87,7 @@ static struct html_flag_info html_flags_info[] = {
 	{HOEDOWN_HTML_ESCAPE, "escape", "Escape all HTML."},
 	{HOEDOWN_HTML_USE_TASK_LIST, "task", "Render task lists."},
 	{HOEDOWN_HTML_LINE_CONTINUE, "line-continue", "Render line continue."},
+	{HOEDOWN_HTML_HEADER_ID, "header-id", "Render header id."},
 };
 
 static const char *category_prefix = "all-";
@@ -474,7 +475,7 @@ main(int argc, char **argv)
 		return 4;
 	}
 
-	document = hoedown_document_new(renderer, extensions, max_nesting);
+	document = hoedown_document_new(renderer, extensions, max_nesting, NULL);
 	if (!document) {
 		fprintf(stderr, "Couldn't allocate document parser.\n");
 		return 4;

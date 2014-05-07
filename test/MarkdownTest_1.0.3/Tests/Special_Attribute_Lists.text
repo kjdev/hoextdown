@@ -9,3 +9,22 @@
 * Red {#1 .red}
     * Green {#2 .green}
         * Blue  {#3 .blue}
+
+---
+
+* Red {.red}
+* Green {.green}
+* Blue {.blue}
+{@list .class-list .ul}
+
+1. Bird {#bird .list .1}
+2. McHale {#mchale .list .2}
+3. Parish {#parish .list .3}
+{@list .class-list .ol}
+
+* Red {#1 .red}
+{@list .class-list .level-1}
+    * Green {#2 .green}
+    {@list .class-list .level-2}
+        * Blue  {#3 .blue}
+        {@list .class-list .level-3}

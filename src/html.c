@@ -6,6 +6,7 @@
 #include <ctype.h>
 
 #include "escape.h"
+#include "hash.h"
 
 #define USE_XHTML(opt) (opt->flags & HOEDOWN_HTML_USE_XHTML)
 #define USE_TASK_LIST(opt) (opt->flags & HOEDOWN_HTML_USE_TASK_LIST)
@@ -59,17 +60,17 @@ static inline void escape_href(hoedown_buffer *ob, const uint8_t *source, size_t
 static int
 rndr_attributes(struct hoedown_buffer *ob, const uint8_t *buf, const size_t size, int *flags, void *opaque)
 {
-	size_t n, i = 1;
+	size_t n, i = 0, len = 0;
 	int id = 0, type = 0;
 
 	hoedown_buffer *class = 0;
 
 	while (i < size) {
-		if (buf[i-1] == '#') {
+		if (buf[i] == '#') {
 			type = 1;
-		} else if (buf[i-1] == '.') {
+		} else if (buf[i] == '.') {
 			type = 2;
-		} else if (buf[i-1] == ':') {
+		} else if (buf[i] != ' ') {
 			type = 3;
 		} else {
 			++i;
@@ -78,10 +79,14 @@ rndr_attributes(struct hoedown_buffer *ob, const uint8_t *buf, const size_t size
 
 		n = i;
 
-		while (i < size &&
-			   buf[i] != '#' && buf[i] != '.' && buf[i] != ':' &&
-			   buf[i] != ' ') {
+		while (i < size && buf[i] != ' ') {
 			++i;
+		}
+
+		len = i - n;
+		if (len == 0) {
+			++i;
+			continue;
 		}
 
 		switch (type) {
@@ -89,7 +94,7 @@ rndr_attributes(struct hoedown_buffer *ob, const uint8_t *buf, const size_t size
 				/* id */
 				if (!id) {
 					HOEDOWN_BUFPUTSL(ob, " id=\"");
-					escape_html(ob, &buf[n], i - n);
+					escape_html(ob, buf+n+1, len-1);
 					hoedown_buffer_putc(ob, '"');
 					id = 1;
 				}
@@ -97,19 +102,43 @@ rndr_attributes(struct hoedown_buffer *ob, const uint8_t *buf, const size_t size
 			case 2:
 				/* class */
 				if (!class) {
-					class = hoedown_buffer_new(64);
-					if (class) {
-						hoedown_buffer_grow(class, size);
-					}
+					class = hoedown_buffer_new(size);
 				}
-				escape_html(class, &buf[n], i - n);
+				escape_html(class, buf+n+1, len-1);
 				hoedown_buffer_putc(class, ' ');
 				break;
-			case 3:
+			case 3: {
 				/* attribute */
+				size_t j;
+				void *s =memchr(buf+n, '=', len);
+				if (s == NULL) {
+					break;
+				}
+				j = (char *)s - ((char *)buf + n) + 1;
+				if (buf[n+j] != buf[i-1]) {
+					while (i < size && buf[i-1] != buf[n+j]) {
+						++i;
+						++len;
+					}
+				}
+				if (len > 3 && strncasecmp((char *)buf+n, "id=", 3) == 0) {
+					if (id) {
+						break;
+					}
+					id = 1;
+				} else if (len > 6 &&
+						   strncasecmp((char *)buf+n, "class=", 6) == 0) {
+					if (!class) {
+						class = hoedown_buffer_new(size);
+					}
+					escape_html(class, buf+n+7, len-8);
+					hoedown_buffer_putc(class, ' ');
+					break;
+				}
 				hoedown_buffer_putc(ob, ' ');
-				hoedown_buffer_put(ob, &buf[n], i - n);
+				hoedown_buffer_put(ob, buf+n, len);
 				break;
+			}
 		}
 	}
 
@@ -171,19 +200,25 @@ rndr_autolink(hoedown_buffer *ob, const hoedown_buffer *link, enum hoedown_autol
 }
 
 static void
-rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, void *opaque)
+rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, const hoedown_buffer *attr, void *opaque)
 {
+	int class = 0;
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 
 	if (lang) {
-		int class = 0;
 		HOEDOWN_BUFPUTSL(ob, "<pre><code");
-		rndr_attributes(ob, lang->data, lang->size, &class, opaque);
+		if (attr && attr->size) {
+			rndr_attributes(ob, attr->data, attr->size, &class, opaque);
+		}
 		if (!class) {
 			HOEDOWN_BUFPUTSL(ob, " class=\"language-");
 			escape_html(ob, lang->data, lang->size);
 			hoedown_buffer_putc(ob, '"');
 		}
+		hoedown_buffer_putc(ob, '>');
+	} else if (attr && attr->size) {
+		HOEDOWN_BUFPUTSL(ob, "<pre><code");
+		rndr_attributes(ob, attr->data, attr->size, &class, opaque);
 		hoedown_buffer_putc(ob, '>');
 	} else {
 		HOEDOWN_BUFPUTSL(ob, "<pre><code>");
@@ -205,9 +240,13 @@ rndr_blockquote(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 }
 
 static int
-rndr_codespan(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
+rndr_codespan(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, void *opaque)
 {
-	HOEDOWN_BUFPUTSL(ob, "<code>");
+	HOEDOWN_BUFPUTSL(ob, "<code");
+	if (attr && attr->size) {
+		rndr_attributes(ob, attr->data, attr->size, NULL, opaque);
+	}
+	hoedown_buffer_putc(ob, '>');
 	if (text) escape_html(ob, text->data, text->size);
 	HOEDOWN_BUFPUTSL(ob, "</code>");
 	return 1;
@@ -296,18 +335,49 @@ rndr_linebreak(hoedown_buffer *ob, void *opaque)
 }
 
 static void
-rndr_toc_id(hoedown_buffer *ob, const uint8_t *source, size_t length)
+rndr_header_id(hoedown_buffer *ob, const uint8_t *source, size_t length, int escape, void *opaque)
 {
-	size_t i = 0;
+	size_t i = 0, n = 0;
+	hoedown_html_renderer_state *state = opaque;
+	hoedown_hash *hash = state->hash.header_id;
+
 	while (i < length) {
 		if (isalnum(source[i])) {
 			hoedown_buffer_putc(ob, tolower(source[i]));
-		} else if (isascii(source[i])) {
+		} else if (source[i] == ' ') {
 			hoedown_buffer_putc(ob, '-');
-		} else {
-			hoedown_buffer_printf(ob, "%02X", source[i]);
+		} else if (source[i] == '-' || source[i] == '_') {
+			hoedown_buffer_putc(ob, source[i]);
+		} else if (!isascii(source[i])) {
+			if (escape) {
+				hoedown_buffer_printf(ob, "%%%02X", source[i]);
+			} else {
+				hoedown_buffer_putc(ob, source[i]);
+			}
+		} else if (source[i] == '&') {
+			while (i < length && source[i] != ';') {
+				++i;
+			}
 		}
 		++i;
+	}
+
+	if (hash) {
+		void *value = hoedown_hash_find(hash, (char *)source, length);
+		if (value) {
+			size_t *p = (size_t *)value;
+			++(*p);
+			n = *p;
+		}
+		if (n > 0) {
+			hoedown_buffer_printf(ob, "-%ld", n);
+		} else if (hash) {
+			size_t *p = (size_t *)malloc(sizeof(size_t));
+			if (p) {
+				*p = 0;
+				hoedown_hash_add(hash, (char *)source, length, (void *)p, free);
+			}
+		}
 	}
 }
 
@@ -319,20 +389,14 @@ rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer
 	if (ob->size)
 		hoedown_buffer_putc(ob, '\n');
 
-	if ((state->flags & HOEDOWN_HTML_TOC) && (level <= state->toc_data.nesting_level)) {
-		if (attr && attr->size) {
-			hoedown_buffer_printf(ob, "<h%d", level);
-			rndr_attributes(ob, attr->data, attr->size, NULL, opaque);
-			hoedown_buffer_putc(ob, '>');
-		} else {
-			hoedown_buffer_printf(ob, "<h%d id=\"toc_", level);
-			rndr_toc_id(ob, text->data, text->size);
-			hoedown_buffer_puts(ob, "\">");
-		}
-	} else if (attr && attr->size) {
+	if (attr && attr->size) {
 		hoedown_buffer_printf(ob, "<h%d", level);
 		rndr_attributes(ob, attr->data, attr->size, NULL, opaque);
 		hoedown_buffer_putc(ob, '>');
+	} else if ((state->flags & HOEDOWN_HTML_HEADER_ID) || (state->flags & HOEDOWN_HTML_TOC)) {
+		hoedown_buffer_printf(ob, "<h%d id=\"", level);
+		rndr_header_id(ob, text->data, text->size, 0, opaque);
+		hoedown_buffer_puts(ob, "\">");
 	} else {
 		hoedown_buffer_printf(ob, "<h%d>", level);
 	}
@@ -352,13 +416,7 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *
 	HOEDOWN_BUFPUTSL(ob, "<a href=\"");
 
 	if (link && link->size) {
-		if ((state->flags & HOEDOWN_HTML_TOC) &&
-			link->size > 4 && strncasecmp((char *)link->data, "#toc_", 5) == 0) {
-			hoedown_buffer_puts(ob, "#toc_");
-			rndr_toc_id(ob, link->data + 5, link->size - 5);
-		} else {
-			escape_href(ob, link->data, link->size);
-		}
+		escape_href(ob, link->data, link->size);
 	}
 
 	if (title && title->size) {
@@ -384,27 +442,22 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *
 }
 
 static void
-rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque)
+rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, unsigned int flags, void *opaque)
 {
-	hoedown_html_renderer_state *state = opaque;
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 
 	if (flags & HOEDOWN_LIST_ORDERED) {
-		if ((flags & HOEDOWN_LI_TASK) && state->class_data.task) {
-			hoedown_buffer_printf(ob, "<ol class=\"%s\">\n", state->class_data.task);
-		} else if (state->class_data.ol) {
-			hoedown_buffer_printf(ob, "<ol class=\"%s\">\n", state->class_data.ol);
-		} else {
-			hoedown_buffer_put(ob, "<ol>\n", 5);
+		hoedown_buffer_put(ob, "<ol", 3);
+		if (attr && attr->size) {
+			rndr_attributes(ob, attr->data, attr->size, NULL, opaque);
 		}
+		hoedown_buffer_put(ob, ">\n", 2);
 	} else {
-		if ((flags & HOEDOWN_LI_TASK) && state->class_data.task) {
-			hoedown_buffer_printf(ob, "<ul class=\"%s\">\n", state->class_data.task);
-		} else if (state->class_data.ul) {
-			hoedown_buffer_printf(ob, "<ul class=\"%s\">\n", state->class_data.ul);
-		} else {
-			hoedown_buffer_put(ob, "<ul>\n", 5);
+		hoedown_buffer_put(ob, "<ul", 3);
+		if (attr && attr->size) {
+			rndr_attributes(ob, attr->data, attr->size, NULL, opaque);
 		}
+		hoedown_buffer_put(ob, ">\n", 2);
 	}
 
 	if (text) hoedown_buffer_put(ob, text->data, text->size);
@@ -787,8 +840,8 @@ toc_header(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer 
 				HOEDOWN_BUFPUTSL(ob, "\">");
 			}
 		} else {
-			hoedown_buffer_puts(ob, "<a href=\"#toc_");
-			rndr_toc_id(ob, text->data, text->size);
+			hoedown_buffer_puts(ob, "<a href=\"#");
+			rndr_header_id(ob, text->data, text->size, 1, opaque);
 			hoedown_buffer_puts(ob, "\">");
 		}
 
@@ -878,7 +931,9 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		NULL,
 
 		toc_initialize,
-		toc_finalize
+		toc_finalize,
+
+		NULL,
 	};
 
 	hoedown_html_renderer_state *state;
@@ -904,7 +959,9 @@ hoedown_html_toc_renderer_new(int nesting_level)
 	}
 
 	memcpy(renderer, &cb_default, sizeof(hoedown_renderer));
-	
+
+	state->hash.header_id = hoedown_hash_new(0);
+
 	renderer->opaque = state;
 	return renderer;
 }
@@ -949,7 +1006,9 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 		rndr_normal_text,
 
 		NULL,
-		NULL
+		NULL,
+
+		NULL,
 	};
 
 	hoedown_html_renderer_state *state;
@@ -988,14 +1047,23 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 
 	if (render_flags & HOEDOWN_HTML_SKIP_HTML || render_flags & HOEDOWN_HTML_ESCAPE)
 		renderer->blockhtml = NULL;
-	
+
+	state->hash.header_id = hoedown_hash_new(0);
+
 	renderer->opaque = state;
+
 	return renderer;
 }
 
 void
 hoedown_html_renderer_free(hoedown_renderer *renderer)
 {
+	if (renderer->opaque) {
+		hoedown_html_renderer_state *state = renderer->opaque;
+		if (state->hash.header_id) {
+			hoedown_hash_free(state->hash.header_id);
+		}
+	}
 	free(renderer->opaque);
 	free(renderer);
 }

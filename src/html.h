@@ -5,6 +5,7 @@
 
 #include "document.h"
 #include "buffer.h"
+#include "hash.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -23,7 +24,8 @@ typedef enum {
 	HOEDOWN_HTML_USE_XHTML = (1 << 8),
 	HOEDOWN_HTML_ESCAPE = (1 << 9),
 	HOEDOWN_HTML_USE_TASK_LIST = (1 << 10),
-	HOEDOWN_HTML_LINE_CONTINUE = (1 << 11)
+	HOEDOWN_HTML_LINE_CONTINUE = (1 << 11),
+	HOEDOWN_HTML_HEADER_ID = (1 << 12)
 } hoedown_html_render_mode;
 
 typedef enum {
@@ -45,10 +47,8 @@ struct hoedown_html_renderer_state {
 	} toc_data;
 
 	struct {
-		char *ol;
-		char *ul;
-		char *task;
-	} class_data;
+		hoedown_hash *header_id;
+	} hash;
 
 	unsigned int flags;
 

@@ -57,7 +57,7 @@ enum hoedown_extensions {
 	HOEDOWN_EXT_LAX_SPACING |\
 	HOEDOWN_EXT_NO_INTRA_EMPHASIS |\
 	HOEDOWN_EXT_SPACE_HEADERS |\
-	HOEDOWN_EXT_SPECIAL_ATTRIBUTE)
+	HOEDOWN_EXT_SPECIAL_ATTRIBUTE )
 
 #define HOEDOWN_EXT_NEGATIVE (\
 	HOEDOWN_EXT_DISABLE_INDENTED_CODE )
@@ -94,12 +94,12 @@ struct hoedown_renderer {
 	void *opaque;
 
 	/* block level callbacks - NULL skips the block */
-	void (*blockcode)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, void *opaque);
+	void (*blockcode)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, const hoedown_buffer *attr, void *opaque);
 	void (*blockquote)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*blockhtml)(hoedown_buffer *ob,const  hoedown_buffer *text, void *opaque);
 	void (*header)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, int level, void *opaque);
 	void (*hrule)(hoedown_buffer *ob, void *opaque);
-	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
+	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, unsigned int flags, void *opaque);
 	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, unsigned int *flags, void *opaque);
 	void (*paragraph)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*table)(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, const hoedown_buffer *attr, void *opaque);
@@ -110,7 +110,7 @@ struct hoedown_renderer {
 
 	/* span level callbacks - NULL or return 0 prints the span verbatim */
 	int (*autolink)(hoedown_buffer *ob, const hoedown_buffer *link, enum hoedown_autolink type, void *opaque);
-	int (*codespan)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
+	int (*codespan)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, void *opaque);
 	int (*double_emphasis)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	int (*emphasis)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	int (*underline)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
@@ -132,6 +132,9 @@ struct hoedown_renderer {
 	/* header and footer */
 	void (*doc_header)(hoedown_buffer *ob, void *opaque);
 	void (*doc_footer)(hoedown_buffer *ob, void *opaque);
+
+	/* user block */
+	int (*user_block)(hoedown_buffer *ob, const hoedown_buffer *text,  void *opaque);
 };
 
 typedef struct hoedown_renderer hoedown_renderer;
@@ -139,6 +142,8 @@ typedef struct hoedown_renderer hoedown_renderer;
 struct hoedown_document;
 
 typedef struct hoedown_document hoedown_document;
+
+typedef int (*hoedown_is_user_block)(uint8_t *data, size_t size);
 
 /**********************
  * EXPORTED FUNCTIONS *
@@ -148,7 +153,8 @@ extern hoedown_document *
 hoedown_document_new(
 	const hoedown_renderer *renderer,
 	unsigned int extensions,
-	size_t max_nesting);
+	size_t max_nesting,
+	hoedown_is_user_block is_user_block);
 
 extern void
 hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size);
