@@ -134,7 +134,7 @@ struct hoedown_renderer {
 	void (*doc_footer)(hoedown_buffer *ob, void *opaque);
 
 	/* user block */
-	int (*user_block)(hoedown_buffer *ob, const hoedown_buffer *text,  void *opaque);
+	void (*user_block)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 };
 
 typedef struct hoedown_renderer hoedown_renderer;
@@ -143,7 +143,7 @@ struct hoedown_document;
 
 typedef struct hoedown_document hoedown_document;
 
-typedef int (*hoedown_is_user_block)(uint8_t *data, size_t size);
+typedef int (*hoedown_is_user_block)(uint8_t *data, size_t size, void *opaque);
 
 /**********************
  * EXPORTED FUNCTIONS *

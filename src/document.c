@@ -447,7 +447,7 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 		int user_block = 0;
 		while (end < size) {
 			if (doc->is_user_block) {
-				user_block = doc->is_user_block(data+end, size - end);
+				user_block = doc->is_user_block(data+end, size - end, doc->md.opaque);
 				if (user_block) {
 					break;
 				}
@@ -475,11 +475,11 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 		if (user_block) {
 			work.data = data + i;
 			work.size = size - i;
+			end = size - i;
 			if (doc->md.user_block) {
-				end = doc->md.user_block(ob, &work, doc->md.opaque);
+				doc->md.user_block(ob, &work, doc->md.opaque);
 			} else {
 				hoedown_buffer_put(ob, data + i, size - i);
-				end = size - i;
 			}
 			if (!end) {
 				end = i + 1;
@@ -2590,7 +2590,7 @@ static size_t
 parse_userblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size)
 {
 	hoedown_buffer work = { 0, 0, 0, 0 };
-	size_t len = doc->is_user_block(data, size);
+	size_t len = doc->is_user_block(data, size, doc->md.opaque);
 
 	if (!len) {
 		return 0;
@@ -2600,11 +2600,11 @@ parse_userblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 	work.size = len;
 
 	if (doc->md.user_block) {
-		return doc->md.user_block(ob, &work, doc->md.opaque);
+		doc->md.user_block(ob, &work, doc->md.opaque);
 	} else {
 		hoedown_buffer_put(ob, work.data, work.size);
-		return len;
 	}
+	return len;
 }
 
 /* parse_block • parsing of one block, returning next uint8_t to parse */
