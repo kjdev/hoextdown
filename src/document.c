@@ -444,7 +444,7 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 		return;
 
 	while (i < size) {
-		int user_block = 0;
+		size_t user_block = 0;
 		while (end < size) {
 			if (doc->is_user_block) {
 				user_block = doc->is_user_block(data+end, size - end, doc->md.opaque);
@@ -474,8 +474,8 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 
 		if (user_block) {
 			work.data = data + i;
-			work.size = size - i;
-			end = size - i;
+			work.size = user_block;
+			end = user_block;
 			if (doc->md.user_block) {
 				doc->md.user_block(ob, &work, doc->md.opaque);
 			} else {
