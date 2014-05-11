@@ -224,7 +224,7 @@ rndr_header(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opa
 	if (ob->size)
 		hoedown_buffer_putc(ob, '\n');
 
-	if ((state->flags & HOEDOWN_HTML_TOC) && (level <= state->toc_data.nesting_level))
+	if (level <= state->toc_data.nesting_level)
 		hoedown_buffer_printf(ob, "<h%d id=\"toc_%d\">", level, state->toc_data.header_count++);
 	else
 		hoedown_buffer_printf(ob, "<h%d>", level);
@@ -335,6 +335,8 @@ rndr_raw_block(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	size_t org, sz;
 	if (!text) return;
+	//FIXME: do we *really* need to trim the HTML?
+	//how does that make a difference?
 	sz = text->size;
 	while (sz > 0 && text->data[sz - 1] == '\n') sz--;
 	org = 0;
@@ -389,26 +391,14 @@ rndr_raw_html(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque)
 {
 	hoedown_html_renderer_state *state = opaque;
 
-	/* HTML_ESCAPE overrides SKIP_HTML, SKIP_STYLE, SKIP_LINKS and SKIP_IMAGES
-	* It doens't see if there are any valid tags, just escape all of them. */
+	/* ESCAPE overrides SKIP_HTML. It doesn't look to see if
+	 * there are any valid tags, just escapes all of them. */
 	if((state->flags & HOEDOWN_HTML_ESCAPE) != 0) {
 		escape_html(ob, text->data, text->size);
 		return 1;
 	}
 
 	if ((state->flags & HOEDOWN_HTML_SKIP_HTML) != 0)
-		return 1;
-
-	if ((state->flags & HOEDOWN_HTML_SKIP_STYLE) != 0 &&
-		hoedown_html_is_tag(text->data, text->size, "style"))
-		return 1;
-
-	if ((state->flags & HOEDOWN_HTML_SKIP_LINKS) != 0 &&
-		hoedown_html_is_tag(text->data, text->size, "a"))
-		return 1;
-
-	if ((state->flags & HOEDOWN_HTML_SKIP_IMAGES) != 0 &&
-		hoedown_html_is_tag(text->data, text->size, "img"))
 		return 1;
 
 	hoedown_buffer_put(ob, text->data, text->size);
@@ -650,10 +640,7 @@ hoedown_html_toc_renderer_new(int nesting_level)
 
 	memset(state, 0x0, sizeof(hoedown_html_renderer_state));
 
-	if (nesting_level > 0) {
-		state->flags |= HOEDOWN_HTML_TOC;
-		state->toc_data.nesting_level = nesting_level;
-	}
+	state->toc_data.nesting_level = nesting_level;
 
 	/* Prepare the renderer */
 	renderer = malloc(sizeof(hoedown_renderer));
@@ -722,11 +709,7 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 	memset(state, 0x0, sizeof(hoedown_html_renderer_state));
 
 	state->flags = render_flags;
-
-	if (nesting_level > 0) {
-		state->flags |= HOEDOWN_HTML_TOC;
-		state->toc_data.nesting_level = nesting_level;
-	}
+	state->toc_data.nesting_level = nesting_level;
 
 	/* Prepare the renderer */
 	renderer = malloc(sizeof(hoedown_renderer));
@@ -736,14 +719,6 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 	}
 
 	memcpy(renderer, &cb_default, sizeof(hoedown_renderer));
-
-	if (render_flags & HOEDOWN_HTML_SKIP_IMAGES)
-		renderer->image = NULL;
-
-	if (render_flags & HOEDOWN_HTML_SKIP_LINKS) {
-		renderer->link = NULL;
-		renderer->autolink = NULL;
-	}
 
 	if (render_flags & HOEDOWN_HTML_SKIP_HTML || render_flags & HOEDOWN_HTML_ESCAPE)
 		renderer->blockhtml = NULL;

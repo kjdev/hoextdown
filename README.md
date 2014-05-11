@@ -34,8 +34,7 @@ Features
 	all possible DOS attacks (stack overflows, out of memory situations, malformed
 	Markdown syntax...).
 
-	We've worked very hard to make `Hoedown` never crash or run out of memory
-	under *any* input.
+	We've worked very hard to make `Hoedown` never leak or crash under *any* input.
 
 	**Warning**: `Hoedown` doesn't validate or post-process the HTML in Markdown documents.
 	Unless you use `HTML_ESCAPE` or `HTML_SKIP`, you should strongly consider using a
