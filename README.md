@@ -6,8 +6,8 @@ Extended the following functions.
 
 * [Special Attributes](#special-attributes)
 * [Task Lists](#task-lists)
-* [Name-based TOC ID](#name-based-toc-id)
 * [Line Continue](#line-continue)
+* [Header ID](#header-id)
 
 ## Special Attributes
 
@@ -92,22 +92,24 @@ or [x] (incomplete or complete), like this
 - [x] completed
 ```
 
-## Name-based TOC ID
-
-Changed to be the name based on the ID of the table of contents.
-
-```
-# Header 1
-```
-
-prefix will be 'toc\_', like this
-
-```
-[toc to header](#toc_header-1)
-```
-
 ## Line Continue
 
 Add the `HOEDOWN_HTML_LINE_CONTINUE` to Hoedown html flags.
 
 Remove the line breaks at the end of the line.
+
+## Header ID
+
+Add the `HOEDOWN_HTML_HEADER_ID` to Hoedown html flags.
+
+Output header id.
+
+```
+# Header 1
+```
+
+becomes:
+
+```
+<h1 id="header-1">Header 1</h1>
+```
