@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define ESCAPE_GROW_FACTOR(x) (((x) * 12) / 10) /* this is very scientific, yes */
-
 /*
  * The following characters will not be escaped:
  *
@@ -71,7 +69,6 @@ hoedown_escape_href(hoedown_buffer *ob, const uint8_t *src, size_t size)
 					return;
 				}
 
-				hoedown_buffer_grow(ob, ESCAPE_GROW_FACTOR(size));
 			}
 
 			hoedown_buffer_put(ob, src + org, i - org);
@@ -173,7 +170,6 @@ hoedown_escape_html(hoedown_buffer *ob, const uint8_t *src, size_t size, int sec
 					return;
 				}
 
-				hoedown_buffer_grow(ob, ESCAPE_GROW_FACTOR(size));
 			}
 
 			hoedown_buffer_put(ob, src + org, i - org);

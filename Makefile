@@ -50,8 +50,8 @@ test: hoedown
 	test/runner.sh "./hoedown --special-attribute --tables --fenced-code --task --line-continue" test/MarkdownTest_1.0.3/Tests
 
 test-toc: hoedown
-	test/runner.sh "./hoedown --special-attribute --toc -t 6" test/MarkdownTest_1.0.3/Tests/Toc
-	test/runner.sh "./hoedown --special-attribute --toc -t 6 --html-toc" test/MarkdownTest_1.0.3/Tests/Toc_Render
+	test/runner.sh "./hoedown --special-attribute -t 6" test/MarkdownTest_1.0.3/Tests/Toc
+	test/runner.sh "./hoedown --special-attribute -t 6 --html-toc" test/MarkdownTest_1.0.3/Tests/Toc_Render
 
 test-pl: hoedown
 	perl test/MarkdownTest_1.0.3/MarkdownTest.pl \

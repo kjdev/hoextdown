@@ -58,7 +58,7 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_FENCED_CODE, "fenced-code", "Parse fenced code blocks."},
 	{HOEDOWN_EXT_FOOTNOTES, "footnotes", "Parse footnotes."},
 
-	{HOEDOWN_EXT_AUTOLINK, "autolink", "Automatically turn URLs into links."},
+	{HOEDOWN_EXT_AUTOLINK, "autolink", "Automatically turn safe URLs into links."},
 	{HOEDOWN_EXT_STRIKETHROUGH, "strikethrough", "Parse ~~stikethrough~~ spans."},
 	{HOEDOWN_EXT_UNDERLINE, "underline", "Parse _underline_ instead of emphasis."},
 	{HOEDOWN_EXT_HIGHLIGHT, "highlight", "Parse ==highlight== spans."},
@@ -76,15 +76,11 @@ static struct extension_info extensions_info[] = {
 
 static struct html_flag_info html_flags_info[] = {
 	{HOEDOWN_HTML_SKIP_HTML, "skip-html", "Strip all HTML tags."},
-	{HOEDOWN_HTML_SKIP_STYLE, "skip-style", "Strip <style> tags."},
-	{HOEDOWN_HTML_SKIP_IMAGES, "skip-images", "Don't render images."},
-	{HOEDOWN_HTML_SKIP_LINKS, "skip-links", "Don't render links."},
+	{HOEDOWN_HTML_ESCAPE, "escape", "Escape all HTML."},
 	{HOEDOWN_HTML_EXPAND_TABS, "expand-tabs", "Expand tabs to spaces."},
 	{HOEDOWN_HTML_SAFELINK, "safelink", "Only allow links to safe protocols."},
-	{HOEDOWN_HTML_TOC, "toc", "Produce links to the Table of Contents."},
 	{HOEDOWN_HTML_HARD_WRAP, "hard-wrap", "Render each linebreak as <br>."},
 	{HOEDOWN_HTML_USE_XHTML, "xhtml", "Render XHTML."},
-	{HOEDOWN_HTML_ESCAPE, "escape", "Escape all HTML."},
 	{HOEDOWN_HTML_USE_TASK_LIST, "task", "Render task lists."},
 	{HOEDOWN_HTML_LINE_CONTINUE, "line-continue", "Render line continue."},
 	{HOEDOWN_HTML_HEADER_ID, "header-id", "Render header id."},
@@ -112,7 +108,7 @@ print_help(const char *basename) {
 	/* main options */
 	printf("Main options:\n");
 	print_option('n', "max-nesting=N", "Maximum level of block nesting parsed. Default is " str(DEF_MAX_NESTING) ".");
-	print_option('t', "toc-level=N", "Maximum level for headers included in the TOC. Implies '--toc'.");
+	print_option('t', "toc-level=N", "Maximum level for headers included in the TOC. Zero disables TOC (the default).");
 	print_option(  0, "html", "Render (X)HTML. The default.");
 	print_option(  0, "html-toc", "Render the Table of Contents in (X)HTML.");
 	print_option(  0, "null", "Use a special \"null\" renderer that has no callbacks.");
@@ -457,7 +453,7 @@ main(int argc, char **argv)
 	}
 
 	/* toc_data */
-	if (html_flags & HOEDOWN_HTML_TOC) {
+	if (toc_level > 0) {
 		hoedown_html_renderer_state *state;
 		state = (hoedown_html_renderer_state *)renderer->opaque;
 		state->toc_data.current_level = 0;
