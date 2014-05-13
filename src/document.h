@@ -143,7 +143,7 @@ struct hoedown_document;
 
 typedef struct hoedown_document hoedown_document;
 
-typedef int (*hoedown_is_user_block)(uint8_t *data, size_t size, void *opaque);
+typedef size_t (*hoedown_is_user_block)(uint8_t *data, size_t size, void *opaque);
 
 /**********************
  * EXPORTED FUNCTIONS *
