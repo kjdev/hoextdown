@@ -5,18 +5,32 @@
 #include <string.h>
 #include <assert.h>
 
+/* hoedown_buffer_init: initialize a buffer with custom allocators */
+void
+hoedown_buffer_init(
+	hoedown_buffer *buf,
+	size_t unit,
+	hoedown_realloc_callback data_realloc,
+	hoedown_free_callback data_free,
+	hoedown_free_callback buffer_free)
+{
+	if (!buf)
+		return;
+
+	buf->data = NULL;
+	buf->size = buf->asize = 0;
+	buf->unit = unit;
+	buf->data_realloc = data_realloc;
+	buf->data_free = data_free;
+	buf->buffer_free = buffer_free;
+}
+
 /* hoedown_buffer_new: allocation of a new buffer */
 hoedown_buffer *
 hoedown_buffer_new(size_t unit)
 {
-	hoedown_buffer *ret;
-	ret = malloc(sizeof (hoedown_buffer));
-
-	if (ret) {
-		ret->data = 0;
-		ret->size = ret->asize = 0;
-		ret->unit = unit;
-	}
+	hoedown_buffer *ret = malloc(sizeof (hoedown_buffer));
+	hoedown_buffer_init(ret, unit, realloc, free, free);
 	return ret;
 }
 
@@ -27,8 +41,10 @@ hoedown_buffer_free(hoedown_buffer *buf)
 	if (!buf)
 		return;
 
-	free(buf->data);
-	free(buf);
+	buf->data_free(buf->data);
+
+	if (buf->buffer_free)
+		buf->buffer_free(buf);
 }
 
 /* hoedown_buffer_reset: frees internal data of the buffer */
@@ -38,7 +54,7 @@ hoedown_buffer_reset(hoedown_buffer *buf)
 	if (!buf)
 		return;
 
-	free(buf->data);
+	buf->data_free(buf->data);
 	buf->data = NULL;
 	buf->size = buf->asize = 0;
 }
@@ -59,7 +75,7 @@ hoedown_buffer_grow(hoedown_buffer *buf, size_t neosz)
 	while (neoasz < neosz)
 		neoasz += buf->unit;
 
-	neodata = realloc(buf->data, neoasz);
+	neodata = buf->data_realloc(buf->data, neoasz);
 	if (!neodata)
 		return HOEDOWN_BUF_ENOMEM;
 
