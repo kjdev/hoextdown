@@ -21,12 +21,19 @@ typedef enum {
 	HOEDOWN_BUF_ENOMEM = -1
 } hoedown_buferror_t;
 
+typedef void *(*hoedown_realloc_callback)(void *, size_t);
+typedef void (*hoedown_free_callback)(void *);
+
 /* hoedown_buffer: character array buffer */
 struct hoedown_buffer {
 	uint8_t *data;	/* actual character data */
 	size_t size;	/* size of the string */
 	size_t asize;	/* allocated size (0 = volatile buffer) */
 	size_t unit;	/* reallocation unit size (0 = read-only buffer) */
+
+	hoedown_realloc_callback data_realloc;
+	hoedown_free_callback data_free;
+	hoedown_free_callback buffer_free;
 };
 
 typedef struct hoedown_buffer hoedown_buffer;
@@ -34,6 +41,15 @@ typedef struct hoedown_buffer hoedown_buffer;
 /* HOEDOWN_BUFPUTSL: optimized hoedown_buffer_puts of a string literal */
 #define HOEDOWN_BUFPUTSL(output, literal) \
 	hoedown_buffer_put(output, literal, sizeof(literal) - 1)
+
+/* hoedown_buffer_init: initialize a buffer with custom allocators */
+void hoedown_buffer_init(
+	hoedown_buffer *buffer,
+	size_t unit,
+	hoedown_realloc_callback data_realloc,
+	hoedown_free_callback data_free,
+	hoedown_free_callback buffer_free
+);
 
 /* hoedown_buffer_new: allocation of a new buffer */
 hoedown_buffer *hoedown_buffer_new(size_t unit) __attribute__ ((malloc));
