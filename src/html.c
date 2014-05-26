@@ -8,6 +8,10 @@
 #include "escape.h"
 #include "hash.h"
 
+#ifdef _MSC_VER
+#define strncasecmp    _strnicmp
+#endif
+
 #define USE_XHTML(opt) (opt->flags & HOEDOWN_HTML_USE_XHTML)
 #define USE_TASK_LIST(opt) (opt->flags & HOEDOWN_HTML_USE_TASK_LIST)
 

@@ -7,6 +7,22 @@
 #define HOEDOWN_HASH_FNV_PRIME 0x01000193
 #define HOEDOWN_HASH_FNV_OFFSET_BASIS 0x811c9dc5
 
+#ifdef _MSC_VER
+static char *
+strndup(const char* str, size_t n)
+{
+    if (str) {
+        char *s = (char *)malloc(sizeof(char) * (n + 1));
+        if (s) {
+            memcpy(s, str, n);
+            s[n] = '\0';
+        }
+        return s;
+    }
+    return NULL;
+}
+#endif
+
 static unsigned int
 hoedown_hash_fnv(const char *key, const char *max, size_t limit)
 {
