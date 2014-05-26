@@ -9,6 +9,13 @@ Extended the following functions.
 * [Line Continue](#line-continue)
 * [Header ID](#header-id)
 
+## RPM Package
+
+[Related article](http://hiden.samurai-factory.jp/c/hoextdown/download)
+
+* CentOS 6: [hoextdown-2.0.0.2-0.el6.sf.x86_64.rpm](http://hiden.samurai-factory.jp/download/rpm/el6/hoextdown-2.0.0.2-0.el6.sf.x86_64.rpm)
+* Fedora 20: [hoextdown-2.0.0.2-0.fc20.sf.x86_64.rpm](http://hiden.samurai-factory.jp/download/rpm/fc20/hoextdown-2.0.0.2-0.fc20.sf.x86_64.rpm)
+
 ## Special Attributes
 
 Add the `HOEDOWN_EXT_SPECIAL_ATTRIBUTE` to Hoedown document flags.
