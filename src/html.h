@@ -17,7 +17,7 @@ typedef enum {
 	HOEDOWN_HTML_EXPAND_TABS = (1 << 2),
 	HOEDOWN_HTML_SAFELINK = (1 << 3),
 	HOEDOWN_HTML_HARD_WRAP = (1 << 4),
-	HOEDOWN_HTML_USE_XHTML = (1 << 5),
+	HOEDOWN_HTML_USE_XHTML = (1 << 5)
 } hoedown_html_flags;
 
 typedef enum {

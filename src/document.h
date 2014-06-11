@@ -61,7 +61,7 @@ enum hoedown_extensions {
 /* list/listitem flags */
 enum hoedown_listflags {
 	HOEDOWN_LIST_ORDERED = (1 << 0),
-	HOEDOWN_LI_BLOCK = (1 << 1),	/* <li> containing block data */
+	HOEDOWN_LI_BLOCK = (1 << 1)	/* <li> containing block data */
 };
 
 enum hoedown_tableflags {
