@@ -42,7 +42,7 @@ struct footnote_ref {
 
 	int is_used;
 	unsigned int num;
-	
+
 	hoedown_buffer *contents;
 };
 
@@ -246,9 +246,9 @@ create_footnote_ref(struct footnote_list *list, const uint8_t *name, size_t name
 	struct footnote_ref *ref = calloc(1, sizeof(struct footnote_ref));
 	if (!ref)
 		return NULL;
-	
+
 	ref->id = hash_link_ref(name, name_size);
-	
+
 	return ref;
 }
 
@@ -259,7 +259,7 @@ add_footnote_ref(struct footnote_list *list, struct footnote_ref *ref)
 	if (!item)
 		return 0;
 	item->ref = ref;
-	
+
 	if (list->head == NULL) {
 		list->head = list->tail = item;
 	} else {
@@ -267,7 +267,7 @@ add_footnote_ref(struct footnote_list *list, struct footnote_ref *ref)
 		list->tail = item;
 	}
 	list->count++;
-	
+
 	return 1;
 }
 
@@ -276,15 +276,15 @@ find_footnote_ref(struct footnote_list *list, uint8_t *name, size_t length)
 {
 	unsigned int hash = hash_link_ref(name, length);
 	struct footnote_item *item = NULL;
-	
+
 	item = list->head;
-	
+
 	while (item != NULL) {
 		if (item->ref->id == hash)
 			return item->ref;
 		item = item->next;
 	}
-	
+
 	return NULL;
 }
 
@@ -300,7 +300,7 @@ free_footnote_list(struct footnote_list *list, int free_refs)
 {
 	struct footnote_item *item = list->head;
 	struct footnote_item *next;
-	
+
 	while (item) {
 		next = item->next;
 		if (free_refs)
@@ -432,7 +432,7 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 {
 	size_t i = 0, end = 0;
 	uint8_t action = 0;
-	hoedown_buffer work = { 0, 0, 0, 0 };
+	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
 
 	if (doc->work_bufs[BUFFER_SPAN].size +
 		doc->work_bufs[BUFFER_BLOCK].size > doc->max_nesting)
@@ -756,7 +756,7 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 
 	/* real code span */
 	if (f_begin < f_end) {
-		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0 };
+		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0, NULL, NULL, NULL };
 		if (!doc->md.codespan(ob, &work, doc->md.opaque))
 			end = 0;
 	} else {
@@ -770,7 +770,7 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 /* char_quote • '"' parsing a quote */
 static size_t
 char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
-{    
+{
 	size_t end, nq = 0, i, f_begin, f_end;
 
 	/* counting the number of quotes in the delimiter */
@@ -798,7 +798,7 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 
 	/* real quote */
 	if (f_begin < f_end) {
-		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0 };
+		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0, NULL, NULL, NULL };
 		if (!doc->md.quote(ob, &work, doc->md.opaque))
 			end = 0;
 	} else {
@@ -815,7 +815,7 @@ static size_t
 char_escape(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
 	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~";
-	hoedown_buffer work = { 0, 0, 0, 0 };
+	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
 
 	if (size > 1) {
 		if (strchr(escape_chars, data[1]) == NULL)
@@ -840,7 +840,7 @@ static size_t
 char_entity(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
 	size_t end = 1;
-	hoedown_buffer work = { 0, 0, 0, 0 };
+	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
 
 	if (end < size && data[end] == '#')
 		end++;
@@ -869,7 +869,7 @@ char_langle_tag(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 {
 	enum hoedown_autolink altype = HOEDOWN_AUTOLINK_NONE;
 	size_t end = tag_length(data, size, &altype);
-	hoedown_buffer work = { data, end, 0, 0 };
+	hoedown_buffer work = { data, end, 0, 0, NULL, NULL, NULL };
 	int ret = 0;
 
 	if (end > 2) {
@@ -1002,20 +1002,20 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	txt_e = i;
 	i++;
-	
+
 	/* footnote link */
 	if (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^') {
-		hoedown_buffer id = { 0, 0, 0, 0 };
+		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
 		struct footnote_ref *fr;
 
 		if (txt_e < 3)
 			goto cleanup;
-		
+
 		id.data = data + 2;
 		id.size = txt_e - 2;
-		
+
 		fr = find_footnote_ref(&doc->footnotes_found, id.data, id.size);
-		
+
 		/* mark footnote used */
 		if (fr && !fr->is_used) {
 			if(!add_footnote_ref(&doc->footnotes_used, fr))
@@ -1023,11 +1023,11 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 			fr->is_used = 1;
 			fr->num = doc->footnotes_used.count;
 		}
-		
+
 		/* render */
 		if (fr && doc->md.footnote_ref)
 				ret = doc->md.footnote_ref(ob, fr->num, doc->md.opaque);
-		
+
 		goto cleanup;
 	}
 
@@ -1119,7 +1119,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	/* reference style link */
 	else if (i < size && data[i] == '[') {
-		hoedown_buffer id = { 0, 0, 0, 0 };
+		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
 		struct link_ref *lr;
 
 		/* looking for the id */
@@ -1165,7 +1165,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	/* shortcut reference style link */
 	else {
-		hoedown_buffer id = { 0, 0, 0, 0 };
+		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
 		struct link_ref *lr;
 
 		/* crafting the id */
@@ -1566,7 +1566,7 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 {
 	size_t i = 0, end = 0;
 	int level = 0;
-	hoedown_buffer work = { data, 0, 0, 0 };
+	hoedown_buffer work = { data, 0, 0, 0, NULL, NULL, NULL };
 
 	while (i < size) {
 		for (end = i + 1; end < size && data[end - 1] != '\n'; end++) /* empty */;
@@ -1677,8 +1677,8 @@ parse_fencedcode(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 	size_t w, w2;
 	size_t width, width2;
 	uint8_t chr, chr2;
-	hoedown_buffer text = { 0, 0, 0, 0 };
-	hoedown_buffer lang = { 0, 0, 0, 0 };
+	hoedown_buffer text = { 0, 0, 0, 0, NULL, NULL, NULL };
+	hoedown_buffer lang = { 0, 0, 0, 0, NULL, NULL, NULL };
 
 	// parse codefence line
 	while (i < size && data[i] != '\n') i++;
@@ -1950,9 +1950,9 @@ parse_footnote_def(hoedown_buffer *ob, hoedown_document *doc, unsigned int num, 
 {
 	hoedown_buffer *work = 0;
 	work = newbuf(doc, BUFFER_SPAN);
-	
+
 	parse_block(work, doc, data, size);
-	
+
 	if (doc->md.footnote_def)
 	doc->md.footnote_def(ob, work, num, doc->md.opaque);
 	popbuf(doc, BUFFER_SPAN);
@@ -1965,19 +1965,19 @@ parse_footnote_list(hoedown_buffer *ob, hoedown_document *doc, struct footnote_l
 	hoedown_buffer *work = 0;
 	struct footnote_item *item;
 	struct footnote_ref *ref;
-	
+
 	if (footnotes->count == 0)
 		return;
-	
+
 	work = newbuf(doc, BUFFER_BLOCK);
-	
+
 	item = footnotes->head;
 	while (item) {
 		ref = item->ref;
 		parse_footnote_def(work, doc, ref->num, ref->contents->data, ref->contents->size);
 		item = item->next;
 	}
-	
+
 	if (doc->md.footnotes)
 		doc->md.footnotes(ob, work, doc->md.opaque);
 	popbuf(doc, BUFFER_BLOCK);
@@ -2063,7 +2063,7 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 {
 	size_t i, j = 0, tag_end;
 	const char *curtag = NULL;
-	hoedown_buffer work = { data, 0, 0, 0 };
+	hoedown_buffer work = { data, 0, 0, 0, NULL, NULL, NULL };
 
 	/* identification of the opening tag */
 	if (size < 2 || data[0] != '<')
@@ -2190,7 +2190,7 @@ parse_table_row(
 	}
 
 	for (; col < columns; ++col) {
-		hoedown_buffer empty_cell = { 0, 0, 0, 0 };
+		hoedown_buffer empty_cell = { 0, 0, 0, 0, NULL, NULL, NULL };
 		doc->md.table_cell(row_work, &empty_cell, col_data[col] | header_flag, doc->md.opaque);
 	}
 
@@ -2425,9 +2425,9 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 	size_t ind = 0;
 	int in_empty = 0;
 	size_t start = 0;
-	
+
 	size_t id_offset, id_end;
-	
+
 	/* up to 3 optional leading spaces */
 	if (beg + 3 >= end) return 0;
 	if (data[beg] == ' ') { i = 1;
@@ -2435,7 +2435,7 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 	if (data[beg + 2] == ' ') { i = 3;
 	if (data[beg + 3] == ' ') return 0; } } }
 	i += beg;
-	
+
 	/* id part: caret followed by anything between brackets */
 	if (data[i] != '[') return 0;
 	i++;
@@ -2446,21 +2446,21 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		i++;
 	if (i >= end || data[i] != ']') return 0;
 	id_end = i;
-	
+
 	/* spacer: colon (space | tab)* newline? (space | tab)* */
 	i++;
-	if (i >= end || data[i] != ':') return 0; 
+	if (i >= end || data[i] != ':') return 0;
 	i++;
-	
+
 	/* getting content buffer */
 	contents = hoedown_buffer_new(64);
-	
+
 	start = i;
-	
+
 	/* process lines similiar to a list item */
 	while (i < end) {
 		while (i < end && data[i] != '\n' && data[i] != '\r') i++;
-		
+
 		/* process an empty line */
 		if (is_empty(data + start, i - start)) {
 			in_empty = 1;
@@ -2471,12 +2471,12 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 			start = i;
 			continue;
 		}
-	
+
 		/* calculating the indentation */
 		ind = 0;
 		while (ind < 4 && start + ind < end && data[start + ind] == ' ')
 			ind++;
-	
+
 		/* joining only indented stuff after empty lines;
 		 * note that now we only require 1 space of indentation
 		 * to continue, just like lists */
@@ -2487,9 +2487,9 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		else if (in_empty) {
 			hoedown_buffer_putc(contents, '\n');
 		}
-	
+
 		in_empty = 0;
-	
+
 		/* adding the line into the content buffer */
 		hoedown_buffer_put(contents, data + start + ind, i - start - ind);
 		/* add carriage return */
@@ -2502,10 +2502,10 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		}
 		start = i;
 	}
-	
+
 	if (last)
 		*last = start;
-	
+
 	if (list) {
 		struct footnote_ref *ref;
 		ref = create_footnote_ref(list, data + id_offset, id_end - id_offset);
@@ -2517,7 +2517,7 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		}
 		ref->contents = contents;
 	}
-	
+
 	return 1;
 }
 
@@ -2746,9 +2746,9 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 
 	/* reset the references table */
 	memset(&doc->refs, 0x0, REF_TABLE_SIZE * sizeof(void *));
-	
+
 	footnotes_enabled = doc->ext_flags & HOEDOWN_EXT_FOOTNOTES;
-	
+
 	/* reset the footnotes lists */
 	if (footnotes_enabled) {
 		memset(&doc->footnotes_found, 0x0, sizeof(doc->footnotes_found));
@@ -2801,7 +2801,7 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 
 		parse_block(ob, doc, text->data, text->size);
 	}
-	
+
 	/* footnotes */
 	if (footnotes_enabled)
 		parse_footnote_list(ob, doc, &doc->footnotes_used);
