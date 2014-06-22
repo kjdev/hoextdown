@@ -798,9 +798,12 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 
 	/* real quote */
 	if (f_begin < f_end) {
-		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0, NULL, NULL, NULL };
-		if (!doc->md.quote(ob, &work, doc->md.opaque))
+		hoedown_buffer *work = newbuf(doc, BUFFER_SPAN);
+		parse_inline(work, doc, data + f_begin, f_end - f_begin);
+
+		if (!doc->md.quote(ob, work, doc->md.opaque))
 			end = 0;
+		popbuf(doc, BUFFER_SPAN);
 	} else {
 		if (!doc->md.quote(ob, 0, doc->md.opaque))
 			end = 0;
