@@ -312,7 +312,7 @@ free_footnote_list(struct footnote_list *list, int free_refs)
 
 
 /*
- * Check whether a char is a Markdown space.
+ * Check whether a char is a Markdown spacing char.
 
  * Right now we only consider spaces the actual
  * space and a newline: tabs and carriage returns
@@ -399,7 +399,7 @@ tag_length(uint8_t *data, size_t size, enum hoedown_autolink *autolink)
 		i++;
 	}
 
-	/* completing autolink test: no whitespace or ' or " */
+	/* completing autolink test: no spacing or ' or " */
 	if (i >= size)
 		*autolink = HOEDOWN_AUTOLINK_NONE;
 
@@ -557,7 +557,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 }
 
 /* parse_emph1 • parsing single emphase */
-/* closed by a symbol not preceded by whitespace and not followed by symbol */
+/* closed by a symbol not preceded by spacing and not followed by symbol */
 static size_t
 parse_emph1(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, uint8_t c)
 {
@@ -642,7 +642,7 @@ parse_emph3(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t siz
 		if (!len) return 0;
 		i += len;
 
-		/* skip whitespace preceded symbols */
+		/* skip spacing preceded symbols */
 		if (data[i] != c || _isspace(data[i - 1]))
 			continue;
 
@@ -684,7 +684,7 @@ char_emphasis(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 	}
 
 	if (size > 2 && data[1] != c) {
-		/* whitespace cannot follow an opening emphasis;
+		/* spacing cannot follow an opening emphasis;
 		 * strikethrough only takes two characters '~~' */
 		if (c == '~' || c == '=' || _isspace(data[1]) || (ret = parse_emph1(ob, doc, data + 1, size - 1, c)) == 0)
 			return 0;
@@ -745,7 +745,7 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 	if (i < nb && end >= size)
 		return 0; /* no matching delimiter */
 
-	/* trimming outside whitespaces */
+	/* trimming outside spaces */
 	f_begin = nb;
 	while (f_begin < end && data[f_begin] == ' ')
 		f_begin++;
@@ -787,7 +787,7 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 	if (i < nq && end >= size)
 		return 0; /* no matching delimiter */
 
-	/* trimming outside whitespaces */
+	/* trimming outside spaces */
 	f_begin = nq;
 	while (f_begin < end && data[f_begin] == ' ')
 		f_begin++;
@@ -1034,7 +1034,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		goto cleanup;
 	}
 
-	/* skip any amount of whitespace or newline */
+	/* skip any amount of spacing */
 	/* (this is much more laxist than original markdown syntax) */
 	while (i < size && _isspace(data[i]))
 		i++;
@@ -1043,7 +1043,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 	if (i < size && data[i] == '(') {
 		size_t nb_p;
 
-		/* skipping initial whitespace */
+		/* skipping initial spacing */
 		i++;
 
 		while (i < size && _isspace(data[i]))
@@ -1086,7 +1086,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 			if (i >= size) goto cleanup;
 
-			/* skipping whitespaces after title */
+			/* skipping spacing after title */
 			title_e = i - 1;
 			while (title_e > title_b && _isspace(data[title_e]))
 				title_e--;
@@ -1098,7 +1098,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 			}
 		}
 
-		/* remove whitespace at the end of the link */
+		/* remove spacing at the end of the link */
 		while (link_e > link_b && _isspace(data[link_e - 1]))
 			link_e--;
 
@@ -1199,7 +1199,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		link = lr->link;
 		title = lr->title;
 
-		/* rewinding the whitespace */
+		/* rewinding the spacing */
 		i = txt_e + 1;
 	}
 
@@ -1312,7 +1312,7 @@ is_hrule(uint8_t *data, size_t size)
 		return 0;
 	c = data[i];
 
-	/* the whole line must be the char or whitespace */
+	/* the whole line must be the char or space */
 	while (i < size && data[i] != '\n') {
 		if (data[i] == c) n++;
 		else if (data[i] != ' ')
@@ -2563,7 +2563,7 @@ is_ref(const uint8_t *data, size_t beg, size_t end, size_t *last, struct link_re
 	while (i < end && data[i] == ' ') i++;
 	if (i >= end) return 0;
 
-	/* link: whitespace-free sequence, optionally between angle brackets */
+	/* link: spacing-free sequence, optionally between angle brackets */
 	if (data[i] == '<')
 		i++;
 
