@@ -439,6 +439,7 @@ main(int argc, char **argv)
 			break;
 		default:
 			renderer = NULL;
+			renderer_free = NULL;
 	};
 
 	if (!renderer) {
