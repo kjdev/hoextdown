@@ -1832,8 +1832,8 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			if (in_empty)
 				has_inside_empty = 1;
 
-			if (pre == orgpre) /* the following item must have */
-				break;             /* the same indentation */
+			if (pre <= orgpre) /* the following item must have */
+				break;             /* the same (or less) indentation */
 
 			if (!sublist)
 				sublist = work->size;
