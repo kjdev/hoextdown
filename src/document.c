@@ -1022,11 +1022,11 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 				goto cleanup;
 			fr->is_used = 1;
 			fr->num = doc->footnotes_used.count;
-		}
 
-		/* render */
-		if (fr && doc->md.footnote_ref)
+			/* render */
+			if (doc->md.footnote_ref)
 				ret = doc->md.footnote_ref(ob, fr->num, doc->md.opaque);
+		}
 
 		goto cleanup;
 	}
