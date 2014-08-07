@@ -25,7 +25,7 @@ libhoedown.so: libhoedown.so.1
 	ln -f -s $^ $@
 
 libhoedown.so.1: $(HOEDOWN_SRC)
-	$(CC) $(LDFLAGS) -shared $^ -o $@
+	$(CC) -shared $^ $(LDFLAGS) -o $@
 
 libhoedown.a: $(HOEDOWN_SRC)
 	$(AR) rcs libhoedown.a $^
@@ -33,10 +33,10 @@ libhoedown.a: $(HOEDOWN_SRC)
 # Executables
 
 hoedown: bin/hoedown.o $(HOEDOWN_SRC)
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) $^ $(LDFLAGS) -o $@
 
 smartypants: bin/smartypants.o $(HOEDOWN_SRC)
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) $^ $(LDFLAGS) -o $@
 
 # Perfect hashing
 
