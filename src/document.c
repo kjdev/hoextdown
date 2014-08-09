@@ -2822,6 +2822,48 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 }
 
 void
+hoedown_document_render_inline(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size)
+{
+	size_t i = 0, mark;
+	hoedown_buffer *text = hoedown_buffer_new(64);
+	if (!text)
+		return;
+
+	/* reset the references table */
+	memset(&doc->refs, 0x0, REF_TABLE_SIZE * sizeof(void *));
+
+	/* first pass: convert all spacing to spaces */
+	hoedown_buffer_grow(text, doc_size);
+	while (1) {
+		mark = i;
+		while (i < doc_size && document[i] != '\n' && document[i] != '\r')
+			i++;
+
+		expand_tabs(text, document + mark, i - mark);
+
+		if (i >= doc_size)
+			break;
+
+		while (i < doc_size && (document[i] == '\n' || document[i] == '\r')) {
+			/* add one \n per newline */
+			if (document[i] == '\n' || (i + 1 < doc_size && document[i + 1] != '\n'))
+				hoedown_buffer_putc(text, '\n');
+			i++;
+		}
+	}
+
+	/* second pass: actual rendering */
+	hoedown_buffer_grow(ob, doc_size + (doc_size >> 1));
+	parse_inline(ob, doc, text->data, text->size);
+
+	/* clean-up */
+	hoedown_buffer_free(text);
+
+	assert(doc->work_bufs[BUFFER_SPAN].size == 0);
+	assert(doc->work_bufs[BUFFER_BLOCK].size == 0);
+}
+
+void
 hoedown_document_free(hoedown_document *doc)
 {
 	size_t i;
