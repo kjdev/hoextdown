@@ -465,6 +465,20 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 	}
 }
 
+/* is_escaped • returns whether special char at data[loc] is escaped by '\\' */
+static int
+is_escaped(uint8_t *data, size_t loc)
+{
+	size_t i = loc;
+	while (i >= 1 && data[i - 1] == '\\')
+		i--;
+
+	/* odd numbers of backslashes escapes data[loc] */
+	if ((loc - i) % 2)
+		return 1;
+	return 0;
+}
+
 /* find_emph_char • looks for the next emph uint8_t, skipping other constructs */
 static size_t
 find_emph_char(uint8_t *data, size_t size, uint8_t c)
@@ -479,7 +493,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 			return 0;
 
 		/* not counting escaped chars */
-		if (i && data[i - 1] == '\\') {
+		if (is_escaped(data, i)) {
 			i++; continue;
 		}
 
