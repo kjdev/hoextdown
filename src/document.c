@@ -817,7 +817,7 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 static size_t
 char_escape(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
-	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~";
+	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~=\"";
 	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
 
 	if (size > 1) {
