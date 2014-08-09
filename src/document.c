@@ -1267,8 +1267,12 @@ char_superscript(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 	if (data[1] == '(') {
 		sup_start = sup_len = 2;
 
-		while (sup_len < size && data[sup_len] != ')' && data[sup_len - 1] != '\\')
+		do {
+			while (sup_len < size && data[sup_len] != ')')
+				sup_len++;
 			sup_len++;
+		} while (is_escaped(data, sup_len - 1));
+		sup_len--;
 
 		if (sup_len == size)
 			return 0;
