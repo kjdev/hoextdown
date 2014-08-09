@@ -1001,7 +1001,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		if (data[i] == '\n')
 			text_has_nl = 1;
 
-		else if (data[i - 1] == '\\')
+		else if (is_escaped(data, i))
 			continue;
 
 		else if (data[i] == '[')

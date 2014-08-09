@@ -41,3 +41,11 @@ Super\^script
 **Foo\\\Bar\\**
 
 *Foo\\Bar\\\*
+
+[Foo\]](http://example.com)
+
+[Foo\\](http://example.com)
+
+[Foo\\\]](http://example.com)
+
+[Foo\\\\](http://example.com)
