@@ -481,7 +481,7 @@ is_escaped(uint8_t *data, size_t loc)
 static size_t
 find_emph_char(uint8_t *data, size_t size, uint8_t c)
 {
-	size_t i = 1;
+	size_t i = 0;
 
 	while (i < size) {
 		while (i < size && data[i] != c && data[i] != '[' && data[i] != '`')
@@ -1266,7 +1266,7 @@ char_superscript(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 
 	if (data[1] == '(') {
 		sup_start = 2;
-		sup_len = find_emph_char(data + 1, size - 1, ')') + 1;
+		sup_len = find_emph_char(data + 2, size - 2, ')') + 2;
 
 		if (sup_len == size)
 			return 0;
@@ -2189,7 +2189,6 @@ parse_table_row(
 
 		cell_start = i;
 
-		i--;
 		size_t len = find_emph_char(data + i, size - i, '|');
 		i += len ? len : size - i;
 
