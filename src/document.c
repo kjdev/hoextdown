@@ -699,7 +699,7 @@ char_emphasis(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 
 	if (size > 2 && data[1] != c) {
 		/* spacing cannot follow an opening emphasis;
-		 * strikethrough only takes two characters '~~' */
+		 * strikethrough and highlight only takes two characters '~~' */
 		if (c == '~' || c == '=' || _isspace(data[1]) || (ret = parse_emph1(ob, doc, data + 1, size - 1, c)) == 0)
 			return 0;
 
