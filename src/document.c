@@ -498,6 +498,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 		if (data[i] == c)
 			return i;
 
+		/* skipping a codespan */
 		if (data[i] == '`') {
 			size_t span_nb = 0, bt;
 			size_t tmp_i = 0;
@@ -518,6 +519,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 				i++;
 			}
 
+			/* not a well-formed codespan; use found matching emph char */
 			if (i >= size) return tmp_i;
 		}
 		/* skipping a link */
