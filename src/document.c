@@ -2189,8 +2189,9 @@ parse_table_row(
 
 		cell_start = i;
 
-		while (i < size && data[i] != '|')
-			i++;
+		i--;
+		size_t len = find_emph_char(data + i, size - i, '|');
+		i += len ? len : size - i;
 
 		cell_end = i - 1;
 
