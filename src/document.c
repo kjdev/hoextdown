@@ -474,9 +474,7 @@ is_escaped(uint8_t *data, size_t loc)
 		i--;
 
 	/* odd numbers of backslashes escapes data[loc] */
-	if ((loc - i) % 2)
-		return 1;
-	return 0;
+	return (loc - i) % 2;
 }
 
 /* find_emph_char • looks for the next emph uint8_t, skipping other constructs */
