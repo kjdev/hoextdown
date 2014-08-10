@@ -1266,7 +1266,7 @@ char_superscript(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 
 	if (data[1] == '(') {
 		sup_start = 2;
-		sup_len = find_emph_char(data + 2, size - 2, ')') + 2;
+		sup_len = find_emph_char(data + 1, size - 1, ')') + 1;
 
 		if (sup_len == size)
 			return 0;
