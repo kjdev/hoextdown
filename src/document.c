@@ -792,14 +792,15 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 		nq++;
 
 	/* finding the next delimiter */
-	i = 0;
-	for (end = nq; end < size && i < nq; end++) {
-		if (data[end] == '"') i++;
-		else i = 0;
+	end = nq;
+	while (1) {
+		i = end;
+		end += find_emph_char(data + end, size - end, '"');
+		if (end == i) return 0;		/* no matching delimiter */
+		i = end;
+		while (end < size && data[end] == '"' && end - i < nq) end++;
+		if (end - i >= nq) break;
 	}
-
-	if (i < nq && end >= size)
-		return 0; /* no matching delimiter */
 
 	/* trimming outside spaces */
 	f_begin = nq;
