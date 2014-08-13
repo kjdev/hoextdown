@@ -1837,21 +1837,21 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			has_next_oli = prefix_oli(data + beg + i, end - beg - i);
 		}
 
-		/* checking for ul/ol switch */
-		if (in_empty && (
-			((*flags & HOEDOWN_LIST_ORDERED) && has_next_uli) ||
-			(!(*flags & HOEDOWN_LIST_ORDERED) && has_next_oli))){
-			*flags |= HOEDOWN_LI_END;
-			break; /* the following item must have same list type */
-		}
-
 		/* checking for a new item */
 		if ((has_next_uli && !is_hrule(data + beg + i, end - beg - i)) || has_next_oli) {
 			if (in_empty)
 				has_inside_empty = 1;
 
-			if (pre <= orgpre) /* the following item must have */
-				break;             /* the same (or less) indentation */
+			/* the following item must have the same (or less) indentation */
+			if (pre <= orgpre) {
+				/* if the following item has different list type, we end this list */
+				if (in_empty && (
+					((*flags & HOEDOWN_LIST_ORDERED) && has_next_uli) ||
+					(!(*flags & HOEDOWN_LIST_ORDERED) && has_next_oli)))
+					*flags |= HOEDOWN_LI_END;
+
+				break;
+			}
 
 			if (!sublist)
 				sublist = work->size;
