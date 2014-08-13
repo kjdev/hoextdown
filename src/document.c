@@ -465,27 +465,40 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 	}
 }
 
+/* is_escaped • returns whether special char at data[loc] is escaped by '\\' */
+static int
+is_escaped(uint8_t *data, size_t loc)
+{
+	size_t i = loc;
+	while (i >= 1 && data[i - 1] == '\\')
+		i--;
+
+	/* odd numbers of backslashes escapes data[loc] */
+	return (loc - i) % 2;
+}
+
 /* find_emph_char • looks for the next emph uint8_t, skipping other constructs */
 static size_t
 find_emph_char(uint8_t *data, size_t size, uint8_t c)
 {
-	size_t i = 1;
+	size_t i = 0;
 
 	while (i < size) {
-		while (i < size && data[i] != c && data[i] != '[')
+		while (i < size && data[i] != c && data[i] != '[' && data[i] != '`')
 			i++;
 
 		if (i == size)
 			return 0;
 
-		if (data[i] == c)
-			return i;
-
 		/* not counting escaped chars */
-		if (i && data[i - 1] == '\\') {
+		if (is_escaped(data, i)) {
 			i++; continue;
 		}
 
+		if (data[i] == c)
+			return i;
+
+		/* skipping a codespan */
 		if (data[i] == '`') {
 			size_t span_nb = 0, bt;
 			size_t tmp_i = 0;
@@ -506,6 +519,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 				i++;
 			}
 
+			/* not a well-formed codespan; use found matching emph char */
 			if (i >= size) return tmp_i;
 		}
 		/* skipping a link */
@@ -685,7 +699,7 @@ char_emphasis(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 
 	if (size > 2 && data[1] != c) {
 		/* spacing cannot follow an opening emphasis;
-		 * strikethrough only takes two characters '~~' */
+		 * strikethrough and highlight only takes two characters '~~' */
 		if (c == '~' || c == '=' || _isspace(data[1]) || (ret = parse_emph1(ob, doc, data + 1, size - 1, c)) == 0)
 			return 0;
 
@@ -778,14 +792,15 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 		nq++;
 
 	/* finding the next delimiter */
-	i = 0;
-	for (end = nq; end < size && i < nq; end++) {
-		if (data[end] == '"') i++;
-		else i = 0;
+	end = nq;
+	while (1) {
+		i = end;
+		end += find_emph_char(data + end, size - end, '"');
+		if (end == i) return 0;		/* no matching delimiter */
+		i = end;
+		while (end < size && data[end] == '"' && end - i < nq) end++;
+		if (end - i >= nq) break;
 	}
-
-	if (i < nq && end >= size)
-		return 0; /* no matching delimiter */
 
 	/* trimming outside spaces */
 	f_begin = nq;
@@ -817,7 +832,7 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 static size_t
 char_escape(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
-	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~";
+	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~=\"";
 	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
 
 	if (size > 1) {
@@ -987,7 +1002,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		if (data[i] == '\n')
 			text_has_nl = 1;
 
-		else if (data[i - 1] == '\\')
+		else if (is_escaped(data, i))
 			continue;
 
 		else if (data[i] == '[')
@@ -1251,10 +1266,8 @@ char_superscript(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 		return 0;
 
 	if (data[1] == '(') {
-		sup_start = sup_len = 2;
-
-		while (sup_len < size && data[sup_len] != ')' && data[sup_len - 1] != '\\')
-			sup_len++;
+		sup_start = 2;
+		sup_len = find_emph_char(data + 2, size - 2, ')') + 2;
 
 		if (sup_len == size)
 			return 0;
@@ -2177,8 +2190,8 @@ parse_table_row(
 
 		cell_start = i;
 
-		while (i < size && data[i] != '|')
-			i++;
+		size_t len = find_emph_char(data + i, size - i, '|');
+		i += len ? len : size - i;
 
 		cell_end = i - 1;
 
