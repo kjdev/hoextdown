@@ -984,6 +984,7 @@ static size_t
 char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
 	int is_img = (offset && data[-1] == '!'), level;
+	int is_footnote = (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^');
 	size_t i = 1, txt_e, link_b = 0, link_e = 0, title_b = 0, title_e = 0;
 	hoedown_buffer *content = 0;
 	hoedown_buffer *link = 0;
@@ -994,7 +995,8 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 	int in_title = 0, qtype = 0;
 
 	/* checking whether the correct renderer exists */
-	if ((is_img && !doc->md.image) || (!is_img && !doc->md.link))
+	if ((is_footnote && !doc->md.footnote_ref) || (is_img && !doc->md.image)
+		|| (!is_img && !is_footnote && !doc->md.link))
 		goto cleanup;
 
 	/* looking for the matching closing bracket */
@@ -1022,7 +1024,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 	i++;
 
 	/* footnote link */
-	if (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^') {
+	if (is_footnote) {
 		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
 		struct footnote_ref *fr;
 
