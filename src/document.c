@@ -329,17 +329,22 @@ _isspace(int c)
 }
 
 /*
- * Replace all spacing characters in data with spaces.
- * Currently the only spacing characters are '\n' and space.
+ * Replace all spacing characters in data with spaces. As a special
+ * case, this collapses a newline with the previous space, if possible.
  */
 static inline void
-replace_spacing(uint8_t *data, size_t size)
+replace_spacing(hoedown_buffer *ob, const uint8_t *data, size_t size)
 {
-	size_t i = 0;
+	size_t i = 0, mark;
 	while (1) {
+		mark = i;
 		while (i < size && data[i] != '\n') i++;
+		hoedown_buffer_put(ob, data + mark, i - mark);
+
 		if (i >= size) break;
-		data[i] = ' ';
+
+		if (!(i > 0 && data[i-1] == ' '))
+			hoedown_buffer_putc(ob, ' ');
 		i++;
 	}
 }
@@ -1148,12 +1153,10 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		link_e = i;
 
 		/* finding the link_ref */
-		if (link_b == link_e) {
-			hoedown_buffer_put(id, data + 1, txt_e - 1);
-			replace_spacing(id->data, id->size);
-		} else {
+		if (link_b == link_e)
+			replace_spacing(id, data + 1, txt_e - 1);
+		else
 			hoedown_buffer_put(id, data + link_b, link_e - link_b);
-		}
 
 		lr = find_link_ref(doc->refs, id->data, id->size);
 		if (!lr)
@@ -1171,8 +1174,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		struct link_ref *lr;
 
 		/* crafting the id */
-		hoedown_buffer_put(id, data + 1, txt_e - 1);
-		replace_spacing(id->data, id->size);
+		replace_spacing(id, data + 1, txt_e - 1);
 
 		/* finding the link_ref */
 		lr = find_link_ref(doc->refs, id->data, id->size);
