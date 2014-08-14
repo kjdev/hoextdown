@@ -65,7 +65,7 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_QUOTE, "quote", "Render \"quotes\" as <q>quotes</q>."},
 	{HOEDOWN_EXT_SUPERSCRIPT, "superscript", "Parse super^script."},
 
-	{HOEDOWN_EXT_LAX_SPACING, "lax-spacing", "Allow HTML blocks on the same line as text."},
+	{HOEDOWN_EXT_LAX_SPACING, "lax-spacing", "Don't require a blank line between some blocks."},
 	{HOEDOWN_EXT_NO_INTRA_EMPHASIS, "disable-intra-emphasis", "Disable emphasis_between_words."},
 	{HOEDOWN_EXT_SPACE_HEADERS, "space-headers", "Require a space after '#' in headers."},
 
