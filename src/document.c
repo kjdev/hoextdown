@@ -1362,8 +1362,8 @@ parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang, size_t *width,
 	lang->size = i - lang_start;
 
 	/* Avoid parsing a codespan as a fence */
-	i = w;
-	while (i < size && data[i] != *chr) i++;
+	i = lang_start + 2;
+	while (i < size && !(data[i] == *chr && data[i-1] == *chr && data[i-2] == *chr)) i++;
 	if (i < size) return 0;
 
 	return w;
