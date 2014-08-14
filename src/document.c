@@ -336,6 +336,7 @@ static inline void
 replace_spacing(hoedown_buffer *ob, const uint8_t *data, size_t size)
 {
 	size_t i = 0, mark;
+	hoedown_buffer_grow(ob, size);
 	while (1) {
 		mark = i;
 		while (i < size && data[i] != '\n') i++;
