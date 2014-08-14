@@ -328,6 +328,22 @@ _isspace(int c)
 	return c == ' ' || c == '\n';
 }
 
+/*
+ * Replace all spacing characters in data with spaces.
+ * Currently the only spacing characters are '\n' and space.
+ */
+static inline void
+replace_spacing(uint8_t *data, size_t size)
+{
+	size_t i = 0;
+	while (1) {
+		while (i < size && data[i] != '\n') i++;
+		if (i >= size) break;
+		data[i] = ' ';
+		i++;
+	}
+}
+
 /****************************
  * INLINE PARSING FUNCTIONS *
  ****************************/
@@ -979,20 +995,19 @@ char_autolink_url(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size
 	return link_len;
 }
 
-/* char_link • '[': parsing a link or an image */
+/* char_link • '[': parsing a link, a footnote or an image */
 static size_t
 char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
 	int is_img = (offset && data[-1] == '!' && !is_escaped(data - offset, offset - 1)), level;
 	int is_footnote = (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^');
 	size_t i = 1, txt_e, link_b = 0, link_e = 0, title_b = 0, title_e = 0;
-	hoedown_buffer *content = 0;
-	hoedown_buffer *link = 0;
-	hoedown_buffer *title = 0;
-	hoedown_buffer *u_link = 0;
+	hoedown_buffer *content = NULL;
+	hoedown_buffer *link = NULL;
+	hoedown_buffer *title = NULL;
+	hoedown_buffer *u_link = NULL;
 	size_t org_work_size = doc->work_bufs[BUFFER_SPAN].size;
-	int text_has_nl = 0, ret = 0;
-	int in_title = 0, qtype = 0;
+	int ret = 0, in_title = 0, qtype = 0;
 
 	/* checking whether the correct renderer exists */
 	if ((is_footnote && !doc->md.footnote_ref) || (is_img && !doc->md.image)
@@ -1001,10 +1016,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	/* looking for the matching closing bracket */
 	for (level = 1; i < size; i++) {
-		if (data[i] == '\n')
-			text_has_nl = 1;
-
-		else if (is_escaped(data, i))
+		if (is_escaped(data, i))
 			continue;
 
 		else if (data[i] == '[')
@@ -1025,7 +1037,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	/* footnote link */
 	if (is_footnote) {
-		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
+		hoedown_buffer id = { NULL, 0, 0, 0, NULL, NULL, NULL };
 		struct footnote_ref *fr;
 
 		if (txt_e < 3)
@@ -1139,7 +1151,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	/* reference style link */
 	else if (i < size && data[i] == '[') {
-		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
+		hoedown_buffer *id = newbuf(doc, BUFFER_SPAN);
 		struct link_ref *lr;
 
 		/* looking for the id */
@@ -1151,29 +1163,13 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 		/* finding the link_ref */
 		if (link_b == link_e) {
-			if (text_has_nl) {
-				hoedown_buffer *b = newbuf(doc, BUFFER_SPAN);
-				size_t j;
-
-				for (j = 1; j < txt_e; j++) {
-					if (data[j] != '\n')
-						hoedown_buffer_putc(b, data[j]);
-					else if (data[j - 1] != ' ')
-						hoedown_buffer_putc(b, ' ');
-				}
-
-				id.data = b->data;
-				id.size = b->size;
-			} else {
-				id.data = data + 1;
-				id.size = txt_e - 1;
-			}
+			hoedown_buffer_put(id, data + 1, txt_e - 1);
+			replace_spacing(id->data, id->size);
 		} else {
-			id.data = data + link_b;
-			id.size = link_e - link_b;
+			hoedown_buffer_put(id, data + link_b, link_e - link_b);
 		}
 
-		lr = find_link_ref(doc->refs, id.data, id.size);
+		lr = find_link_ref(doc->refs, id->data, id->size);
 		if (!lr)
 			goto cleanup;
 
@@ -1185,30 +1181,15 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	/* shortcut reference style link */
 	else {
-		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
+		hoedown_buffer *id = newbuf(doc, BUFFER_SPAN);
 		struct link_ref *lr;
 
 		/* crafting the id */
-		if (text_has_nl) {
-			hoedown_buffer *b = newbuf(doc, BUFFER_SPAN);
-			size_t j;
-
-			for (j = 1; j < txt_e; j++) {
-				if (data[j] != '\n')
-					hoedown_buffer_putc(b, data[j]);
-				else if (data[j - 1] != ' ')
-					hoedown_buffer_putc(b, ' ');
-			}
-
-			id.data = b->data;
-			id.size = b->size;
-		} else {
-			id.data = data + 1;
-			id.size = txt_e - 1;
-		}
+		hoedown_buffer_put(id, data + 1, txt_e - 1);
+		replace_spacing(id->data, id->size);
 
 		/* finding the link_ref */
-		lr = find_link_ref(doc->refs, id.data, id.size);
+		lr = find_link_ref(doc->refs, id->data, id->size);
 		if (!lr)
 			goto cleanup;
 
