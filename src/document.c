@@ -550,7 +550,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 			}
 
 			i++;
-			while (i < size && (data[i] == ' ' || data[i] == '\n'))
+			while (i < size && _isspace(data[i]))
 				i++;
 
 			if (i >= size)
@@ -999,7 +999,7 @@ char_autolink_url(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size
 static size_t
 char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
-	int is_img = (offset && data[-1] == '!' && !is_escaped(data - offset, offset - 1)), level;
+	int is_img = (offset && data[-1] == '!' && !is_escaped(data - offset, offset - 1));
 	int is_footnote = (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^');
 	size_t i = 1, txt_e, link_b = 0, link_e = 0, title_b = 0, title_e = 0;
 	hoedown_buffer *content = NULL;
@@ -1015,25 +1015,11 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		goto cleanup;
 
 	/* looking for the matching closing bracket */
-	for (level = 1; i < size; i++) {
-		if (is_escaped(data, i))
-			continue;
-
-		else if (data[i] == '[')
-			level++;
-
-		else if (data[i] == ']') {
-			level--;
-			if (level <= 0)
-				break;
-		}
-	}
-
-	if (i >= size)
-		goto cleanup;
-
+	i += find_emph_char(data + i, size - i, ']');
 	txt_e = i;
-	i++;
+
+	if (i < size && data[i] == ']') i++;
+	else goto cleanup;
 
 	/* footnote link */
 	if (is_footnote) {
