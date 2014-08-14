@@ -983,7 +983,7 @@ char_autolink_url(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size
 static size_t
 char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
-	int is_img = (offset && data[-1] == '!'), level;
+	int is_img = (offset && data[-1] == '!' && !is_escaped(data - offset, offset - 1)), level;
 	int is_footnote = (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^');
 	size_t i = 1, txt_e, link_b = 0, link_e = 0, title_b = 0, title_e = 0;
 	hoedown_buffer *content = 0;
@@ -1220,7 +1220,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		i = txt_e + 1;
 	}
 
-	/* building content: img alt is escaped, link content is parsed */
+	/* building content: img alt is kept, only link content is parsed */
 	if (txt_e > 1) {
 		content = newbuf(doc, BUFFER_SPAN);
 		if (is_img) {
