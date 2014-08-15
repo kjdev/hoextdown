@@ -1835,12 +1835,12 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			*flags |= HOEDOWN_LI_END;
 			break;
 		}
-		else if (in_empty) {
+
+		if (in_empty) {
 			hoedown_buffer_putc(work, '\n');
 			has_inside_empty = 1;
+			in_empty = 0;
 		}
-
-		in_empty = 0;
 
 		/* adding the line without prefix into the working buffer */
 		hoedown_buffer_put(work, data + beg + i, end - beg - i);
