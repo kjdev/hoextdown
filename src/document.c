@@ -1976,79 +1976,82 @@ parse_footnote_list(hoedown_buffer *ob, hoedown_document *doc, struct footnote_l
 	popbuf(doc, BUFFER_BLOCK);
 }
 
-/* htmlblock_end • checking end of HTML block : </tag>[ \t]*\n[ \t*]\n */
-/*	returns the length on match, 0 otherwise */
-static size_t
-htmlblock_end_tag(
+/* htmlblock_is_end • check for end of HTML block : </tag>( *)\n */
+/*	returns tag length on match, 0 otherwise */
+/*	assumes data starts with "<" */
+static inline size_t
+htmlblock_is_end(
 	const char *tag,
 	size_t tag_len,
 	hoedown_document *doc,
 	uint8_t *data,
 	size_t size)
 {
-	size_t i, w;
+	size_t i = tag_len + 3, w;
 
-	/* checking if tag is a match */
-	if (tag_len + 3 >= size ||
+	/* try to match the end tag */
+	/* note: we're not considering tags like "</tag >" which are still valid */
+	if (i > size ||
+		data[1] != '/' ||
 		strncasecmp((char *)data + 2, tag, tag_len) != 0 ||
 		data[tag_len + 2] != '>')
 		return 0;
 
-	/* checking white lines */
-	i = tag_len + 3;
-	w = 0;
-	if (i < size && (w = is_empty(data + i, size - i)) == 0)
-		return 0; /* non-blank after tag */
-	i += w;
-	w = 0;
-
-	if (i < size)
-		w = is_empty(data + i, size - i);
+	/* rest of the line must be empty */
+	if ((w = is_empty(data + i, size - i)) == 0 && i < size)
+		return 0;
 
 	return i + w;
 }
 
+/* htmlblock_find_end • try to find HTML block ending tag */
+/*	returns the length on match, 0 otherwise */
 static size_t
-htmlblock_end(const char *curtag,
+htmlblock_find_end(
+	const char *tag,
+	size_t tag_len,
 	hoedown_document *doc,
 	uint8_t *data,
-	size_t size,
-	int start_of_line)
+	size_t size)
 {
-	size_t tag_size = strlen(curtag);
-	size_t i = 1, end_tag;
-	int block_lines = 0;
+	size_t i = 0, w;
 
-	while (i < size) {
+	while (1) {
+		while (i < size && data[i] != '<') i++;
+		if (i >= size) return 0;
+
+		w = htmlblock_is_end(tag, tag_len, doc, data + i, size - i);
+		if (w) return i + w;
 		i++;
-		while (i < size && !(data[i - 1] == '<' && data[i] == '/')) {
-			if (data[i] == '\n')
-				block_lines++;
-
-			i++;
-		}
-
-		/* If we are only looking for unindented tags, skip the tag
-		 * if it doesn't follow a newline.
-		 *
-		 * The only exception to this is if the tag is still on the
-		 * initial line; in that case it still counts as a closing
-		 * tag
-		 */
-		if (start_of_line && block_lines > 0 && data[i - 2] != '\n')
-			continue;
-
-		if (i + 2 + tag_size >= size)
-			break;
-
-		end_tag = htmlblock_end_tag(curtag, tag_size, doc, data + i - 1, size - i + 1);
-		if (end_tag)
-			return i + end_tag - 1;
 	}
-
-	return 0;
 }
 
+/* htmlblock_find_end_strict • try to find end of HTML block in strict mode */
+/*	(it must be an unindented line, and have a blank line afterwads) */
+/*	returns the length on match, 0 otherwise */
+static size_t
+htmlblock_find_end_strict(
+	const char *tag,
+	size_t tag_len,
+	hoedown_document *doc,
+	uint8_t *data,
+	size_t size)
+{
+	size_t i = 0, mark;
+
+	while (1) {
+		mark = i;
+		while (i < size && data[i] != '\n') i++;
+		if (i < size) i++;
+		if (i == mark) return 0;
+		
+		if (data[mark] == ' ' && mark > 0) continue;
+		mark += htmlblock_find_end(tag, tag_len, doc, data + mark, i - mark);
+		if (mark == i && (is_empty(data + i, size - i) || i >= size)) break;
+	}
+
+	return i;
+}
 
 /* parse_htmlblock • parsing of inline HTML block */
 static size_t
@@ -2114,15 +2117,14 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		return 0;
 	}
 
-	/* looking for an unindented matching closing tag */
-	/*	followed by a blank line */
-	tag_end = htmlblock_end(curtag, doc, data, size, 1);
+	/* looking for a matching closing tag in strict mode */
+	size_t tag_len = strlen(curtag);
+	tag_end = htmlblock_find_end_strict(curtag, tag_len, doc, data, size);
 
 	/* if not found, trying a second pass looking for indented match */
 	/* but not if tag is "ins" or "del" (following original Markdown.pl) */
-	if (!tag_end && strcmp(curtag, "ins") != 0 && strcmp(curtag, "del") != 0) {
-		tag_end = htmlblock_end(curtag, doc, data, size, 0);
-	}
+	if (!tag_end && strcmp(curtag, "ins") != 0 && strcmp(curtag, "del") != 0)
+		tag_end = htmlblock_find_end(curtag, tag_len, doc, data, size);
 
 	if (!tag_end)
 		return 0;
