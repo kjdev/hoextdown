@@ -44,7 +44,7 @@ struct footnote_ref {
 
 	int is_used;
 	unsigned int num;
-	
+
 	hoedown_buffer *contents;
 };
 
@@ -251,9 +251,9 @@ create_footnote_ref(struct footnote_list *list, const uint8_t *name, size_t name
 	struct footnote_ref *ref = calloc(1, sizeof(struct footnote_ref));
 	if (!ref)
 		return NULL;
-	
+
 	ref->id = hash_link_ref(name, name_size);
-	
+
 	return ref;
 }
 
@@ -264,7 +264,7 @@ add_footnote_ref(struct footnote_list *list, struct footnote_ref *ref)
 	if (!item)
 		return 0;
 	item->ref = ref;
-	
+
 	if (list->head == NULL) {
 		list->head = list->tail = item;
 	} else {
@@ -272,7 +272,7 @@ add_footnote_ref(struct footnote_list *list, struct footnote_ref *ref)
 		list->tail = item;
 	}
 	list->count++;
-	
+
 	return 1;
 }
 
@@ -281,15 +281,15 @@ find_footnote_ref(struct footnote_list *list, uint8_t *name, size_t length)
 {
 	unsigned int hash = hash_link_ref(name, length);
 	struct footnote_item *item = NULL;
-	
+
 	item = list->head;
-	
+
 	while (item != NULL) {
 		if (item->ref->id == hash)
 			return item->ref;
 		item = item->next;
 	}
-	
+
 	return NULL;
 }
 
@@ -305,7 +305,7 @@ free_footnote_list(struct footnote_list *list, int free_refs)
 {
 	struct footnote_item *item = list->head;
 	struct footnote_item *next;
-	
+
 	while (item) {
 		next = item->next;
 		if (free_refs)
@@ -317,7 +317,7 @@ free_footnote_list(struct footnote_list *list, int free_refs)
 
 
 /*
- * Check whether a char is a Markdown space.
+ * Check whether a char is a Markdown spacing char.
 
  * Right now we only consider spaces the actual
  * space and a newline: tabs and carriage returns
@@ -404,7 +404,7 @@ tag_length(uint8_t *data, size_t size, enum hoedown_autolink *autolink)
 		i++;
 	}
 
-	/* completing autolink test: no whitespace or ' or " */
+	/* completing autolink test: no spacing or ' or " */
 	if (i >= size)
 		*autolink = HOEDOWN_AUTOLINK_NONE;
 
@@ -503,7 +503,7 @@ static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer
 {
 	size_t i, len, begin = 0, end = 0;
 
-    i = size;
+	i = size;
 	while (data[i-1] == '\n') {
 		i--;
 	}
@@ -550,30 +550,43 @@ static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer
 		}
 	}
 
-    return len;
+	return len;
+}
+
+/* is_escaped • returns whether special char at data[loc] is escaped by '\\' */
+static int
+is_escaped(uint8_t *data, size_t loc)
+{
+	size_t i = loc;
+	while (i >= 1 && data[i - 1] == '\\')
+		i--;
+
+	/* odd numbers of backslashes escapes data[loc] */
+	return (loc - i) % 2;
 }
 
 /* find_emph_char • looks for the next emph uint8_t, skipping other constructs */
 static size_t
 find_emph_char(uint8_t *data, size_t size, uint8_t c)
 {
-	size_t i = 1;
+	size_t i = 0;
 
 	while (i < size) {
-		while (i < size && data[i] != c && data[i] != '[')
+		while (i < size && data[i] != c && data[i] != '[' && data[i] != '`')
 			i++;
 
 		if (i == size)
 			return 0;
 
-		if (data[i] == c)
-			return i;
-
 		/* not counting escaped chars */
-		if (i && data[i - 1] == '\\') {
+		if (is_escaped(data, i)) {
 			i++; continue;
 		}
 
+		if (data[i] == c)
+			return i;
+
+		/* skipping a codespan */
 		if (data[i] == '`') {
 			size_t span_nb = 0, bt;
 			size_t tmp_i = 0;
@@ -594,6 +607,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 				i++;
 			}
 
+			/* not a well-formed codespan; use found matching emph char */
 			if (i >= size) return tmp_i;
 		}
 		/* skipping a link */
@@ -645,7 +659,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 }
 
 /* parse_emph1 • parsing single emphase */
-/* closed by a symbol not preceded by whitespace and not followed by symbol */
+/* closed by a symbol not preceded by spacing and not followed by symbol */
 static size_t
 parse_emph1(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, uint8_t c)
 {
@@ -730,7 +744,7 @@ parse_emph3(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t siz
 		if (!len) return 0;
 		i += len;
 
-		/* skip whitespace preceded symbols */
+		/* skip spacing preceded symbols */
 		if (data[i] != c || _isspace(data[i - 1]))
 			continue;
 
@@ -772,8 +786,8 @@ char_emphasis(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 	}
 
 	if (size > 2 && data[1] != c) {
-		/* whitespace cannot follow an opening emphasis;
-		 * strikethrough only takes two characters '~~' */
+		/* spacing cannot follow an opening emphasis;
+		 * strikethrough and highlight only takes two characters '~~' */
 		if (c == '~' || c == '=' || _isspace(data[1]) || (ret = parse_emph1(ob, doc, data + 1, size - 1, c)) == 0)
 			return 0;
 
@@ -833,7 +847,7 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 	if (i < nb && end >= size)
 		return 0; /* no matching delimiter */
 
-	/* trimming outside whitespaces */
+	/* trimming outside spaces */
 	f_begin = nb;
 	while (f_begin < end && data[f_begin] == ' ')
 		f_begin++;
@@ -881,16 +895,17 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 		nq++;
 
 	/* finding the next delimiter */
-	i = 0;
-	for (end = nq; end < size && i < nq; end++) {
-		if (data[end] == '"') i++;
-		else i = 0;
+	end = nq;
+	while (1) {
+		i = end;
+		end += find_emph_char(data + end, size - end, '"');
+		if (end == i) return 0;		/* no matching delimiter */
+		i = end;
+		while (end < size && data[end] == '"' && end - i < nq) end++;
+		if (end - i >= nq) break;
 	}
 
-	if (i < nq && end >= size)
-		return 0; /* no matching delimiter */
-
-	/* trimming outside whitespaces */
+	/* trimming outside spaces */
 	f_begin = nq;
 	while (f_begin < end && data[f_begin] == ' ')
 		f_begin++;
@@ -901,9 +916,12 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 
 	/* real quote */
 	if (f_begin < f_end) {
-		hoedown_buffer work = { data + f_begin, f_end - f_begin, 0, 0, NULL, NULL, NULL };
-		if (!doc->md.quote(ob, &work, doc->md.opaque))
+		hoedown_buffer *work = newbuf(doc, BUFFER_SPAN);
+		parse_inline(work, doc, data + f_begin, f_end - f_begin);
+
+		if (!doc->md.quote(ob, work, doc->md.opaque))
 			end = 0;
+		popbuf(doc, BUFFER_SPAN);
 	} else {
 		if (!doc->md.quote(ob, 0, doc->md.opaque))
 			end = 0;
@@ -917,7 +935,7 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 static size_t
 char_escape(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
-	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~";
+	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~=\"";
 	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
 
 	if (size > 1) {
@@ -1089,7 +1107,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		if (data[i] == '\n')
 			text_has_nl = 1;
 
-		else if (data[i - 1] == '\\')
+		else if (is_escaped(data, i))
 			continue;
 
 		else if (data[i] == '[')
@@ -1107,7 +1125,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	txt_e = i;
 	i++;
-	
+
 	/* footnote link */
 	if (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^') {
 		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
@@ -1115,28 +1133,28 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 		if (txt_e < 3)
 			goto cleanup;
-		
+
 		id.data = data + 2;
 		id.size = txt_e - 2;
-		
+
 		fr = find_footnote_ref(&doc->footnotes_found, id.data, id.size);
-		
+
 		/* mark footnote used */
 		if (fr && !fr->is_used) {
 			if(!add_footnote_ref(&doc->footnotes_used, fr))
 				goto cleanup;
 			fr->is_used = 1;
 			fr->num = doc->footnotes_used.count;
-		}
-		
-		/* render */
-		if (fr && doc->md.footnote_ref)
+
+			/* render */
+			if (doc->md.footnote_ref)
 				ret = doc->md.footnote_ref(ob, fr->num, doc->md.opaque);
-		
+		}
+
 		goto cleanup;
 	}
 
-	/* skip any amount of whitespace or newline */
+	/* skip any amount of spacing */
 	/* (this is much more laxist than original markdown syntax) */
 	while (i < size && _isspace(data[i]))
 		i++;
@@ -1145,7 +1163,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 	if (i < size && data[i] == '(') {
 		size_t nb_p;
 
-		/* skipping initial whitespace */
+		/* skipping initial spacing */
 		i++;
 
 		while (i < size && _isspace(data[i]))
@@ -1188,7 +1206,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 			if (i >= size) goto cleanup;
 
-			/* skipping whitespaces after title */
+			/* skipping spacing after title */
 			title_e = i - 1;
 			while (title_e > title_b && _isspace(data[title_e]))
 				title_e--;
@@ -1200,7 +1218,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 			}
 		}
 
-		/* remove whitespace at the end of the link */
+		/* remove spacing at the end of the link */
 		while (link_e > link_b && _isspace(data[link_e - 1]))
 			link_e--;
 
@@ -1303,7 +1321,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		title = lr->title;
 		attr = lr->attr;
 
-		/* rewinding the whitespace */
+		/* rewinding the spacing */
 		i = txt_e + 1;
 	}
 
@@ -1397,10 +1415,8 @@ char_superscript(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 		return 0;
 
 	if (data[1] == '(') {
-		sup_start = sup_len = 2;
-
-		while (sup_len < size && data[sup_len] != ')' && data[sup_len - 1] != '\\')
-			sup_len++;
+		sup_start = 2;
+		sup_len = find_emph_char(data + 2, size - 2, ')') + 2;
 
 		if (sup_len == size)
 			return 0;
@@ -1458,7 +1474,7 @@ is_hrule(uint8_t *data, size_t size)
 		return 0;
 	c = data[i];
 
-	/* the whole line must be the char or whitespace */
+	/* the whole line must be the char or space */
 	while (i < size && data[i] != '\n') {
 		if (data[i] == c) n++;
 		else if (data[i] != ' ')
@@ -2014,8 +2030,8 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			if (in_empty)
 				has_inside_empty = 1;
 
-			if (pre == orgpre) /* the following item must have */
-				break;             /* the same indentation */
+			if (pre <= orgpre) /* the following item must have */
+				break;             /* the same (or less) indentation */
 
 			if (!sublist)
 				sublist = work->size;
@@ -2164,9 +2180,9 @@ parse_footnote_def(hoedown_buffer *ob, hoedown_document *doc, unsigned int num, 
 {
 	hoedown_buffer *work = 0;
 	work = newbuf(doc, BUFFER_SPAN);
-	
+
 	parse_block(work, doc, data, size);
-	
+
 	if (doc->md.footnote_def)
 	doc->md.footnote_def(ob, work, num, doc->md.opaque);
 	popbuf(doc, BUFFER_SPAN);
@@ -2179,19 +2195,19 @@ parse_footnote_list(hoedown_buffer *ob, hoedown_document *doc, struct footnote_l
 	hoedown_buffer *work = 0;
 	struct footnote_item *item;
 	struct footnote_ref *ref;
-	
+
 	if (footnotes->count == 0)
 		return;
-	
+
 	work = newbuf(doc, BUFFER_BLOCK);
-	
+
 	item = footnotes->head;
 	while (item) {
 		ref = item->ref;
 		parse_footnote_def(work, doc, ref->num, ref->contents->data, ref->contents->size);
 		item = item->next;
 	}
-	
+
 	if (doc->md.footnotes)
 		doc->md.footnotes(ob, work, doc->md.opaque);
 	popbuf(doc, BUFFER_BLOCK);
@@ -2388,8 +2404,8 @@ parse_table_row(
 
 		cell_start = i;
 
-		while (i < size && data[i] != '|')
-			i++;
+		size_t len = find_emph_char(data + i, size - i, '|');
+		i += len ? len : size - i;
 
 		cell_end = i - 1;
 
@@ -2687,9 +2703,9 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 	size_t ind = 0;
 	int in_empty = 0;
 	size_t start = 0;
-	
+
 	size_t id_offset, id_end;
-	
+
 	/* up to 3 optional leading spaces */
 	if (beg + 3 >= end) return 0;
 	if (data[beg] == ' ') { i = 1;
@@ -2697,7 +2713,7 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 	if (data[beg + 2] == ' ') { i = 3;
 	if (data[beg + 3] == ' ') return 0; } } }
 	i += beg;
-	
+
 	/* id part: caret followed by anything between brackets */
 	if (data[i] != '[') return 0;
 	i++;
@@ -2708,21 +2724,21 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		i++;
 	if (i >= end || data[i] != ']') return 0;
 	id_end = i;
-	
+
 	/* spacer: colon (space | tab)* newline? (space | tab)* */
 	i++;
-	if (i >= end || data[i] != ':') return 0; 
+	if (i >= end || data[i] != ':') return 0;
 	i++;
-	
+
 	/* getting content buffer */
 	contents = hoedown_buffer_new(64);
-	
+
 	start = i;
-	
+
 	/* process lines similiar to a list item */
 	while (i < end) {
 		while (i < end && data[i] != '\n' && data[i] != '\r') i++;
-		
+
 		/* process an empty line */
 		if (is_empty(data + start, i - start)) {
 			in_empty = 1;
@@ -2733,12 +2749,12 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 			start = i;
 			continue;
 		}
-	
+
 		/* calculating the indentation */
 		ind = 0;
 		while (ind < 4 && start + ind < end && data[start + ind] == ' ')
 			ind++;
-	
+
 		/* joining only indented stuff after empty lines;
 		 * note that now we only require 1 space of indentation
 		 * to continue, just like lists */
@@ -2749,9 +2765,9 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		else if (in_empty) {
 			hoedown_buffer_putc(contents, '\n');
 		}
-	
+
 		in_empty = 0;
-	
+
 		/* adding the line into the content buffer */
 		hoedown_buffer_put(contents, data + start + ind, i - start - ind);
 		/* add carriage return */
@@ -2764,10 +2780,10 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		}
 		start = i;
 	}
-	
+
 	if (last)
 		*last = start;
-	
+
 	if (list) {
 		struct footnote_ref *ref;
 		ref = create_footnote_ref(list, data + id_offset, id_end - id_offset);
@@ -2779,7 +2795,7 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		}
 		ref->contents = contents;
 	}
-	
+
 	return 1;
 }
 
@@ -2823,7 +2839,7 @@ is_ref(const uint8_t *data, size_t beg, size_t end, size_t *last, struct link_re
 	while (i < end && data[i] == ' ') i++;
 	if (i >= end) return 0;
 
-	/* link: whitespace-free sequence, optionally between angle brackets */
+	/* link: spacing-free sequence, optionally between angle brackets */
 	if (data[i] == '<')
 		i++;
 
@@ -3062,9 +3078,9 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 
 	/* reset the references table */
 	memset(&doc->refs, 0x0, REF_TABLE_SIZE * sizeof(void *));
-	
+
 	footnotes_enabled = doc->ext_flags & HOEDOWN_EXT_FOOTNOTES;
-	
+
 	/* reset the footnotes lists */
 	if (footnotes_enabled) {
 		memset(&doc->footnotes_found, 0x0, sizeof(doc->footnotes_found));
@@ -3117,7 +3133,7 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 
 		parse_block(ob, doc, text->data, text->size);
 	}
-	
+
 	/* footnotes */
 	if (footnotes_enabled)
 		parse_footnote_list(ob, doc, &doc->footnotes_used);
@@ -3136,6 +3152,48 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 	assert(doc->work_bufs[BUFFER_SPAN].size == 0);
 	assert(doc->work_bufs[BUFFER_BLOCK].size == 0);
 	assert(doc->work_bufs[BUFFER_ATTRIBUTE].size == 0);
+}
+
+void
+hoedown_document_render_inline(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size)
+{
+	size_t i = 0, mark;
+	hoedown_buffer *text = hoedown_buffer_new(64);
+	if (!text)
+		return;
+
+	/* reset the references table */
+	memset(&doc->refs, 0x0, REF_TABLE_SIZE * sizeof(void *));
+
+	/* first pass: convert all spacing to spaces */
+	hoedown_buffer_grow(text, doc_size);
+	while (1) {
+		mark = i;
+		while (i < doc_size && document[i] != '\n' && document[i] != '\r')
+			i++;
+
+		expand_tabs(text, document + mark, i - mark);
+
+		if (i >= doc_size)
+			break;
+
+		while (i < doc_size && (document[i] == '\n' || document[i] == '\r')) {
+			/* add one \n per newline */
+			if (document[i] == '\n' || (i + 1 < doc_size && document[i + 1] != '\n'))
+				hoedown_buffer_putc(text, '\n');
+			i++;
+		}
+	}
+
+	/* second pass: actual rendering */
+	hoedown_buffer_grow(ob, doc_size + (doc_size >> 1));
+	parse_inline(ob, doc, text->data, text->size);
+
+	/* clean-up */
+	hoedown_buffer_free(text);
+
+	assert(doc->work_bufs[BUFFER_SPAN].size == 0);
+	assert(doc->work_bufs[BUFFER_BLOCK].size == 0);
 }
 
 void
