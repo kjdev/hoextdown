@@ -340,6 +340,28 @@ is_empty_all(const uint8_t *data, size_t size)
 	return i == size;
 }
 
+/*
+ * Replace all spacing characters in data with spaces. As a special
+ * case, this collapses a newline with the previous space, if possible.
+ */
+static inline void
+replace_spacing(hoedown_buffer *ob, const uint8_t *data, size_t size)
+{
+	size_t i = 0, mark;
+	hoedown_buffer_grow(ob, size);
+	while (1) {
+		mark = i;
+		while (i < size && data[i] != '\n') i++;
+		hoedown_buffer_put(ob, data + mark, i - mark);
+
+		if (i >= size) break;
+
+		if (!(i > 0 && data[i-1] == ' '))
+			hoedown_buffer_putc(ob, ' ');
+		i++;
+	}
+}
+
 /****************************
  * INLINE PARSING FUNCTIONS *
  ****************************/
@@ -546,7 +568,7 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 			}
 
 			i++;
-			while (i < size && (data[i] == ' ' || data[i] == '\n'))
+			while (i < size && _isspace(data[i]))
 				i++;
 
 			if (i >= size)
@@ -1036,51 +1058,35 @@ char_autolink_url(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size
 	return link_len;
 }
 
-/* char_link • '[': parsing a link or an image */
+/* char_link • '[': parsing a link, a footnote or an image */
 static size_t
 char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
-	int is_img = (offset && data[-1] == '!'), level;
+	int is_img = (offset && data[-1] == '!' && !is_escaped(data - offset, offset - 1));
+	int is_footnote = (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^');
 	size_t i = 1, txt_e, link_b = 0, link_e = 0, title_b = 0, title_e = 0;
-	hoedown_buffer *content = 0;
-	hoedown_buffer *link = 0;
-	hoedown_buffer *title = 0;
-	hoedown_buffer *u_link = 0;
+	hoedown_buffer *content = NULL;
+	hoedown_buffer *link = NULL;
+	hoedown_buffer *title = NULL;
+	hoedown_buffer *u_link = NULL;
 	size_t org_work_size = doc->work_bufs[BUFFER_SPAN].size;
-	int text_has_nl = 0, ret = 0;
-	int in_title = 0, qtype = 0;
+	int ret = 0, in_title = 0, qtype = 0;
 
 	/* checking whether the correct renderer exists */
-	if ((is_img && !doc->md.image) || (!is_img && !doc->md.link))
+	if ((is_footnote && !doc->md.footnote_ref) || (is_img && !doc->md.image)
+		|| (!is_img && !is_footnote && !doc->md.link))
 		goto cleanup;
 
 	/* looking for the matching closing bracket */
-	for (level = 1; i < size; i++) {
-		if (data[i] == '\n')
-			text_has_nl = 1;
-
-		else if (is_escaped(data, i))
-			continue;
-
-		else if (data[i] == '[')
-			level++;
-
-		else if (data[i] == ']') {
-			level--;
-			if (level <= 0)
-				break;
-		}
-	}
-
-	if (i >= size)
-		goto cleanup;
-
+	i += find_emph_char(data + i, size - i, ']');
 	txt_e = i;
-	i++;
+
+	if (i < size && data[i] == ']') i++;
+	else goto cleanup;
 
 	/* footnote link */
-	if (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^') {
-		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
+	if (is_footnote) {
+		hoedown_buffer id = { NULL, 0, 0, 0, NULL, NULL, NULL };
 		struct footnote_ref *fr;
 
 		if (txt_e < 3)
@@ -1194,7 +1200,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	/* reference style link */
 	else if (i < size && data[i] == '[') {
-		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
+		hoedown_buffer *id = newbuf(doc, BUFFER_SPAN);
 		struct link_ref *lr;
 
 		/* looking for the id */
@@ -1205,30 +1211,12 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		link_e = i;
 
 		/* finding the link_ref */
-		if (link_b == link_e) {
-			if (text_has_nl) {
-				hoedown_buffer *b = newbuf(doc, BUFFER_SPAN);
-				size_t j;
+		if (link_b == link_e)
+			replace_spacing(id, data + 1, txt_e - 1);
+		else
+			hoedown_buffer_put(id, data + link_b, link_e - link_b);
 
-				for (j = 1; j < txt_e; j++) {
-					if (data[j] != '\n')
-						hoedown_buffer_putc(b, data[j]);
-					else if (data[j - 1] != ' ')
-						hoedown_buffer_putc(b, ' ');
-				}
-
-				id.data = b->data;
-				id.size = b->size;
-			} else {
-				id.data = data + 1;
-				id.size = txt_e - 1;
-			}
-		} else {
-			id.data = data + link_b;
-			id.size = link_e - link_b;
-		}
-
-		lr = find_link_ref(doc->refs, id.data, id.size);
+		lr = find_link_ref(doc->refs, id->data, id->size);
 		if (!lr)
 			goto cleanup;
 
@@ -1240,30 +1228,14 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 	/* shortcut reference style link */
 	else {
-		hoedown_buffer id = { 0, 0, 0, 0, NULL, NULL, NULL };
+		hoedown_buffer *id = newbuf(doc, BUFFER_SPAN);
 		struct link_ref *lr;
 
 		/* crafting the id */
-		if (text_has_nl) {
-			hoedown_buffer *b = newbuf(doc, BUFFER_SPAN);
-			size_t j;
-
-			for (j = 1; j < txt_e; j++) {
-				if (data[j] != '\n')
-					hoedown_buffer_putc(b, data[j]);
-				else if (data[j - 1] != ' ')
-					hoedown_buffer_putc(b, ' ');
-			}
-
-			id.data = b->data;
-			id.size = b->size;
-		} else {
-			id.data = data + 1;
-			id.size = txt_e - 1;
-		}
+		replace_spacing(id, data + 1, txt_e - 1);
 
 		/* finding the link_ref */
-		lr = find_link_ref(doc->refs, id.data, id.size);
+		lr = find_link_ref(doc->refs, id->data, id->size);
 		if (!lr)
 			goto cleanup;
 
@@ -1275,7 +1247,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		i = txt_e + 1;
 	}
 
-	/* building content: img alt is escaped, link content is parsed */
+	/* building content: img alt is kept, only link content is parsed */
 	if (txt_e > 1) {
 		content = newbuf(doc, BUFFER_SPAN);
 		if (is_img) {
@@ -1462,6 +1434,11 @@ parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang, size_t *width,
 
 	lang->data = data + lang_start;
 	lang->size = i - lang_start;
+
+	/* Avoid parsing a codespan as a fence */
+	i = lang_start + 2;
+	while (i < size && !(data[i] == *chr && data[i-1] == *chr && data[i-2] == *chr)) i++;
+	if (i < size) return 0;
 
 	return w;
 }
@@ -1903,21 +1880,21 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			has_next_oli = prefix_oli(data + beg + i, end - beg - i);
 		}
 
-		/* checking for ul/ol switch */
-		if (in_empty && (
-			((*flags & HOEDOWN_LIST_ORDERED) && has_next_uli) ||
-			(!(*flags & HOEDOWN_LIST_ORDERED) && has_next_oli))){
-			*flags |= HOEDOWN_LI_END;
-			break; /* the following item must have same list type */
-		}
-
 		/* checking for a new item */
 		if ((has_next_uli && !is_hrule(data + beg + i, end - beg - i)) || has_next_oli) {
 			if (in_empty)
 				has_inside_empty = 1;
 
-			if (pre <= orgpre) /* the following item must have */
-				break;             /* the same (or less) indentation */
+			/* the following item must have the same (or less) indentation */
+			if (pre <= orgpre) {
+				/* if the following item has different list type, we end this list */
+				if (in_empty && (
+					((*flags & HOEDOWN_LIST_ORDERED) && has_next_uli) ||
+					(!(*flags & HOEDOWN_LIST_ORDERED) && has_next_oli)))
+					*flags |= HOEDOWN_LI_END;
+
+				break;
+			}
 
 			if (!sublist)
 				sublist = work->size;
@@ -1929,12 +1906,12 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			*flags |= HOEDOWN_LI_END;
 			break;
 		}
-		else if (in_empty) {
+
+		if (in_empty) {
 			hoedown_buffer_putc(work, '\n');
 			has_inside_empty = 1;
+			in_empty = 0;
 		}
-
-		in_empty = 0;
 
 		/* adding the line without prefix into the working buffer */
 		hoedown_buffer_put(work, data + beg + i, end - beg - i);
@@ -2070,79 +2047,82 @@ parse_footnote_list(hoedown_buffer *ob, hoedown_document *doc, struct footnote_l
 	popbuf(doc, BUFFER_BLOCK);
 }
 
-/* htmlblock_end • checking end of HTML block : </tag>[ \t]*\n[ \t*]\n */
-/*	returns the length on match, 0 otherwise */
-static size_t
-htmlblock_end_tag(
+/* htmlblock_is_end • check for end of HTML block : </tag>( *)\n */
+/*	returns tag length on match, 0 otherwise */
+/*	assumes data starts with "<" */
+static inline size_t
+htmlblock_is_end(
 	const char *tag,
 	size_t tag_len,
 	hoedown_document *doc,
 	uint8_t *data,
 	size_t size)
 {
-	size_t i, w;
+	size_t i = tag_len + 3, w;
 
-	/* checking if tag is a match */
-	if (tag_len + 3 >= size ||
+	/* try to match the end tag */
+	/* note: we're not considering tags like "</tag >" which are still valid */
+	if (i > size ||
+		data[1] != '/' ||
 		strncasecmp((char *)data + 2, tag, tag_len) != 0 ||
 		data[tag_len + 2] != '>')
 		return 0;
 
-	/* checking white lines */
-	i = tag_len + 3;
-	w = 0;
-	if (i < size && (w = is_empty(data + i, size - i)) == 0)
-		return 0; /* non-blank after tag */
-	i += w;
-	w = 0;
-
-	if (i < size)
-		w = is_empty(data + i, size - i);
+	/* rest of the line must be empty */
+	if ((w = is_empty(data + i, size - i)) == 0 && i < size)
+		return 0;
 
 	return i + w;
 }
 
+/* htmlblock_find_end • try to find HTML block ending tag */
+/*	returns the length on match, 0 otherwise */
 static size_t
-htmlblock_end(const char *curtag,
+htmlblock_find_end(
+	const char *tag,
+	size_t tag_len,
 	hoedown_document *doc,
 	uint8_t *data,
-	size_t size,
-	int start_of_line)
+	size_t size)
 {
-	size_t tag_size = strlen(curtag);
-	size_t i = 1, end_tag;
-	int block_lines = 0;
+	size_t i = 0, w;
 
-	while (i < size) {
+	while (1) {
+		while (i < size && data[i] != '<') i++;
+		if (i >= size) return 0;
+
+		w = htmlblock_is_end(tag, tag_len, doc, data + i, size - i);
+		if (w) return i + w;
 		i++;
-		while (i < size && !(data[i - 1] == '<' && data[i] == '/')) {
-			if (data[i] == '\n')
-				block_lines++;
-
-			i++;
-		}
-
-		/* If we are only looking for unindented tags, skip the tag
-		 * if it doesn't follow a newline.
-		 *
-		 * The only exception to this is if the tag is still on the
-		 * initial line; in that case it still counts as a closing
-		 * tag
-		 */
-		if (start_of_line && block_lines > 0 && data[i - 2] != '\n')
-			continue;
-
-		if (i + 2 + tag_size >= size)
-			break;
-
-		end_tag = htmlblock_end_tag(curtag, tag_size, doc, data + i - 1, size - i + 1);
-		if (end_tag)
-			return i + end_tag - 1;
 	}
-
-	return 0;
 }
 
+/* htmlblock_find_end_strict • try to find end of HTML block in strict mode */
+/*	(it must be an unindented line, and have a blank line afterwads) */
+/*	returns the length on match, 0 otherwise */
+static size_t
+htmlblock_find_end_strict(
+	const char *tag,
+	size_t tag_len,
+	hoedown_document *doc,
+	uint8_t *data,
+	size_t size)
+{
+	size_t i = 0, mark;
+
+	while (1) {
+		mark = i;
+		while (i < size && data[i] != '\n') i++;
+		if (i < size) i++;
+		if (i == mark) return 0;
+		
+		if (data[mark] == ' ' && mark > 0) continue;
+		mark += htmlblock_find_end(tag, tag_len, doc, data + mark, i - mark);
+		if (mark == i && (is_empty(data + i, size - i) || i >= size)) break;
+	}
+
+	return i;
+}
 
 /* parse_htmlblock • parsing of inline HTML block */
 static size_t
@@ -2208,15 +2188,14 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		return 0;
 	}
 
-	/* looking for an unindented matching closing tag */
-	/*	followed by a blank line */
-	tag_end = htmlblock_end(curtag, doc, data, size, 1);
+	/* looking for a matching closing tag in strict mode */
+	size_t tag_len = strlen(curtag);
+	tag_end = htmlblock_find_end_strict(curtag, tag_len, doc, data, size);
 
 	/* if not found, trying a second pass looking for indented match */
 	/* but not if tag is "ins" or "del" (following original Markdown.pl) */
-	if (!tag_end && strcmp(curtag, "ins") != 0 && strcmp(curtag, "del") != 0) {
-		tag_end = htmlblock_end(curtag, doc, data, size, 0);
-	}
+	if (!tag_end && strcmp(curtag, "ins") != 0 && strcmp(curtag, "del") != 0)
+		tag_end = htmlblock_find_end(curtag, tag_len, doc, data, size);
 
 	if (!tag_end)
 		return 0;
