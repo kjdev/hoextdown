@@ -723,9 +723,9 @@ parse_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 	if (offset && !_isspace(data[-1])) return 0;
 	if (i < size && !_isspace(data[i])) return 0;
 
-	/* if this is a $$ and MATH_DOLLAR is not active,
+	/* if this is a $$ and MATH_EXPLICIT is not active,
 	 * guess wether displaymode should be enabled from the context */
-	if (delimsz == 2 && !(doc->ext_flags & HOEDOWN_EXT_MATH_DOLLAR))
+	if (delimsz == 2 && !(doc->ext_flags & HOEDOWN_EXT_MATH_EXPLICIT))
 		displaymode = is_empty_all(data - offset, offset) && is_empty_all(data + i, size - i);
 
 	/* call callback */
@@ -1353,8 +1353,8 @@ char_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 	if (size > 1 && data[1] == '$')
 		return parse_math(ob, doc, data, offset, size, "$$", 2, 1);
 
-	/* single dollar allowed only with MATH_DOLLAR flag */
-	if (doc->ext_flags & HOEDOWN_EXT_MATH_DOLLAR)
+	/* single dollar allowed only with MATH_EXPLICIT flag */
+	if (doc->ext_flags & HOEDOWN_EXT_MATH_EXPLICIT)
 		return parse_math(ob, doc, data, offset, size, "$", 1, 0);
 
 	return 0;
