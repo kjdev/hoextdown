@@ -331,6 +331,15 @@ _isspace(int c)
 	return c == ' ' || c == '\n';
 }
 
+/* is_empty_all: verify that all the data is spacing */
+static inline int
+is_empty_all(const uint8_t *data, size_t size)
+{
+	size_t i = 0;
+	while (i < size && _isspace(data[i])) i++;
+	return i == size;
+}
+
 /****************************
  * INLINE PARSING FUNCTIONS *
  ****************************/
@@ -706,16 +715,22 @@ parse_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 		i++;
 	}
 
-	/* enforce spacing around the span */
-	if (offset && !_isspace(data[-1])) return 0;
-	if (i + delimsz < size && !_isspace(data[i + delimsz])) return 0;
-
 	/* prepare buffers */
 	hoedown_buffer text = { data + delimsz, i - delimsz, 0, 0, NULL, NULL, NULL };
 
+	/* enforce spacing around the span */
+	i += delimsz;
+	if (offset && !_isspace(data[-1])) return 0;
+	if (i < size && !_isspace(data[i])) return 0;
+
+	/* if this is a $$ and MATH_DOLLAR is not active,
+	 * guess wether displaymode should be enabled from the context */
+	if (delimsz == 2 && !(doc->ext_flags & HOEDOWN_EXT_MATH_DOLLAR))
+		displaymode = is_empty_all(data - offset, offset) && is_empty_all(data + i, size - i);
+
 	/* call callback */
 	if (doc->md.math(ob, &text, displaymode, doc->md.opaque))
-		return i + delimsz;
+		return i;
 	return 0;
 }
 
@@ -1336,9 +1351,9 @@ char_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 {
 	/* double dollar */
 	if (size > 1 && data[1] == '$')
-		return parse_math(ob, doc, data, offset, size, "$$", 2, doc->ext_flags & HOEDOWN_EXT_MATH_DOLLAR);
+		return parse_math(ob, doc, data, offset, size, "$$", 2, 1);
 
-	/* single dollar allowed only at with flag */
+	/* single dollar allowed only with MATH_DOLLAR flag */
 	if (doc->ext_flags & HOEDOWN_EXT_MATH_DOLLAR)
 		return parse_math(ob, doc, data, offset, size, "$", 1, 0);
 
