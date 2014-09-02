@@ -10,11 +10,12 @@
 extern "C" {
 #endif
 
-/*********
- * FLAGS *
- *********/
 
-enum hoedown_extensions {
+/*************
+ * CONSTANTS *
+ *************/
+
+typedef enum hoedown_extensions {
 	/* block-level extensions */
 	HOEDOWN_EXT_TABLES = (1 << 0),
 	HOEDOWN_EXT_FENCED_CODE = (1 << 1),
@@ -35,7 +36,7 @@ enum hoedown_extensions {
 
 	/* negative flags */
 	HOEDOWN_EXT_DISABLE_INDENTED_CODE = (1 << 12)
-};
+} hoedown_extensions;
 
 #define HOEDOWN_EXT_BLOCK (\
 	HOEDOWN_EXT_TABLES |\
@@ -58,30 +59,29 @@ enum hoedown_extensions {
 #define HOEDOWN_EXT_NEGATIVE (\
 	HOEDOWN_EXT_DISABLE_INDENTED_CODE )
 
-/* list/listitem flags */
-enum hoedown_listflags {
+typedef enum hoedown_listflags {
 	HOEDOWN_LIST_ORDERED = (1 << 0),
 	HOEDOWN_LI_BLOCK = (1 << 1)	/* <li> containing block data */
-};
+} hoedown_listflags;
 
-enum hoedown_tableflags {
+typedef enum hoedown_tableflags {
 	HOEDOWN_TABLE_ALIGN_LEFT = 1,
 	HOEDOWN_TABLE_ALIGN_RIGHT = 2,
 	HOEDOWN_TABLE_ALIGN_CENTER = 3,
 	HOEDOWN_TABLE_ALIGNMASK = 3,
 	HOEDOWN_TABLE_HEADER = 4
-};
+} hoedown_tableflags;
 
-/* hoedown_autolink - type of autolink */
-enum hoedown_autolink {
+typedef enum hoedown_autolink_type {
 	HOEDOWN_AUTOLINK_NONE,		/* used internally when it is not an autolink*/
 	HOEDOWN_AUTOLINK_NORMAL,	/* normal http/http/ftp/mailto/etc link */
 	HOEDOWN_AUTOLINK_EMAIL		/* e-mail link without explit mailto: */
-};
+} hoedown_autolink_type;
 
-/********************
- * TYPE DEFINITIONS *
- ********************/
+
+/*********
+ * TYPES *
+ *********/
 
 /* hoedown_renderer - functions for rendering parsed data */
 struct hoedown_renderer {
@@ -94,17 +94,17 @@ struct hoedown_renderer {
 	void (*blockhtml)(hoedown_buffer *ob,const  hoedown_buffer *text, void *opaque);
 	void (*header)(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque);
 	void (*hrule)(hoedown_buffer *ob, void *opaque);
-	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
-	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
+	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_listflags flags, void *opaque);
+	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_listflags flags, void *opaque);
 	void (*paragraph)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*table)(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, void *opaque);
 	void (*table_row)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
-	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int flags, void *opaque);
+	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_tableflags flags, void *opaque);
 	void (*footnotes)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*footnote_def)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int num, void *opaque);
 
 	/* span level callbacks - NULL or return 0 prints the span verbatim */
-	int (*autolink)(hoedown_buffer *ob, const hoedown_buffer *link, enum hoedown_autolink type, void *opaque);
+	int (*autolink)(hoedown_buffer *ob, const hoedown_buffer *link, hoedown_autolink_type type, void *opaque);
 	int (*codespan)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	int (*double_emphasis)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	int (*emphasis)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
@@ -128,31 +128,32 @@ struct hoedown_renderer {
 	void (*doc_header)(hoedown_buffer *ob, void *opaque);
 	void (*doc_footer)(hoedown_buffer *ob, void *opaque);
 };
-
 typedef struct hoedown_renderer hoedown_renderer;
 
 struct hoedown_document;
-
 typedef struct hoedown_document hoedown_document;
 
-/**********************
- * EXPORTED FUNCTIONS *
- **********************/
 
-extern hoedown_document *
-hoedown_document_new(
+/*************
+ * FUNCTIONS *
+ *************/
+
+/* hoedown_document_new: allocate a new document processor instance */
+hoedown_document *hoedown_document_new(
 	const hoedown_renderer *renderer,
-	unsigned int extensions,
-	size_t max_nesting);
+	hoedown_extensions extensions,
+	size_t max_nesting
+) __attribute__ ((malloc));
 
-extern void
-hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size);
+/* hoedown_document_render: render regular Markdown using the document processor */
+void hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *data, size_t size);
 
-extern void
-hoedown_document_render_inline(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *document, size_t doc_size);
+/* hoedown_document_render_inline: render inline Markdown using the document processor */
+void hoedown_document_render_inline(hoedown_document *doc, hoedown_buffer *ob, const uint8_t *data, size_t size);
 
-extern void
-hoedown_document_free(hoedown_document *doc);
+/* hoedown_document_free: deallocate a document processor instance */
+void hoedown_document_free(hoedown_document *doc);
+
 
 #ifdef __cplusplus
 }

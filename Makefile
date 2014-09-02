@@ -1,4 +1,4 @@
-CFLAGS = -g -O3 -Wall -Wextra -Wno-unused-parameter -Isrc
+CFLAGS = -g -O3 -Wall -Wextra -Wno-unused-parameter -Isrc -std=c99
 
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
