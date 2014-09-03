@@ -16,6 +16,7 @@ extern "C" {
 #if defined(_MSC_VER)
 #define __attribute__(x)
 #define inline __inline
+#define __builtin_expect(x,n) x
 #endif
 
 
