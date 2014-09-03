@@ -59,18 +59,18 @@ typedef enum hoedown_extensions {
 #define HOEDOWN_EXT_NEGATIVE (\
 	HOEDOWN_EXT_DISABLE_INDENTED_CODE )
 
-typedef enum hoedown_listflags {
+typedef enum hoedown_list_flags {
 	HOEDOWN_LIST_ORDERED = (1 << 0),
 	HOEDOWN_LI_BLOCK = (1 << 1)	/* <li> containing block data */
-} hoedown_listflags;
+} hoedown_list_flags;
 
-typedef enum hoedown_tableflags {
+typedef enum hoedown_table_flags {
 	HOEDOWN_TABLE_ALIGN_LEFT = 1,
 	HOEDOWN_TABLE_ALIGN_RIGHT = 2,
 	HOEDOWN_TABLE_ALIGN_CENTER = 3,
 	HOEDOWN_TABLE_ALIGNMASK = 3,
 	HOEDOWN_TABLE_HEADER = 4
-} hoedown_tableflags;
+} hoedown_table_flags;
 
 typedef enum hoedown_autolink_type {
 	HOEDOWN_AUTOLINK_NONE,		/* used internally when it is not an autolink*/
@@ -94,12 +94,12 @@ struct hoedown_renderer {
 	void (*blockhtml)(hoedown_buffer *ob,const  hoedown_buffer *text, void *opaque);
 	void (*header)(hoedown_buffer *ob, const hoedown_buffer *text, int level, void *opaque);
 	void (*hrule)(hoedown_buffer *ob, void *opaque);
-	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_listflags flags, void *opaque);
-	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_listflags flags, void *opaque);
+	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_list_flags flags, void *opaque);
+	void (*listitem)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_list_flags flags, void *opaque);
 	void (*paragraph)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*table)(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, void *opaque);
 	void (*table_row)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
-	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_tableflags flags, void *opaque);
+	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_table_flags flags, void *opaque);
 	void (*footnotes)(hoedown_buffer *ob, const hoedown_buffer *text, void *opaque);
 	void (*footnote_def)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int num, void *opaque);
 

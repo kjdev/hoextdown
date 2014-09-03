@@ -1736,7 +1736,7 @@ parse_blockcode(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 /* parse_listitem • parsing of a single list item */
 /*	assuming initial prefix is already removed */
 static size_t
-parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, hoedown_listflags *flags)
+parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, hoedown_list_flags *flags)
 {
 	hoedown_buffer *work = 0, *inter = 0;
 	size_t beg = 0, end, pre, sublist = 0, orgpre = 0, i;
@@ -1873,7 +1873,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 
 /* parse_list • parsing ordered or unordered list block */
 static size_t
-parse_list(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, hoedown_listflags flags)
+parse_list(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, hoedown_list_flags flags)
 {
 	hoedown_buffer *work = 0;
 	size_t i = 0, j;
@@ -2136,8 +2136,8 @@ parse_table_row(
 	uint8_t *data,
 	size_t size,
 	size_t columns,
-	hoedown_tableflags *col_data,
-	hoedown_tableflags header_flag)
+	hoedown_table_flags *col_data,
+	hoedown_table_flags header_flag)
 {
 	size_t i = 0, col;
 	hoedown_buffer *row_work = 0;
@@ -2193,7 +2193,7 @@ parse_table_header(
 	uint8_t *data,
 	size_t size,
 	size_t *columns,
-	hoedown_tableflags **column_data)
+	hoedown_table_flags **column_data)
 {
 	int pipes;
 	size_t i = 0, col, header_end, under_end;
@@ -2221,7 +2221,7 @@ parse_table_header(
 		return 0;
 
 	*columns = pipes + 1;
-	*column_data = hoedown_calloc(*columns, sizeof(hoedown_tableflags));
+	*column_data = hoedown_calloc(*columns, sizeof(hoedown_table_flags));
 
 	/* Parse the header underline */
 	i++;
@@ -2291,7 +2291,7 @@ parse_table(
 	hoedown_buffer *body_work = 0;
 
 	size_t columns;
-	hoedown_tableflags *col_data = NULL;
+	hoedown_table_flags *col_data = NULL;
 
 	header_work = newbuf(doc, BUFFER_SPAN);
 	body_work = newbuf(doc, BUFFER_BLOCK);
@@ -2854,8 +2854,8 @@ hoedown_document_free(hoedown_document *doc)
 	for (i = 0; i < (size_t)doc->work_bufs[BUFFER_BLOCK].asize; ++i)
 		hoedown_buffer_free(doc->work_bufs[BUFFER_BLOCK].item[i]);
 
-	hoedown_stack_reset(&doc->work_bufs[BUFFER_SPAN]);
-	hoedown_stack_reset(&doc->work_bufs[BUFFER_BLOCK]);
+	hoedown_stack_uninit(&doc->work_bufs[BUFFER_SPAN]);
+	hoedown_stack_uninit(&doc->work_bufs[BUFFER_BLOCK]);
 
 	free(doc);
 }

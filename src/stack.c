@@ -21,15 +21,11 @@ hoedown_stack_init(hoedown_stack *st, size_t initial_size)
 }
 
 void
-hoedown_stack_reset(hoedown_stack *st)
+hoedown_stack_uninit(hoedown_stack *st)
 {
 	assert(st);
 
 	free(st->item);
-
-	st->item = NULL;
-	st->size = 0;
-	st->asize = 0;
 }
 
 void
@@ -42,6 +38,7 @@ hoedown_stack_grow(hoedown_stack *st, size_t neosz)
 
 	st->item = hoedown_realloc(st->item, neosz * sizeof(void *));
 	memset(st->item + st->asize, 0x0, (neosz - st->asize) * sizeof(void *));
+
 	st->asize = neosz;
 
 	if (st->size > neosz)
@@ -54,7 +51,7 @@ hoedown_stack_push(hoedown_stack *st, void *item)
 	assert(st);
 
 	if (st->size >= st->asize)
-		hoedown_stack_grow(st, (st->size + 1) * 2);
+		hoedown_stack_grow(st, st->size * 2);
 
 	st->item[st->size++] = item;
 }

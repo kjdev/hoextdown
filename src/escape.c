@@ -64,16 +64,15 @@ hoedown_escape_href(hoedown_buffer *ob, const uint8_t *data, size_t size)
 
 	while (i < size) {
 		mark = i;
-		while (i < size && HREF_SAFE[data[i]] != 0)
-			i++;
+		while (i < size && HREF_SAFE[data[i]]) i++;
 
-		/* Optimization for cases when there's nothing to escape */
+		/* Optimization for cases where there's nothing to escape */
 		if (mark == 0 && i >= size) {
 			hoedown_buffer_put(ob, data, size);
 			return;
 		}
 
-		if (i > mark) {
+		if (likely(i > mark)) {
 			hoedown_buffer_put(ob, data + mark, i - mark);
 		}
 

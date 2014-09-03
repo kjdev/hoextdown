@@ -29,8 +29,8 @@ typedef struct hoedown_stack hoedown_stack;
 /* hoedown_stack_init: initialize a stack */
 void hoedown_stack_init(hoedown_stack *st, size_t initial_size);
 
-/* hoedown_stack_reset: free internal data of the stack */
-void hoedown_stack_reset(hoedown_stack *st);
+/* hoedown_stack_uninit: free internal data of the stack */
+void hoedown_stack_uninit(hoedown_stack *st);
 
 /* hoedown_stack_grow: increase the allocated size to the given value */
 void hoedown_stack_grow(hoedown_stack *st, size_t neosz);
