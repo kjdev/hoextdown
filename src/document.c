@@ -78,6 +78,7 @@ static size_t char_autolink_email(hoedown_buffer *ob, hoedown_document *doc, uin
 static size_t char_autolink_www(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size);
 static size_t char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size);
 static size_t char_superscript(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size);
+static size_t char_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size);
 
 enum markdown_char_t {
 	MD_CHAR_NONE = 0,
@@ -92,7 +93,8 @@ enum markdown_char_t {
 	MD_CHAR_AUTOLINK_EMAIL,
 	MD_CHAR_AUTOLINK_WWW,
 	MD_CHAR_SUPERSCRIPT,
-	MD_CHAR_QUOTE
+	MD_CHAR_QUOTE,
+	MD_CHAR_MATH
 };
 
 static char_trigger markdown_char_ptrs[] = {
@@ -108,7 +110,8 @@ static char_trigger markdown_char_ptrs[] = {
 	&char_autolink_email,
 	&char_autolink_www,
 	&char_superscript,
-	&char_quote
+	&char_quote,
+	&char_math
 };
 
 /* render • structure containing state for a parser instance */
@@ -326,6 +329,15 @@ static inline int
 _isspace(int c)
 {
 	return c == ' ' || c == '\n';
+}
+
+/* is_empty_all: verify that all the data is spacing */
+static inline int
+is_empty_all(const uint8_t *data, size_t size)
+{
+	size_t i = 0;
+	while (i < size && _isspace(data[i])) i++;
+	return i == size;
 }
 
 /*
@@ -707,6 +719,43 @@ parse_emph3(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t siz
 	return 0;
 }
 
+/* parse_math • parses a math span until the given ending delimiter */
+static size_t
+parse_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size, const char *end, size_t delimsz, int displaymode)
+{
+	size_t i = delimsz;
+	if (!doc->md.math) return 0;
+
+	/* find ending delimiter */
+	while (1) {
+		while (i < size && data[i] != (uint8_t)end[0]) i++;
+		if (i >= size) return 0;
+
+		if (!is_escaped(data, i) && !(i + delimsz > size)
+			&& memcmp(data + i, end, delimsz) == 0)
+			break;
+		i++;
+	}
+
+	/* prepare buffers */
+	hoedown_buffer text = { data + delimsz, i - delimsz, 0, 0, NULL, NULL, NULL };
+
+	/* enforce spacing around the span */
+	i += delimsz;
+	if (offset && !_isspace(data[-1])) return 0;
+	if (i < size && !_isspace(data[i])) return 0;
+
+	/* if this is a $$ and MATH_EXPLICIT is not active,
+	 * guess wether displaymode should be enabled from the context */
+	if (delimsz == 2 && !(doc->ext_flags & HOEDOWN_EXT_MATH_EXPLICIT))
+		displaymode = is_empty_all(data - offset, offset) && is_empty_all(data + i, size - i);
+
+	/* call callback */
+	if (doc->md.math(ob, &text, displaymode, doc->md.opaque))
+		return i;
+	return 0;
+}
+
 /* char_emphasis • single and double emphasis parsing */
 static size_t
 char_emphasis(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
@@ -854,10 +903,18 @@ char_quote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 static size_t
 char_escape(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
-	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~=\"";
+	static const char *escape_chars = "\\`*_{}[]()#+-.!:|&<>^~=\"$";
 	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
+	size_t w;
 
 	if (size > 1) {
+		if (data[1] == '\\' && (doc->ext_flags & HOEDOWN_EXT_MATH) &&
+			size > 2 && (data[2] == '(' || data[2] == '[')) {
+			const char *end = (data[2] == '[') ? "\\\\]" : "\\\\)";
+			w = parse_math(ob, doc, data, offset, size, end, 3, data[2] == '[');
+			if (w) return w;
+		}
+
 		if (strchr(escape_chars, data[1]) == NULL)
 			return 0;
 
@@ -1259,6 +1316,20 @@ char_superscript(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 	popbuf(doc, BUFFER_SPAN);
 
 	return (sup_start == 2) ? sup_len + 1 : sup_len;
+}
+
+static size_t
+char_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
+{
+	/* double dollar */
+	if (size > 1 && data[1] == '$')
+		return parse_math(ob, doc, data, offset, size, "$$", 2, 1);
+
+	/* single dollar allowed only with MATH_EXPLICIT flag */
+	if (doc->ext_flags & HOEDOWN_EXT_MATH_EXPLICIT)
+		return parse_math(ob, doc, data, offset, size, "$", 1, 0);
+
+	return 0;
 }
 
 /*********************************
@@ -2713,6 +2784,9 @@ hoedown_document_new(
 
 	if (extensions & HOEDOWN_EXT_QUOTE)
 		doc->active_char['"'] = MD_CHAR_QUOTE;
+
+	if (extensions & HOEDOWN_EXT_MATH)
+		doc->active_char['$'] = MD_CHAR_MATH;
 
 	/* Extension data */
 	doc->ext_flags = extensions;
