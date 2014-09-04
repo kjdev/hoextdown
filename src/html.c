@@ -268,9 +268,9 @@ static void
 rndr_list(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_list_flags flags, void *opaque)
 {
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
-	hoedown_buffer_put(ob, (uint8_t *)(flags & HOEDOWN_LIST_ORDERED ? "<ol>\n" : "<ul>\n"), 5);
+	hoedown_buffer_put(ob, (const uint8_t *)(flags & HOEDOWN_LIST_ORDERED ? "<ol>\n" : "<ul>\n"), 5);
 	if (text) hoedown_buffer_put(ob, text->data, text->size);
-	hoedown_buffer_put(ob, (uint8_t *)(flags & HOEDOWN_LIST_ORDERED ? "</ol>\n" : "</ul>\n"), 6);
+	hoedown_buffer_put(ob, (const uint8_t *)(flags & HOEDOWN_LIST_ORDERED ? "</ol>\n" : "</ul>\n"), 6);
 }
 
 static void
@@ -536,9 +536,9 @@ rndr_footnote_ref(hoedown_buffer *ob, unsigned int num, void *opaque)
 static int
 rndr_math(hoedown_buffer *ob, const hoedown_buffer *text, int displaymode, void *opaque)
 {
-	hoedown_buffer_put(ob, displaymode ? "\\[" : "\\(", 2);
+	hoedown_buffer_put(ob, (const uint8_t *)(displaymode ? "\\[" : "\\("), 2);
 	escape_html(ob, text->data, text->size);
-	hoedown_buffer_put(ob, displaymode ? "\\]" : "\\)", 2);
+	hoedown_buffer_put(ob, (const uint8_t *)(displaymode ? "\\]" : "\\)"), 2);
 	return 1;
 }
 
