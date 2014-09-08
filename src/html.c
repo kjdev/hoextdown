@@ -791,6 +791,15 @@ rndr_footnote_ref(hoedown_buffer *ob, unsigned int num, void *opaque)
 	return 1;
 }
 
+static int
+rndr_math(hoedown_buffer *ob, const hoedown_buffer *text, int displaymode, void *opaque)
+{
+	hoedown_buffer_put(ob, displaymode ? "\\[" : "\\(", 2);
+	escape_html(ob, text->data, text->size);
+	hoedown_buffer_put(ob, displaymode ? "\\]" : "\\)", 2);
+	return 1;
+}
+
 static void
 toc_header(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *attr, int level, void *opaque)
 {
@@ -920,6 +929,7 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		rndr_strikethrough,
 		rndr_superscript,
 		NULL,
+		NULL,
 
 		NULL,
 		NULL,
@@ -992,6 +1002,7 @@ hoedown_html_renderer_new(unsigned int render_flags, int nesting_level)
 		rndr_strikethrough,
 		rndr_superscript,
 		rndr_footnote_ref,
+		rndr_math,
 
 		NULL,
 		rndr_normal_text,
