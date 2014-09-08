@@ -70,7 +70,8 @@ enum hoedown_extensions {
 enum hoedown_listflags {
 	HOEDOWN_LIST_ORDERED = (1 << 0),
 	HOEDOWN_LI_BLOCK = (1 << 1),	/* <li> containing block data */
-	HOEDOWN_LI_TASK = (1 << 2)
+	HOEDOWN_LI_TASK = (1 << 2),
+	HOEDOWN_LI_END = (1 << 3)	/* internal list flag */
 };
 
 enum hoedown_tableflags {

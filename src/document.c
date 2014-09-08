@@ -19,8 +19,6 @@
 #define BUFFER_SPAN 1
 #define BUFFER_ATTRIBUTE 2
 
-#define HOEDOWN_LI_END 8	/* internal list flag */
-
 const char *hoedown_find_block_tag(const char *str, unsigned int len);
 
 /***************
@@ -2075,9 +2073,10 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 				/* if the following item has different list type, we end this list */
 				if (in_empty && (
 					((*flags & HOEDOWN_LIST_ORDERED) && has_next_uli) ||
-					(!(*flags & HOEDOWN_LIST_ORDERED) && has_next_oli)))
+					(!(*flags & HOEDOWN_LIST_ORDERED) && has_next_oli))) {
 					*flags |= HOEDOWN_LI_END;
-
+					has_inside_empty = 0;
+				}
 				break;
 			}
 
