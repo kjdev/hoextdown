@@ -39,7 +39,7 @@ enum hoedown_extensions {
 	HOEDOWN_EXT_DISABLE_INDENTED_CODE = (1 << 12),
 
 	/* special attribute */
-	HOEDOWN_EXT_SPECIAL_ATTRIBUTE = (1 << 13)
+	HOEDOWN_EXT_SPECIAL_ATTRIBUTE = (1 << 15)
 };
 
 #define HOEDOWN_EXT_BLOCK (\
