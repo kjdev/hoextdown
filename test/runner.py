@@ -2,18 +2,19 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals, print_function
-import os
-import sys
-import copy
+import difflib
 import json
+import os
 import re
+import sys
 import subprocess
 import unittest
 
 DLN = '======================================================================'
 SLN = '----------------------------------------------------------------------'
 TEST_ROOT = os.path.dirname(__file__)
-HOEDOWN = [os.path.join(os.path.dirname(TEST_ROOT), 'hoedown')]
+PROJECT_ROOT = os.path.dirname(TEST_ROOT)
+HOEDOWN = [os.path.abspath(os.path.join(PROJECT_ROOT, 'hoedown'))]
 TIDY = ['tidy', '--show-body-only', '1', '--show-warnings', '0',
         '--quiet', '1']
 CONFIG_PATH = os.path.join(TEST_ROOT, 'config.json')

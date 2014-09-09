@@ -92,6 +92,11 @@
             "input": "Tests/Escape character.text",
             "output": "Tests/Escape character.html",
             "skip": true
+        },
+        {
+            "input": "Tests/Math.text",
+            "output": "Tests/Math.html",
+            "flags": ["--math"]
         }
     ]
 }
