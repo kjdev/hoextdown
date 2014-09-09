@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, print_function
+from __future__ import print_function
 import difflib
 import json
 import os
@@ -18,6 +18,17 @@ TIDY = ['tidy', '--show-body-only', '1', '--show-warnings', '0',
         '--quiet', '1']
 CONFIG_PATH = os.path.join(TEST_ROOT, 'config.json')
 SLUGIFY_PATTERN = re.compile(r'\W')
+
+
+def with_metaclass(meta, *bases):
+    """Metaclass injection utility from six.
+
+    See: https://pythonhosted.org/six/
+    """
+    class metaclass(meta):
+        def __new__(cls, name, this_bases, d):
+            return meta(name, bases, d)
+    return type.__new__(metaclass, 'temporary_class', (), {})
 
 
 class TestFailed(AssertionError):
@@ -55,6 +66,11 @@ def _test_func(test_case):
     expected_tidy_proc.wait()
     expected = expected_tidy_proc.stdout.read().strip()
 
+    # Cleanup.
+    hoedown_proc.stdout.close()
+    got_tidy_proc.stdout.close()
+    expected_tidy_proc.stdout.close()
+
     try:
         assert expected == got
     except AssertionError:
@@ -65,7 +81,7 @@ def _make_test(test_case):
     return lambda self: _test_func(test_case)
 
 
-class MarkdownTestCaseMeta(type):
+class MarkdownTestsMeta(type):
     """Meta class for ``MarkdownTestCase`` to inject test cases on the fly.
     """
     def __new__(meta, name, bases, attrs):
@@ -85,8 +101,8 @@ class MarkdownTestCaseMeta(type):
         return type.__new__(meta, name, bases, attrs)
 
 
-class MarkdownTestCase(unittest.TestCase):
-    __metaclass__ = MarkdownTestCaseMeta
+class MarkdownTests(with_metaclass(MarkdownTestsMeta, unittest.TestCase)):
+    pass
 
 
 if __name__ == '__main__':
