@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
 import difflib
 import json
 import os
@@ -9,8 +8,6 @@ import re
 import subprocess
 import unittest
 
-DLN = '======================================================================'
-SLN = '----------------------------------------------------------------------'
 TEST_ROOT = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.dirname(TEST_ROOT)
 HOEDOWN = [os.path.abspath(os.path.join(PROJECT_ROOT, 'hoedown'))]
