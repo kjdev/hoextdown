@@ -6,7 +6,6 @@ import difflib
 import json
 import os
 import re
-import sys
 import subprocess
 import unittest
 
@@ -24,7 +23,10 @@ SLUGIFY_PATTERN = re.compile(r'\W')
 class TestFailed(AssertionError):
     def __init__(self, name, expected, got):
         super(TestFailed, self).__init__(self)
-        diff = difflib.unified_diff(expected.splitlines(), got.splitlines(), 'Expected', 'Got')
+        diff = difflib.unified_diff(
+            expected.splitlines(), got.splitlines(),
+            fromfile='Expected', tofile='Got',
+        )
         self.description = '{name}\n{diff}'.format(
             name=name, diff='\n'.join(diff),
         )
