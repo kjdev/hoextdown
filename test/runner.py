@@ -97,6 +97,8 @@ class MarkdownTestsMeta(type):
             func.__doc__ = input_name
             if test.get('skip', False):
                 func = unittest.skip(input_name)(func)
+            if test.get('fail', False):
+                func = unittest.expectsFailure(func)
             attrs[attr_name] = func
         return type.__new__(meta, name, bases, attrs)
 
