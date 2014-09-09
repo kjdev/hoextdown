@@ -90,8 +90,7 @@
         },
         {
             "input": "Tests/Escape character.text",
-            "output": "Tests/Escape character.html",
-            "skip": true
+            "output": "Tests/Escape character.html"
         },
         {
             "input": "Tests/Math.text",
