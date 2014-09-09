@@ -121,11 +121,7 @@ int
 hoedown_buffer_eq(const hoedown_buffer *buf, const uint8_t *data, size_t size)
 {
 	if (buf->size != size) return 0;
-
-	size_t i = 0;
-	while (i < size && buf->data[i] == data[i]) i++;
-
-	return i == size;
+	return memcmp(buf->data, data, size) == 0;
 }
 
 int
