@@ -24,13 +24,9 @@ SLUGIFY_PATTERN = re.compile(r'\W')
 class TestFailed(AssertionError):
     def __init__(self, name, expected, got):
         super(TestFailed, self).__init__(self)
-        description_format = (
-            '{name}\nExpected\n{sln}\n{expected}\n\n'
-            'Got\n{sln}\n{got}\n\n'
-        )
-        self.description = description_format.format(
-            dln=DLN, sln=SLN, name=name,
-            expected=expected.strip(), got=got.strip(),
+        diff = difflib.unified_diff(expected.splitlines(), got.splitlines(), 'Expected', 'Got')
+        self.description = '{name}\n{diff}'.format(
+            name=name, diff='\n'.join(diff),
         )
 
     def __str__(self):
@@ -48,14 +44,14 @@ def _test_func(test_case):
         TIDY, stdin=hoedown_proc.stdout, stdout=subprocess.PIPE,
     )
     got_tidy_proc.wait()
-    got = got_tidy_proc.stdout.read()
+    got = got_tidy_proc.stdout.read().strip()
 
     expected_tidy_proc = subprocess.Popen(
         TIDY + [os.path.join(TEST_ROOT, test_case['output'])],
         stdout=subprocess.PIPE,
     )
     expected_tidy_proc.wait()
-    expected = expected_tidy_proc.stdout.read()
+    expected = expected_tidy_proc.stdout.read().strip()
 
     try:
         assert expected == got
