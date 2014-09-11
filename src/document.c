@@ -2853,7 +2853,7 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 
 	/* second pass: actual rendering */
 	if (doc->md.doc_header)
-		doc->md.doc_header(ob, &doc->data);
+		doc->md.doc_header(ob, 0, &doc->data);
 
 	if (text->size) {
 		/* adding a final newline if not already present */
@@ -2868,7 +2868,7 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 		parse_footnote_list(ob, doc, &doc->footnotes_used);
 
 	if (doc->md.doc_footer)
-		doc->md.doc_footer(ob, &doc->data);
+		doc->md.doc_footer(ob, 0, &doc->data);
 
 	/* clean-up */
 	hoedown_buffer_free(text);
@@ -2913,7 +2913,14 @@ hoedown_document_render_inline(hoedown_document *doc, hoedown_buffer *ob, const 
 
 	/* second pass: actual rendering */
 	hoedown_buffer_grow(ob, text->size + (text->size >> 1));
+
+	if (doc->md.doc_header)
+		doc->md.doc_header(ob, 1, &doc->data);
+
 	parse_inline(ob, doc, text->data, text->size);
+
+	if (doc->md.doc_footer)
+		doc->md.doc_footer(ob, 1, &doc->data);
 
 	/* clean-up */
 	hoedown_buffer_free(text);
