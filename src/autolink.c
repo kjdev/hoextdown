@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#ifdef _MSC_VER
+#ifndef _MSC_VER
+#include <strings.h>
+#else
 #define strncasecmp	_strnicmp
 #endif
 
