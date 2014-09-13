@@ -183,20 +183,13 @@ main(int argc, char **argv)
 
 	/* reading everything */
 	ib = hoedown_buffer_new(iunit);
-	if (!ib) {
-		fprintf(stderr, "Couldn't allocate input buffer.\n");
-		return 4;
-	}
 
 	while (!feof(in)) {
 		if (ferror(in)) {
 			fprintf(stderr, "I/O errors found while reading input.\n");
 			return 5;
 		}
-		if (hoedown_buffer_grow(ib, ib->size + iunit) != HOEDOWN_BUF_OK) {
-			fprintf(stderr, "Couldn't grow input buffer.\n");
-			return 4;
-		}
+		hoedown_buffer_grow(ib, ib->size + iunit);
 		ib->size += fread(ib->data + ib->size, 1, iunit, in);
 	}
 
@@ -206,10 +199,6 @@ main(int argc, char **argv)
 
 	/* performing SmartyPants processing */
 	ob = hoedown_buffer_new(ounit);
-	if (!ob) {
-		fprintf(stderr, "Couldn't allocate output buffer.\n");
-		return 4;
-	}
 
 	//clock_gettime(CLOCK_MONOTONIC, &start);
 	hoedown_html_smartypants(ob, ib->data, ib->size);

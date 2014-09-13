@@ -401,20 +401,13 @@ main(int argc, char **argv)
 
 	/* reading everything */
 	ib = hoedown_buffer_new(iunit);
-	if (!ib) {
-		fprintf(stderr, "Couldn't allocate input buffer.\n");
-		return 4;
-	}
 
 	while (!feof(in)) {
 		if (ferror(in)) {
 			fprintf(stderr, "I/O errors found while reading input.\n");
 			return 5;
 		}
-		if (hoedown_buffer_grow(ib, ib->size + iunit) != HOEDOWN_BUF_OK) {
-			fprintf(stderr, "Couldn't grow input buffer.\n");
-			return 4;
-		}
+		hoedown_buffer_grow(ib, ib->size + iunit);
 		ib->size += fread(ib->data + ib->size, 1, iunit, in);
 	}
 
@@ -423,8 +416,8 @@ main(int argc, char **argv)
 
 
 	/* creating the renderer */
-	hoedown_renderer *renderer;
-	void (*renderer_free)(hoedown_renderer*);
+	hoedown_renderer *renderer = NULL;
+	void (*renderer_free)(hoedown_renderer*) = NULL;
 
 	switch (renderer_type) {
 		case RENDERER_HTML:
@@ -439,29 +432,12 @@ main(int argc, char **argv)
 			renderer = null_renderer_new();
 			renderer_free = null_renderer_free;
 			break;
-		default:
-			renderer = NULL;
-			renderer_free = NULL;
 	};
-
-	if (!renderer) {
-		fprintf(stderr, "Couldn't allocate renderer.\n");
-		return 4;
-	}
 
 
 	/* performing markdown rendering */
 	ob = hoedown_buffer_new(ounit);
-	if (!ob) {
-		fprintf(stderr, "Couldn't allocate output buffer.\n");
-		return 4;
-	}
-
 	document = hoedown_document_new(renderer, extensions, max_nesting);
-	if (!document) {
-		fprintf(stderr, "Couldn't allocate document parser.\n");
-		return 4;
-	}
 
 	//clock_gettime(CLOCK_MONOTONIC, &start);
 	hoedown_document_render(document, ob, ib->data, ib->size);
