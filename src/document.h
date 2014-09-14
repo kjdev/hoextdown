@@ -107,7 +107,6 @@ struct hoedown_renderer {
 	/* block level callbacks - NULL skips the block */
 	void (*blockcode)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buffer *lang, const hoedown_renderer_data *data);
 	void (*blockquote)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
-	void (*blockhtml)(hoedown_buffer *ob,const  hoedown_buffer *text, const hoedown_renderer_data *data);
 	void (*header)(hoedown_buffer *ob, const hoedown_buffer *text, int level, const hoedown_renderer_data *data);
 	void (*hrule)(hoedown_buffer *ob, const hoedown_renderer_data *data);
 	void (*list)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_list_flags flags, const hoedown_renderer_data *data);
@@ -118,6 +117,7 @@ struct hoedown_renderer {
 	void (*table_cell)(hoedown_buffer *ob, const hoedown_buffer *text, hoedown_table_flags flags, const hoedown_renderer_data *data);
 	void (*footnotes)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
 	void (*footnote_def)(hoedown_buffer *ob, const hoedown_buffer *text, unsigned int num, const hoedown_renderer_data *data);
+	void (*blockhtml)(hoedown_buffer *ob,const  hoedown_buffer *text, const hoedown_renderer_data *data);
 
 	/* span level callbacks - NULL or return 0 prints the span verbatim */
 	int (*autolink)(hoedown_buffer *ob, const hoedown_buffer *link, hoedown_autolink_type type, const hoedown_renderer_data *data);
@@ -130,12 +130,12 @@ struct hoedown_renderer {
 	int (*image)(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *alt, const hoedown_renderer_data *data);
 	int (*linebreak)(hoedown_buffer *ob, const hoedown_renderer_data *data);
 	int (*link)(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *content, const hoedown_renderer_data *data);
-	int (*raw_html_tag)(hoedown_buffer *ob, const hoedown_buffer *tag, const hoedown_renderer_data *data);
 	int (*triple_emphasis)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
 	int (*strikethrough)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
 	int (*superscript)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
 	int (*footnote_ref)(hoedown_buffer *ob, unsigned int num, const hoedown_renderer_data *data);
 	int (*math)(hoedown_buffer *ob, const hoedown_buffer *text, int displaymode, const hoedown_renderer_data *data);
+	int (*raw_html_tag)(hoedown_buffer *ob, const hoedown_buffer *tag, const hoedown_renderer_data *data);
 
 	/* low level callbacks - NULL copies input directly into the output */
 	void (*entity)(hoedown_buffer *ob, const hoedown_buffer *entity, const hoedown_renderer_data *data);
