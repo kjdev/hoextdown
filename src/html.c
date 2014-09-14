@@ -406,16 +406,30 @@ rndr_raw_html(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_rend
 }
 
 static void
-rndr_table(hoedown_buffer *ob, const hoedown_buffer *header, const hoedown_buffer *body, const hoedown_renderer_data *data)
+rndr_table(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_renderer_data *data)
 {
-	if (ob->size) hoedown_buffer_putc(ob, '\n');
-	HOEDOWN_BUFPUTSL(ob, "<table><thead>\n");
-	if (header)
-		hoedown_buffer_put(ob, header->data, header->size);
-	HOEDOWN_BUFPUTSL(ob, "</thead><tbody>\n");
-	if (body)
-		hoedown_buffer_put(ob, body->data, body->size);
-	HOEDOWN_BUFPUTSL(ob, "</tbody></table>\n");
+    if (ob->size) hoedown_buffer_putc(ob, '\n');
+    HOEDOWN_BUFPUTSL(ob, "<table>\n");
+    hoedown_buffer_put(ob, content->data, content->size);
+    HOEDOWN_BUFPUTSL(ob, "</table>\n");
+}
+
+static void
+rndr_table_header(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_renderer_data *data)
+{
+    if (ob->size) hoedown_buffer_putc(ob, '\n');
+    HOEDOWN_BUFPUTSL(ob, "<thead>\n");
+    hoedown_buffer_put(ob, content->data, content->size);
+    HOEDOWN_BUFPUTSL(ob, "</thead>\n");
+}
+
+static void
+rndr_table_body(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_renderer_data *data)
+{
+    if (ob->size) hoedown_buffer_putc(ob, '\n');
+    HOEDOWN_BUFPUTSL(ob, "<tbody>\n");
+    hoedown_buffer_put(ob, content->data, content->size);
+    HOEDOWN_BUFPUTSL(ob, "</tbody>\n");
 }
 
 static void
@@ -613,6 +627,8 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		NULL,
 		NULL,
 		NULL,
+		NULL,
+		NULL,
 
 		NULL,
 		rndr_codespan,
@@ -669,6 +685,8 @@ hoedown_html_renderer_new(hoedown_html_flags render_flags, int nesting_level)
 		rndr_listitem,
 		rndr_paragraph,
 		rndr_table,
+		rndr_table_header,
+		rndr_table_body,
 		rndr_tablerow,
 		rndr_tablecell,
 		rndr_footnotes,

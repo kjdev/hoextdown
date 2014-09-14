@@ -2360,12 +2360,14 @@ parse_table(
 {
 	size_t i;
 
+	hoedown_buffer *work = 0;
 	hoedown_buffer *header_work = 0;
 	hoedown_buffer *body_work = 0;
 
 	size_t columns;
 	hoedown_table_flags *col_data = NULL;
 
+	work = newbuf(doc, BUFFER_BLOCK);
 	header_work = newbuf(doc, BUFFER_SPAN);
 	body_work = newbuf(doc, BUFFER_BLOCK);
 
@@ -2399,12 +2401,19 @@ parse_table(
 			i++;
 		}
 
+        if (doc->md.table_header)
+            doc->md.table_header(work, header_work, &doc->data);
+
+        if (doc->md.table_body)
+            doc->md.table_body(work, body_work, &doc->data);
+
 		if (doc->md.table)
-			doc->md.table(ob, header_work, body_work, &doc->data);
+			doc->md.table(ob, work, &doc->data);
 	}
 
 	free(col_data);
 	popbuf(doc, BUFFER_SPAN);
+	popbuf(doc, BUFFER_BLOCK);
 	popbuf(doc, BUFFER_BLOCK);
 	return i;
 }
