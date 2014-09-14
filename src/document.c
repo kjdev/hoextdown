@@ -972,8 +972,8 @@ char_langle_tag(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 			ret = doc->md.autolink(ob, u_link, altype, &doc->data);
 			popbuf(doc, BUFFER_SPAN);
 		}
-		else if (doc->md.raw_html_tag)
-			ret = doc->md.raw_html_tag(ob, &work, &doc->data);
+		else if (doc->md.raw_html)
+			ret = doc->md.raw_html(ob, &work, &doc->data);
 	}
 
 	if (!ret) return 0;

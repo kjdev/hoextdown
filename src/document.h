@@ -135,7 +135,7 @@ struct hoedown_renderer {
 	int (*superscript)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
 	int (*footnote_ref)(hoedown_buffer *ob, unsigned int num, const hoedown_renderer_data *data);
 	int (*math)(hoedown_buffer *ob, const hoedown_buffer *text, int displaymode, const hoedown_renderer_data *data);
-	int (*raw_html_tag)(hoedown_buffer *ob, const hoedown_buffer *tag, const hoedown_renderer_data *data);
+	int (*raw_html)(hoedown_buffer *ob, const hoedown_buffer *tag, const hoedown_renderer_data *data);
 
 	/* low level callbacks - NULL copies input directly into the output */
 	void (*entity)(hoedown_buffer *ob, const hoedown_buffer *entity, const hoedown_renderer_data *data);
