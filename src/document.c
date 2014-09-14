@@ -734,13 +734,9 @@ parse_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 	/* prepare buffers */
 	hoedown_buffer text = { data + delimsz, i - delimsz, 0, 0, NULL, NULL, NULL };
 
-	/* enforce spacing around the span */
-	i += delimsz;
-	if (offset && !_isspace(data[-1])) return 0;
-	if (i < size && !_isspace(data[i])) return 0;
-
 	/* if this is a $$ and MATH_EXPLICIT is not active,
 	 * guess wether displaymode should be enabled from the context */
+	i += delimsz;
 	if (delimsz == 2 && !(doc->ext_flags & HOEDOWN_EXT_MATH_EXPLICIT))
 		displaymode = is_empty_all(data - offset, offset) && is_empty_all(data + i, size - i);
 
