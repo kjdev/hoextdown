@@ -143,7 +143,7 @@ struct hoedown_renderer {
 	void (*entity)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
 	void (*normal_text)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
 
-	/* header and footer */
+	/* miscellaneous callbacks */
 	void (*doc_header)(hoedown_buffer *ob, int inline_render, const hoedown_renderer_data *data);
 	void (*doc_footer)(hoedown_buffer *ob, int inline_render, const hoedown_renderer_data *data);
 };
