@@ -1000,10 +1000,10 @@ char_autolink_www(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size
 		if (doc->md.normal_text) {
 			link_text = newbuf(doc, BUFFER_SPAN);
 			doc->md.normal_text(link_text, link, &doc->data);
-			doc->md.link(ob, link_url, NULL, link_text, &doc->data);
+			doc->md.link(ob, link_text, link_url, NULL, &doc->data);
 			popbuf(doc, BUFFER_SPAN);
 		} else {
-			doc->md.link(ob, link_url, NULL, link, &doc->data);
+			doc->md.link(ob, link, link_url, NULL, &doc->data);
 		}
 		popbuf(doc, BUFFER_SPAN);
 	}
@@ -1267,7 +1267,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 
 		ret = doc->md.image(ob, u_link, title, content, &doc->data);
 	} else {
-		ret = doc->md.link(ob, u_link, title, content, &doc->data);
+		ret = doc->md.link(ob, content, u_link, title, &doc->data);
 	}
 
 	/* cleanup */
