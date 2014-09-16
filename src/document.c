@@ -88,7 +88,7 @@ enum markdown_char_t {
 	MD_CHAR_LINK,
 	MD_CHAR_LANGLE,
 	MD_CHAR_ESCAPE,
-	MD_CHAR_ENTITITY,
+	MD_CHAR_ENTITY,
 	MD_CHAR_AUTOLINK_URL,
 	MD_CHAR_AUTOLINK_EMAIL,
 	MD_CHAR_AUTOLINK_WWW,
@@ -449,7 +449,7 @@ tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink)
 		*autolink = HOEDOWN_AUTOLINK_NONE;
 	}
 
-	/* looking for sometinhg looking like a tag end */
+	/* looking for something looking like a tag end */
 	while (i < size && data[i] != '>') i++;
 	if (i >= size) return 0;
 	return i + 1;
@@ -735,7 +735,7 @@ parse_math(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offs
 	hoedown_buffer text = { data + delimsz, i - delimsz, 0, 0, NULL, NULL, NULL };
 
 	/* if this is a $$ and MATH_EXPLICIT is not active,
-	 * guess wether displaymode should be enabled from the context */
+	 * guess whether displaymode should be enabled from the context */
 	i += delimsz;
 	if (delimsz == 2 && !(doc->ext_flags & HOEDOWN_EXT_MATH_EXPLICIT))
 		displaymode = is_empty_all(data - offset, offset) && is_empty_all(data + i, size - i);
@@ -2482,7 +2482,7 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 
 	start = i;
 
-	/* process lines similiar to a list item */
+	/* process lines similar to a list item */
 	while (i < end) {
 		while (i < end && data[i] != '\n' && data[i] != '\r') i++;
 
@@ -2727,7 +2727,7 @@ hoedown_document_new(
 
 	doc->active_char['<'] = MD_CHAR_LANGLE;
 	doc->active_char['\\'] = MD_CHAR_ESCAPE;
-	doc->active_char['&'] = MD_CHAR_ENTITITY;
+	doc->active_char['&'] = MD_CHAR_ENTITY;
 
 	if (extensions & HOEDOWN_EXT_AUTOLINK) {
 		doc->active_char[':'] = MD_CHAR_AUTOLINK_URL;

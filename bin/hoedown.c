@@ -141,7 +141,7 @@ print_help(const char *basename) {
 	       "Options are processed in order, so in case of contradictory options the last specified stands.\n\n");
 
 	printf("When FILE is '-', read standard input. If no FILE was given, read standard input. Use '--' to signal end of option parsing. "
-	       "Exit status is 0 if no errors occured, 1 with option parsing errors, 4 with memory allocation errors or 5 with I/O errors.\n\n");
+	       "Exit status is 0 if no errors occurred, 1 with option parsing errors, 4 with memory allocation errors or 5 with I/O errors.\n\n");
 }
 
 
