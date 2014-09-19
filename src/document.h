@@ -31,7 +31,6 @@ typedef enum hoedown_extensions {
 	HOEDOWN_EXT_MATH = (1 << 9),
 
 	/* other flags */
-	HOEDOWN_EXT_LAX_SPACING = (1 << 10),
 	HOEDOWN_EXT_NO_INTRA_EMPHASIS = (1 << 11),
 	HOEDOWN_EXT_SPACE_HEADERS = (1 << 12),
 	HOEDOWN_EXT_MATH_EXPLICIT = (1 << 13),
@@ -55,7 +54,6 @@ typedef enum hoedown_extensions {
 	HOEDOWN_EXT_MATH )
 
 #define HOEDOWN_EXT_FLAGS (\
-	HOEDOWN_EXT_LAX_SPACING |\
 	HOEDOWN_EXT_NO_INTRA_EMPHASIS |\
 	HOEDOWN_EXT_SPACE_HEADERS |\
 	HOEDOWN_EXT_MATH_EXPLICIT )

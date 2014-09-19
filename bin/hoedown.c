@@ -66,7 +66,6 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_SUPERSCRIPT, "superscript", "Parse super^script."},
 	{HOEDOWN_EXT_MATH, "math", "Parse TeX $$math$$ syntax, Kramdown style."},
 
-	{HOEDOWN_EXT_LAX_SPACING, "lax-spacing", "Don't require a blank line between some blocks."},
 	{HOEDOWN_EXT_NO_INTRA_EMPHASIS, "disable-intra-emphasis", "Disable emphasis_between_words."},
 	{HOEDOWN_EXT_SPACE_HEADERS, "space-headers", "Require a space after '#' in headers."},
 	{HOEDOWN_EXT_MATH_EXPLICIT, "math-explicit", "Instead of guessing by context, parse $inline math$ and $$always block math$$ (requires --math)."},
@@ -77,7 +76,6 @@ static struct extension_info extensions_info[] = {
 static struct html_flag_info html_flags_info[] = {
 	{HOEDOWN_HTML_SKIP_HTML, "skip-html", "Strip all HTML tags."},
 	{HOEDOWN_HTML_ESCAPE, "escape", "Escape all HTML."},
-	{HOEDOWN_HTML_SAFELINK, "safelink", "Only allow links to safe protocols."},
 	{HOEDOWN_HTML_HARD_WRAP, "hard-wrap", "Render each linebreak as <br>."},
 	{HOEDOWN_HTML_USE_XHTML, "xhtml", "Render XHTML."},
 };

@@ -18,9 +18,8 @@ extern "C" {
 typedef enum hoedown_html_flags {
 	HOEDOWN_HTML_SKIP_HTML = (1 << 0),
 	HOEDOWN_HTML_ESCAPE = (1 << 1),
-	HOEDOWN_HTML_SAFELINK = (1 << 2),
-	HOEDOWN_HTML_HARD_WRAP = (1 << 3),
-	HOEDOWN_HTML_USE_XHTML = (1 << 4)
+	HOEDOWN_HTML_HARD_WRAP = (1 << 2),
+	HOEDOWN_HTML_USE_XHTML = (1 << 3)
 } hoedown_html_flags;
 
 typedef enum hoedown_html_tag {
