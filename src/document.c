@@ -1638,37 +1638,6 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 			break;
 		}
 
-		/*
-		 * Early termination of a paragraph with the same logic
-		 * as Markdown 1.0.0. If this logic is applied, the
-		 * Markdown 1.0.3 test suite won't pass cleanly
-		 *
-		 * :: If the first character in a new line is not a letter,
-		 * let's check to see if there's some kind of block starting
-		 * here
-		 */
-		if ((doc->ext_flags & HOEDOWN_EXT_LAX_SPACING) && !isalnum(data[i])) {
-			if (prefix_oli(data + i, size - i) ||
-				prefix_uli(data + i, size - i)) {
-				end = i;
-				break;
-			}
-
-			/* see if an html block starts here */
-			if (data[i] == '<' && doc->md.blockhtml &&
-				parse_htmlblock(ob, doc, data + i, size - i, 0)) {
-				end = i;
-				break;
-			}
-
-			/* see if a code fence starts here */
-			if ((doc->ext_flags & HOEDOWN_EXT_FENCED_CODE) != 0 &&
-				is_codefence(data + i, size - i, NULL, NULL)) {
-				end = i;
-				break;
-			}
-		}
-
 		i = end;
 	}
 

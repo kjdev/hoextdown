@@ -63,11 +63,6 @@ rndr_autolink(hoedown_buffer *ob, const hoedown_buffer *link, hoedown_autolink_t
 	if (!link || !link->size)
 		return 0;
 
-	if ((state->flags & HOEDOWN_HTML_SAFELINK) != 0 &&
-		!hoedown_autolink_is_safe(link->data, link->size) &&
-		type != HOEDOWN_AUTOLINK_EMAIL)
-		return 0;
-
 	HOEDOWN_BUFPUTSL(ob, "<a href=\"");
 	if (type == HOEDOWN_AUTOLINK_EMAIL)
 		HOEDOWN_BUFPUTSL(ob, "mailto:");
@@ -237,9 +232,6 @@ static int
 rndr_link(hoedown_buffer *ob, const hoedown_buffer *link, const hoedown_buffer *title, const hoedown_buffer *content, void *opaque)
 {
 	hoedown_html_renderer_state *state = opaque;
-
-	if (link != NULL && (state->flags & HOEDOWN_HTML_SAFELINK) != 0 && !hoedown_autolink_is_safe(link->data, link->size))
-		return 0;
 
 	HOEDOWN_BUFPUTSL(ob, "<a href=\"");
 
