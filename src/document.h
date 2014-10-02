@@ -90,12 +90,8 @@ typedef enum hoedown_autolink_type {
 struct hoedown_document;
 typedef struct hoedown_document hoedown_document;
 
-struct hoedown_internal;
-typedef struct hoedown_internal hoedown_internal;
-
 struct hoedown_renderer_data {
 	void *opaque;
-	hoedown_internal *doc;
 };
 typedef struct hoedown_renderer_data hoedown_renderer_data;
 
