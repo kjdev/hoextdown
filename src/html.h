@@ -46,7 +46,7 @@ struct hoedown_html_renderer_state {
 	hoedown_html_flags flags;
 
 	/* extra callbacks */
-	void (*link_attributes)(hoedown_buffer *ob, const hoedown_buffer *url, void *self);
+	void (*link_attributes)(hoedown_buffer *ob, const hoedown_buffer *url, const hoedown_renderer_data *data);
 };
 typedef struct hoedown_html_renderer_state hoedown_html_renderer_state;
 
