@@ -134,8 +134,9 @@ int
 hoedown_buffer_prefix(const hoedown_buffer *buf, const char *prefix)
 {
 	assert(buf && buf->unit);
+	size_t i;
 
-	for (size_t i = 0; i < buf->size; ++i) {
+	for (i = 0; i < buf->size; ++i) {
 		if (prefix[i] == 0)
 			return 0;
 

@@ -19,8 +19,9 @@ hoedown_autolink_is_safe(const uint8_t *data, size_t size)
 		"http://", "https://", "/", "#", "ftp://", "mailto:"
 	};
 	static const size_t valid_uris_size[] = { 7, 8, 1, 1, 6, 7 };
+	size_t i;
 
-	for (size_t i = 0; i < valid_uris_count; ++i) {
+	for (i = 0; i < valid_uris_count; ++i) {
 		size_t len = valid_uris_size[i];
 
 		if (size > len &&
