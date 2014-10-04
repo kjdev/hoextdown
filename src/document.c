@@ -2671,13 +2671,22 @@ is_ref(const uint8_t *data, size_t beg, size_t end, size_t *last, struct link_re
 
 static void expand_tabs(hoedown_buffer *ob, const uint8_t *line, size_t size)
 {
+	/* This code makes two assumptions:
+	 * - Input is valid UTF-8.  (Any byte with top two bits 10 is skipped,
+	 *   whether or not it is a valid UTF-8 continuation byte.)
+	 * - Input contains no combining characters.  (Combining characters
+	 *   should be skipped but are not.)
+	 */
 	size_t  i = 0, tab = 0;
 
 	while (i < size) {
 		size_t org = i;
 
 		while (i < size && line[i] != '\t') {
-			i++; tab++;
+			i++;
+			/* ignore UTF-8 continuation bytes */
+			if ((line[i] & 0xc0) != 0x80)
+				tab++;
 		}
 
 		if (i > org)
