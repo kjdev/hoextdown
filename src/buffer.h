@@ -37,19 +37,8 @@ struct hoedown_buffer {
 	hoedown_free_callback data_free;
 	hoedown_free_callback buffer_free;
 };
-typedef struct hoedown_buffer hoedown_buffer;
 
-/* malloc / realloc / calloc wrappers */
-#define HOEDOWN_ALLOC_WRAPPER(sig, call)                                      \
-  static inline void *hoedown_##sig __attribute__ ((malloc));                 \
-  static inline void *hoedown_##sig {                                         \
-    void *ret = call;                                                         \
-    if (!ret) {                                                               \
-      fprintf(stderr, "Allocation failed.\n");                                \
-      abort();                                                                \
-    }                                                                         \
-    return ret;                                                               \
-  }
+typedef struct hoedown_buffer hoedown_buffer;
 
 
 /*************
@@ -57,9 +46,9 @@ typedef struct hoedown_buffer hoedown_buffer;
  *************/
 
 /* allocation wrappers */
-HOEDOWN_ALLOC_WRAPPER(malloc(size_t size), malloc(size));
-HOEDOWN_ALLOC_WRAPPER(calloc(size_t nmemb, size_t size), calloc(nmemb, size));
-HOEDOWN_ALLOC_WRAPPER(realloc(void *ptr, size_t size), realloc(ptr, size));
+void *hoedown_malloc(size_t size) __attribute__ ((malloc));
+void *hoedown_calloc(size_t nmemb, size_t size) __attribute__ ((malloc));
+void *hoedown_realloc(void *ptr, size_t size) __attribute__ ((malloc));
 
 /* hoedown_buffer_init: initialize a buffer with custom allocators */
 void hoedown_buffer_init(

@@ -5,6 +5,45 @@
 #include <string.h>
 #include <assert.h>
 
+void *
+hoedown_malloc(size_t size)
+{
+	void *ret = malloc(size);
+
+	if (!ret) {
+		fprintf(stderr, "Allocation failed.\n");
+		abort();
+	}
+
+	return ret;
+}
+
+void *
+hoedown_calloc(size_t nmemb, size_t size)
+{
+	void *ret = calloc(nmemb, size);
+
+	if (!ret) {
+		fprintf(stderr, "Allocation failed.\n");
+		abort();
+	}
+
+	return ret;
+}
+
+void *
+hoedown_realloc(void *ptr, size_t size)
+{
+	void *ret = realloc(ptr, size);
+
+	if (!ret) {
+		fprintf(stderr, "Allocation failed.\n");
+		abort();
+	}
+
+	return ret;
+}
+
 void
 hoedown_buffer_init(
 	hoedown_buffer *buf,
@@ -133,8 +172,9 @@ hoedown_buffer_eqs(const hoedown_buffer *buf, const char *str)
 int
 hoedown_buffer_prefix(const hoedown_buffer *buf, const char *prefix)
 {
-	assert(buf && buf->unit);
 	size_t i;
+
+	assert(buf && buf->unit);
 
 	for (i = 0; i < buf->size; ++i) {
 		if (prefix[i] == 0)

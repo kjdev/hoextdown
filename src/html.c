@@ -42,12 +42,12 @@ hoedown_html_is_tag(const uint8_t *data, size_t size, const char *tagname)
 	return HOEDOWN_HTML_TAG_NONE;
 }
 
-static inline void escape_html(hoedown_buffer *ob, const uint8_t *source, size_t length)
+static void escape_html(hoedown_buffer *ob, const uint8_t *source, size_t length)
 {
 	hoedown_escape_html(ob, source, length, 0);
 }
 
-static inline void escape_href(hoedown_buffer *ob, const uint8_t *source, size_t length)
+static void escape_href(hoedown_buffer *ob, const uint8_t *source, size_t length)
 {
 	hoedown_escape_href(ob, source, length);
 }
@@ -326,15 +326,25 @@ static void
 rndr_raw_block(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data)
 {
 	size_t org, sz;
-	if (!text) return;
-	//FIXME: do we *really* need to trim the HTML?
-	//how does that make a difference?
+
+	if (!text)
+		return;
+
+	/* FIXME: Do we *really* need to trim the HTML? How does that make a difference? */
 	sz = text->size;
-	while (sz > 0 && text->data[sz - 1] == '\n') sz--;
+	while (sz > 0 && text->data[sz - 1] == '\n')
+		sz--;
+
 	org = 0;
-	while (org < sz && text->data[org] == '\n') org++;
-	if (org >= sz) return;
-	if (ob->size) hoedown_buffer_putc(ob, '\n');
+	while (org < sz && text->data[org] == '\n')
+		org++;
+
+	if (org >= sz)
+		return;
+
+	if (ob->size)
+		hoedown_buffer_putc(ob, '\n');
+
 	hoedown_buffer_put(ob, text->data + org, sz - org);
 	hoedown_buffer_putc(ob, '\n');
 }
@@ -591,8 +601,12 @@ toc_link(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffer
 static void
 toc_finalize(hoedown_buffer *ob, int inline_render, const hoedown_renderer_data *data)
 {
-	if (inline_render) return;
-	hoedown_html_renderer_state *state = data->opaque;
+	hoedown_html_renderer_state *state;
+
+	if (inline_render)
+		return;
+
+	state = data->opaque;
 
 	while (state->toc_data.current_level > 0) {
 		HOEDOWN_BUFPUTSL(ob, "</li>\n</ul>\n");
