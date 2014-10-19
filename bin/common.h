@@ -99,7 +99,8 @@ parse_options(
 
 	/* Parse rest as forced arguments */
 	while (i < argc) {
-		parse_argument(regular_args++, argv[i], 1, opaque);
+		result = parse_argument(regular_args++, argv[i], 1, opaque);
+		if (!result) return 0;
 		i++;
 	}
 
