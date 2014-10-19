@@ -13,7 +13,8 @@
 /* PRINT HELP */
 
 void
-print_help(const char *basename) {
+print_help(const char *basename)
+{
 	/* usage */
 	printf("Usage: %s [OPTION]... [FILE]\n\n", basename);
 
@@ -37,34 +38,164 @@ print_help(const char *basename) {
 }
 
 
+/* OPTION PARSING */
+
+struct option_data {
+	char *basename;
+	int done;
+
+	/* time reporting */
+	int show_time;
+
+	/* I/O */
+	size_t iunit;
+	size_t ounit;
+	const char *filename;
+};
+
+int
+parse_short_option(char opt, char *next, void *opaque)
+{
+	struct option_data *data = opaque;
+	long int num;
+	int isNum = next ? parseint(next, &num) : 0;
+
+	if (opt == 'h') {
+		print_help(data->basename);
+		data->done = 1;
+		return 0;
+	}
+
+	if (opt == 'v') {
+		print_version();
+		data->done = 1;
+		return 0;
+	}
+
+	if (opt == 'T') {
+		data->show_time = 1;
+		return 1;
+	}
+
+	/* options requiring value */
+	/* FIXME: add validation */
+
+	if (opt == 'i' && isNum) {
+		data->iunit = num;
+		return 2;
+	}
+
+	if (opt == 'o' && isNum) {
+		data->ounit = num;
+		return 2;
+	}
+
+	fprintf(stderr, "Wrong option '-%c' found.\n", opt);
+	return 0;
+}
+
+int
+parse_long_option(char *opt, char *next, void *opaque)
+{
+	struct option_data *data = opaque;
+	long int num;
+	int isNum = next ? parseint(next, &num) : 0;
+
+	if (strcmp(opt, "help")==0) {
+		print_help(data->basename);
+		data->done = 1;
+		return 0;
+	}
+
+	if (strcmp(opt, "version")==0) {
+		print_version();
+		data->done = 1;
+		return 0;
+	}
+
+	if (strcmp(opt, "time")==0) {
+		data->show_time = 1;
+		return 1;
+	}
+
+	/* FIXME: validation */
+
+	if (strcmp(opt, "input-unit")==0 && isNum) {
+		data->iunit = num;
+		return 2;
+	}
+	if (strcmp(opt, "output-unit")==0 && isNum) {
+		data->ounit = num;
+		return 2;
+	}
+
+	fprintf(stderr, "Wrong option '--%s' found.\n", opt);
+	return 0;
+}
+
+int
+parse_argument(int argn, char *arg, int is_forced, void *opaque)
+{
+	struct option_data *data = opaque;
+
+	if (argn == 0) {
+		/* Input file */
+		if (strcmp(arg, "-")!=0 || is_forced) data->filename = arg;
+		return 1;
+	}
+
+	fprintf(stderr, "Too many arguments.\n");
+	return 0;
+}
+
+
 /* MAIN LOGIC */
 
 int
 main(int argc, char **argv)
 {
+	struct option_data data;
 	/*struct timespec start, end;*/
+	FILE *file = stdin;
 	hoedown_buffer *ib, *ob;
-	FILE *in = NULL;
-	ib = hoedown_buffer_new(iunit);
 
 	/* Parse options */
-	/*TODO*/
+	data.basename = argv[0];
+	data.done = 0;
+	data.show_time = 0;
+	data.iunit = DEF_IUNIT;
+	data.ounit = DEF_OUNIT;
+	data.filename = NULL;
+
+	argc = parse_options(argc, argv, parse_short_option, parse_long_option, parse_argument, &data);
+	if (data.done) return 0;
+	if (!argc) return 1;
+
+	/* Open input file, if needed */
+	if (data.filename) {
+		file = fopen(data.filename, "r");
+		if (!file) {
+			fprintf(stderr, "Unable to open input file \"%s\": %s\n", data.filename, strerror(errno));
+			return 5;
+		}
+	}
 
 	/* Read everything */
+	ib = hoedown_buffer_new(data.iunit);
 
-	while (!feof(in)) {
-		if (ferror(in)) {
+	while (!feof(file)) {
+		if (ferror(file)) {
 			fprintf(stderr, "I/O errors found while reading input.\n");
 			return 5;
 		}
-		hoedown_buffer_grow(ib, ib->size + iunit);
-		ib->size += fread(ib->data + ib->size, 1, iunit, in);
+		hoedown_buffer_grow(ib, ib->size + data.iunit);
+		ib->size += fread(ib->data + ib->size, 1, data.iunit, file);
 	}
 
-	if (in != stdin) fclose(in);
+	if (file != stdin) fclose(file);
 
 	/* Perform SmartyPants processing */
-	ob = hoedown_buffer_new(ounit);
+	ob = hoedown_buffer_new(data.ounit);
 
 	/*clock_gettime(CLOCK_MONOTONIC, &start);*/
 	hoedown_html_smartypants(ob, ib->data, ib->size);
@@ -74,7 +205,7 @@ main(int argc, char **argv)
 	(void)fwrite(ob->data, 1, ob->size, stdout);
 
 	/* Show rendering time */
-	if (show_time) {
+	if (data.show_time) {
 		/*TODO: enable this
 		long long elapsed = (end.tv_sec - start.tv_sec)*1e9 + (end.tv_nsec - start.tv_nsec);
 		if (elapsed < 1e9)
