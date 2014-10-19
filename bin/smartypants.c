@@ -1,7 +1,7 @@
 #include "html.h"
 
 #include "common.h"
-//#include <time.h>
+/*#include <time.h>*/
 
 #define DEF_IUNIT 1024
 #define DEF_OUNIT 64
@@ -41,7 +41,7 @@ int
 main(int argc, char **argv)
 {
 	int show_time = 0;
-	//struct timespec start, end;
+	/*struct timespec start, end;*/
 
 	/* buffers */
 	hoedown_buffer *ib, *ob;
@@ -79,6 +79,8 @@ main(int argc, char **argv)
 			char opt;
 			const char *val;
 			for (j = 1; (opt = arg[j]); j++) {
+				long int num;
+				int isNum;
 				if (opt == 'h') {
 					print_help(argv[0]);
 					return 1;
@@ -102,8 +104,7 @@ main(int argc, char **argv)
 					return 1;
 				}
 
-				long int num;
-				int isNum = parseint(val, &num);
+				isNum = parseint(val, &num);
 
 				if (opt == 'i' && isNum) {
 					iunit = num;
@@ -200,9 +201,9 @@ main(int argc, char **argv)
 	/* performing SmartyPants processing */
 	ob = hoedown_buffer_new(ounit);
 
-	//clock_gettime(CLOCK_MONOTONIC, &start);
+	/*clock_gettime(CLOCK_MONOTONIC, &start);*/
 	hoedown_html_smartypants(ob, ib->data, ib->size);
-	//clock_gettime(CLOCK_MONOTONIC, &end);
+	/*clock_gettime(CLOCK_MONOTONIC, &end);*/
 
 
 	/* writing the result to stdout */
@@ -211,13 +212,13 @@ main(int argc, char **argv)
 
 	/* showing rendering time */
 	if (show_time) {
-		//TODO: enable this
-		//long long elapsed = (  end.tv_sec*1000000000 +   end.tv_nsec)
-		//                  - (start.tv_sec*1000000000 + start.tv_nsec);
-		//if (elapsed < 1000000000)
-		//	fprintf(stderr, "Time spent on rendering: %.2f ms.\n", ((double)elapsed)/1000000);
-		//else
-		//	fprintf(stderr, "Time spent on rendering: %.3f s.\n", ((double)elapsed)/1000000000);
+		/*TODO: enable this
+		long long elapsed = (end.tv_sec - start.tv_sec)*1e9 + (end.tv_nsec - start.tv_nsec);
+		if (elapsed < 1e9)
+			fprintf(stderr, "Time spent on rendering: %.2f ms.\n", ((double)elapsed)/1e6);
+		else
+			fprintf(stderr, "Time spent on rendering: %.3f s.\n", ((double)elapsed)/1e9);
+		*/
 	}
 
 
