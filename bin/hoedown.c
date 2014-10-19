@@ -4,29 +4,14 @@
 #include "common.h"
 /*#include <time.h>*/
 
-/* NULL RENDERER */
+
+/* FEATURES INFO / DEFAULTS */
 
 enum renderer_type {
 	RENDERER_HTML,
 	RENDERER_HTML_TOC,
 	RENDERER_NULL
 };
-
-hoedown_renderer *
-null_renderer_new() {
-	hoedown_renderer *rend = malloc(sizeof(hoedown_renderer));
-	if (rend)
-		memset(rend, 0x00, sizeof(hoedown_renderer));
-	return rend;
-}
-
-void
-null_renderer_free(hoedown_renderer *rend) {
-	free(rend);
-}
-
-
-/* FEATURES INFO / DEFAULTS */
 
 struct extension_category_info {
 	unsigned int flags;
@@ -108,7 +93,6 @@ print_help(const char *basename) {
 	print_option('t', "toc-level=N", "Maximum level for headers included in the TOC. Zero disables TOC (the default).");
 	print_option(  0, "html", "Render (X)HTML. The default.");
 	print_option(  0, "html-toc", "Render the Table of Contents in (X)HTML.");
-	print_option(  0, "null", "Use a special \"null\" renderer that has no callbacks.");
 	print_option('T', "time", "Show time spent in rendering.");
 	print_option('i', "input-unit=N", "Reading block size. Default is " str(DEF_IUNIT) ".");
 	print_option('o', "output-unit=N", "Writing block size. Default is " str(DEF_OUNIT) ".");
@@ -319,10 +303,6 @@ main(int argc, char **argv)
 			opt_parsed = 1;
 			renderer_type = RENDERER_HTML_TOC;
 		}
-		if (strcmp(opt, "null")==0) {
-			opt_parsed = 1;
-			renderer_type = RENDERER_NULL;
-		}
 
 		const char *name;
 		size_t i;
@@ -427,10 +407,6 @@ main(int argc, char **argv)
 		case RENDERER_HTML_TOC:
 			renderer = hoedown_html_toc_renderer_new(toc_level);
 			renderer_free = hoedown_html_renderer_free;
-			break;
-		case RENDERER_NULL:
-			renderer = null_renderer_new();
-			renderer_free = null_renderer_free;
 			break;
 	};
 
