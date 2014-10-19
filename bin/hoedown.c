@@ -9,8 +9,7 @@
 
 enum renderer_type {
 	RENDERER_HTML,
-	RENDERER_HTML_TOC,
-	RENDERER_NULL
+	RENDERER_HTML_TOC
 };
 
 struct extension_category_info {
@@ -76,7 +75,8 @@ static const char *negative_prefix = "no-";
 /* PRINT HELP */
 
 void
-print_help(const char *basename) {
+print_help(const char *basename)
+{
 	size_t i;
 	size_t e;
 
@@ -135,254 +135,17 @@ print_help(const char *basename) {
 int
 main(int argc, char **argv)
 {
-	int show_time = 0;
 	/*struct timespec start, end;*/
-
-	/* buffers */
 	hoedown_buffer *ib, *ob;
-	size_t iunit = DEF_IUNIT, ounit = DEF_OUNIT;
-
-	/* files */
 	FILE *in = NULL;
-
-	/* renderer */
 	hoedown_renderer *renderer = NULL;
 	void (*renderer_free)(hoedown_renderer*) = NULL;
-	int toc_level = 0;
-	int renderer_type = RENDERER_HTML;
-
-	/* document */
 	hoedown_document *document;
-	unsigned int extensions = 0;
-	size_t max_nesting = DEF_MAX_NESTING;
 
-	/* HTML renderer-specific */
-	unsigned int html_flags = 0;
+	/* Parse options */
+	/* TODO */
 
-
-	/* option parsing */
-	int just_args = 0;
-	int i, j;
-	for (i = 1; i < argc; i++) {
-		char *arg = argv[i];
-		if (!arg[0]) continue;
-
-		if (just_args || arg[0] != '-') {
-			/* regular argument */
-			in = fopen(arg, "r");
-			if (!in) {
-				fprintf(stderr, "Unable to open input file \"%s\": %s\n", arg, strerror(errno));
-				return 5;
-			}
-			continue;
-		}
-
-		if (!arg[1]) {
-			/* arg is "-" */
-			in = stdin;
-			continue;
-		}
-
-		if (arg[1] != '-') {
-			/* parse short options */
-			char opt;
-			const char *val;
-			for (j = 1; (opt = arg[j]); j++) {
-				long int num;
-				int isNum;
-
-				if (opt == 'h') {
-					print_help(argv[0]);
-					return 1;
-				}
-
-				if (opt == 'v') {
-					print_version();
-					return 1;
-				}
-
-				if (opt == 'T') {
-					show_time = 1;
-					continue;
-				}
-
-				/* options requiring value */
-				if (arg[++j]) val = arg+j;
-				else if (argv[++i]) val = argv[i];
-				else {
-					fprintf(stderr, "Wrong option '-%c' found.\n", opt);
-					return 1;
-				}
-
-				isNum = parseint(val, &num);
-
-				if (opt == 'n' && isNum) {
-					max_nesting = num;
-					break;
-				}
-
-				if (opt == 't' && isNum) {
-					toc_level = num;
-					break;
-				}
-
-				if (opt == 'i' && isNum) {
-					iunit = num;
-					break;
-				}
-
-				if (opt == 'o' && isNum) {
-					ounit = num;
-					break;
-				}
-
-				fprintf(stderr, "Wrong option '-%c' found.\n", opt);
-				return 1;
-			}
-			continue;
-		}
-
-		if (!arg[2]) {
-			/* arg is "--" */
-			just_args = 1;
-			continue;
-		}
-
-		/* parse long option */
-		char opt [100];
-		strncpy(opt, arg+2, 100);
-		opt[99] = 0;
-
-		char *val = strchr(opt, '=');
-
-		long int num = 0;
-		int isNum = 0;
-
-		if (val) {
-			*val = 0;
-			val++;
-
-			if (*val)
-				isNum = parseint(val, &num);
-		}
-
-		int opt_parsed = 0;
-
-		if (strcmp(opt, "help")==0) {
-			print_help(argv[0]);
-			return 1;
-		}
-
-		if (strcmp(opt, "version")==0) {
-			print_version();
-			return 1;
-		}
-
-		if (strcmp(opt, "max-nesting")==0 && isNum) {
-			opt_parsed = 1;
-			max_nesting = num;
-		}
-		if (strcmp(opt, "toc-level")==0 && isNum) {
-			opt_parsed = 1;
-			toc_level = num;
-		}
-		if (strcmp(opt, "input-unit")==0 && isNum) {
-			opt_parsed = 1;
-			iunit = num;
-		}
-		if (strcmp(opt, "output-unit")==0 && isNum) {
-			opt_parsed = 1;
-			ounit = num;
-		}
-
-		if (strcmp(opt, "html")==0) {
-			opt_parsed = 1;
-			renderer_type = RENDERER_HTML;
-		}
-		if (strcmp(opt, "html-toc")==0) {
-			opt_parsed = 1;
-			renderer_type = RENDERER_HTML_TOC;
-		}
-
-		const char *name;
-		size_t i;
-
-		/* extension categories */
-		if ((name = strprefix(opt, category_prefix))) {
-			for (i = 0; i < count_of(categories_info); i++) {
-				struct extension_category_info *category = categories_info+i;
-				if (strcmp(name, category->option_name)==0) {
-					opt_parsed = 1;
-					extensions |= category->flags;
-					break;
-				}
-			}
-		}
-
-		/* extensions */
-		for (i = 0; i < count_of(extensions_info); i++) {
-			struct extension_info *extension = extensions_info+i;
-			if (strcmp(opt, extension->option_name)==0) {
-				opt_parsed = 1;
-				extensions |= extension->flag;
-				break;
-			}
-		}
-
-		/* html flags */
-		for (i = 0; i < count_of(html_flags_info); i++) {
-			struct html_flag_info *html_flag = html_flags_info+i;
-			if (strcmp(opt, html_flag->option_name)==0) {
-				opt_parsed = 1;
-				html_flags |= html_flag->flag;
-				break;
-			}
-		}
-
-		/* negations */
-		if ((name = strprefix(opt, negative_prefix))) {
-			for (i = 0; i < count_of(categories_info); i++) {
-				struct extension_category_info *category = categories_info+i;
-				if (strcmp(name, category->option_name)==0) {
-					opt_parsed = 1;
-					extensions &= ~(category->flags);
-					break;
-				}
-			}
-			for (i = 0; i < count_of(extensions_info); i++) {
-				struct extension_info *extension = extensions_info+i;
-				if (strcmp(name, extension->option_name)==0) {
-					opt_parsed = 1;
-					extensions &= ~(extension->flag);
-					break;
-				}
-			}
-			for (i = 0; i < count_of(html_flags_info); i++) {
-				struct html_flag_info *html_flag = html_flags_info+i;
-				if (strcmp(name, html_flag->option_name)==0) {
-					opt_parsed = 1;
-					html_flags &= ~(html_flag->flag);
-					break;
-				}
-			}
-		}
-
-		if (strcmp(opt, "time")==0) {
-			opt_parsed = 1;
-			show_time = 1;
-		}
-
-		if (!opt_parsed) {
-			fprintf(stderr, "Wrong option '%s' found.\n", arg);
-			return 1;
-		}
-	}
-
-	if (!in)
-		in = stdin;
-
-
-	/* reading everything */
+	/* Read everything */
 	ib = hoedown_buffer_new(iunit);
 
 	while (!feof(in)) {
@@ -394,11 +157,9 @@ main(int argc, char **argv)
 		ib->size += fread(ib->data + ib->size, 1, iunit, in);
 	}
 
-	if (in != stdin)
-		fclose(in);
+	if (in != stdin) fclose(in);
 
-
-	/* creating the renderer */
+	/* Create the renderer */
 	switch (renderer_type) {
 		case RENDERER_HTML:
 			renderer = hoedown_html_renderer_new(html_flags, toc_level);
@@ -410,8 +171,7 @@ main(int argc, char **argv)
 			break;
 	};
 
-
-	/* performing markdown rendering */
+	/* Perform Markdown rendering */
 	ob = hoedown_buffer_new(ounit);
 	document = hoedown_document_new(renderer, extensions, max_nesting);
 
@@ -419,12 +179,10 @@ main(int argc, char **argv)
 	hoedown_document_render(document, ob, ib->data, ib->size);
 	/*clock_gettime(CLOCK_MONOTONIC, &end);*/
 
-
-	/* writing the result to stdout */
+	/* Write the result to stdout */
 	(void)fwrite(ob->data, 1, ob->size, stdout);
 
-
-	/* showing rendering time */
+	/* Show rendering time */
 	if (show_time) {
 		/*TODO: enable this
 		long long elapsed = (end.tv_sec - start.tv_sec)*1e9 + (end.tv_nsec - start.tv_nsec);
@@ -435,8 +193,7 @@ main(int argc, char **argv)
 		*/
 	}
 
-
-	/* cleanup */
+	/* Cleanup */
 	hoedown_buffer_free(ib);
 	hoedown_buffer_free(ob);
 
