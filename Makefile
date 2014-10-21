@@ -1,4 +1,4 @@
-CFLAGS = -g -O3 -Wall -Wextra -Wno-unused-parameter -Isrc
+CFLAGS = -g -O3 -ansi -pedantic -Wall -Wextra -Wno-unused-parameter -Isrc
 
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
@@ -63,3 +63,6 @@ clean:
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/html_blocks.o: src/html_blocks.c
+	$(CC) $(CFLAGS) -Wno-static-in-inline -c -o $@ $<
