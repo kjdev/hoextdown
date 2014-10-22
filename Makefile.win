@@ -34,3 +34,8 @@ clean:
 
 .c.obj:
 	$(CC) $(CFLAGS) /c $< /Fo$@
+
+# Testing
+
+test: hoedown.exe
+	python test\runner.py
