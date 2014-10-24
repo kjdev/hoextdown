@@ -1,0 +1,146 @@
+{
+    "tests": [
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Amps and angle encoding.text",
+            "output": "MarkdownTest_1.0.3/Tests/Amps and angle encoding.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Auto links.text",
+            "output": "MarkdownTest_1.0.3/Tests/Auto links.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Backslash escapes.text",
+            "output": "MarkdownTest_1.0.3/Tests/Backslash escapes.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Blockquotes with code blocks.text",
+            "output": "MarkdownTest_1.0.3/Tests/Blockquotes with code blocks.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Code Blocks.text",
+            "output": "MarkdownTest_1.0.3/Tests/Code Blocks.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Code Spans.text",
+            "output": "MarkdownTest_1.0.3/Tests/Code Spans.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Hard-wrapped paragraphs with list-like lines.text",
+            "output": "MarkdownTest_1.0.3/Tests/Hard-wrapped paragraphs with list-like lines.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Horizontal rules.text",
+            "output": "MarkdownTest_1.0.3/Tests/Horizontal rules.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Inline HTML (Advanced).text",
+            "output": "MarkdownTest_1.0.3/Tests/Inline HTML (Advanced).html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Inline HTML (Simple).text",
+            "output": "MarkdownTest_1.0.3/Tests/Inline HTML (Simple).html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Inline HTML comments.text",
+            "output": "MarkdownTest_1.0.3/Tests/Inline HTML comments.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Links, inline style.text",
+            "output": "MarkdownTest_1.0.3/Tests/Links, inline style.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Links, reference style.text",
+            "output": "MarkdownTest_1.0.3/Tests/Links, reference style.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Links, shortcut references.text",
+            "output": "MarkdownTest_1.0.3/Tests/Links, shortcut references.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Literal quotes in titles.text",
+            "output": "MarkdownTest_1.0.3/Tests/Literal quotes in titles.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Markdown Documentation - Basics.text",
+            "output": "MarkdownTest_1.0.3/Tests/Markdown Documentation - Basics.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Markdown Documentation - Syntax.text",
+            "output": "MarkdownTest_1.0.3/Tests/Markdown Documentation - Syntax.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Nested blockquotes.text",
+            "output": "MarkdownTest_1.0.3/Tests/Nested blockquotes.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Ordered and unordered lists.text",
+            "output": "MarkdownTest_1.0.3/Tests/Ordered and unordered lists.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Strong and em together.text",
+            "output": "MarkdownTest_1.0.3/Tests/Strong and em together.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Tabs.text",
+            "output": "MarkdownTest_1.0.3/Tests/Tabs.html"
+        },
+        {
+            "input": "MarkdownTest_1.0.3/Tests/Tidyness.text",
+            "output": "MarkdownTest_1.0.3/Tests/Tidyness.html"
+        },
+        {
+            "input": "Tests/Escape character.text",
+            "output": "Tests/Escape character.html"
+        },
+        {
+            "input": "Tests/Math.text",
+            "output": "Tests/Math.html",
+            "flags": ["--math"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Headers.text",
+            "output": "Tests/extras/Special_Attribute_Headers.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Links.text",
+            "output": "Tests/extras/Special_Attribute_Links.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Lists.text",
+            "output": "Tests/extras/Special_Attribute_Lists.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_FencedCode.text",
+            "output": "Tests/extras/Special_Attribute_FencedCode.html",
+            "flags": ["--special-attribute", "--fenced-code"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Tables.text",
+            "output": "Tests/extras/Special_Attribute_Tables.html",
+            "flags": ["--special-attribute", "--tables"]
+        },
+        {
+            "input": "Tests/extras/Tasks.text",
+            "output": "Tests/extras/Tasks.html",
+            "flags": ["--task", "--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Line_Continue.text",
+            "output": "Tests/extras/Line_Continue.html",
+            "flags": ["--line-continue"]
+        },
+        {
+            "input": "Tests/extras/Toc.text",
+            "output": "Tests/extras/Toc.html",
+            "flags": ["-t", "6", "--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Toc_Render.text",
+            "output": "Tests/extras/Toc_Render.html",
+            "flags": ["-t", "6", "--special-attribute", "--html-toc"]
+        }
+    ]
+}

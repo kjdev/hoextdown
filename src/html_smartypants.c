@@ -60,7 +60,7 @@ static const uint8_t smartypants_cb_chars[UINT8_MAX+1] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-static inline int
+static int
 word_boundary(uint8_t c)
 {
 	return c == 0 || isspace(c) || ispunct(c);

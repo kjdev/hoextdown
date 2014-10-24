@@ -7,9 +7,8 @@
 #define HOEDOWN_HASH_FNV_PRIME 0x01000193
 #define HOEDOWN_HASH_FNV_OFFSET_BASIS 0x811c9dc5
 
-#ifdef _MSC_VER
 static char *
-strndup(const char* str, size_t n)
+_strndup(const char* str, size_t n)
 {
     if (str) {
         char *s = (char *)malloc(sizeof(char) * (n + 1));
@@ -21,7 +20,15 @@ strndup(const char* str, size_t n)
     }
     return NULL;
 }
-#endif
+
+static char *
+_strdup(const char* str)
+{
+    if (str) {
+        return _strndup(str, strlen(str));
+    }
+    return NULL;
+}
 
 static unsigned int
 hoedown_hash_fnv(const char *key, const char *max, size_t limit)
@@ -103,9 +110,9 @@ hoedown_hash_item_push(hoedown_hash_item *item, const char *key, size_t key_len,
     }
 
     if (key_len > 0) {
-        entry->key = strndup(key, key_len);
+        entry->key = _strndup(key, key_len);
     } else {
-        entry->key = strdup(key);
+        entry->key = _strdup(key);
     }
     entry->value = value;
     entry->destruct = destruct;

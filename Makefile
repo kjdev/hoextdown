@@ -1,4 +1,4 @@
-CFLAGS = -g -O3 -Wall -Wextra -Wno-unused-parameter -Isrc
+CFLAGS = -g -O3 -pedantic -Wall -Wextra -Wno-unused-parameter -Isrc
 
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
@@ -47,11 +47,7 @@ src/html_blocks.c: html_block_names.gperf
 # Testing
 
 test: hoedown
-	test/runner.sh "./hoedown --special-attribute --tables --fenced-code --task --line-continue" test/MarkdownTest_1.0.3/Tests
-
-test-toc: hoedown
-	test/runner.sh "./hoedown --special-attribute -t 6" test/MarkdownTest_1.0.3/Tests/Toc
-	test/runner.sh "./hoedown --special-attribute -t 6 --html-toc" test/MarkdownTest_1.0.3/Tests/Toc_Render
+	python test/runner.py
 
 test-pl: hoedown
 	perl test/MarkdownTest_1.0.3/MarkdownTest.pl \
@@ -68,3 +64,6 @@ clean:
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/html_blocks.o: src/html_blocks.c
+	$(CC) $(CFLAGS) -Wno-static-in-inline -c -o $@ $<
