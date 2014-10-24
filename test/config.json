@@ -141,6 +141,11 @@
             "input": "Tests/extras/Toc_Render.text",
             "output": "Tests/extras/Toc_Render.html",
             "flags": ["-t", "6", "--special-attribute", "--html-toc"]
+        },
+        {
+            "input": "Tests/extras/FencedCode_Script.text",
+            "output": "Tests/extras/FencedCode_Script.html",
+            "flags": ["--fenced-script"]
         }
     ]
 }

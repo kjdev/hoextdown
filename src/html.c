@@ -207,6 +207,16 @@ rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buf
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 
 	if (lang) {
+		hoedown_html_renderer_state *state = data->opaque;
+		if ((state->flags & HOEDOWN_HTML_FENCED_CODE_SCRIPT) &&
+		    lang->size > 7 && memcmp(lang->data, "script@", 7) == 0) {
+			HOEDOWN_BUFPUTSL(ob, "<script type=\"");
+			escape_html(ob, lang->data + 7, lang->size - 7);
+			HOEDOWN_BUFPUTSL(ob, "\">\n");
+			hoedown_buffer_put(ob, text->data, text->size);
+			HOEDOWN_BUFPUTSL(ob, "</script>\n");
+			return;
+		}
 		HOEDOWN_BUFPUTSL(ob, "<pre><code");
 		if (attr && attr->size) {
 			rndr_attributes(ob, attr->data, attr->size, &class, data);

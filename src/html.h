@@ -23,7 +23,8 @@ typedef enum hoedown_html_flags {
 	HOEDOWN_HTML_USE_XHTML = (1 << 3),
 	HOEDOWN_HTML_USE_TASK_LIST = (1 << 4),
 	HOEDOWN_HTML_LINE_CONTINUE = (1 << 5),
-	HOEDOWN_HTML_HEADER_ID = (1 << 6)
+	HOEDOWN_HTML_HEADER_ID = (1 << 6),
+	HOEDOWN_HTML_FENCED_CODE_SCRIPT = (1 << 7)
 } hoedown_html_flags;
 
 typedef enum hoedown_html_tag {

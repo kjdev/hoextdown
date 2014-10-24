@@ -67,6 +67,7 @@ static struct html_flag_info html_flags_info[] = {
 	{HOEDOWN_HTML_USE_TASK_LIST, "task", "Render task lists."},
 	{HOEDOWN_HTML_LINE_CONTINUE, "line-continue", "Render line continue."},
 	{HOEDOWN_HTML_HEADER_ID, "header-id", "Render header id."},
+	{HOEDOWN_HTML_FENCED_CODE_SCRIPT, "fenced-script", "Render fenced code blocks as script tag."},
 };
 
 static const char *category_prefix = "all-";
@@ -390,6 +391,11 @@ main(int argc, char **argv)
 	argc = parse_options(argc, argv, parse_short_option, parse_long_option, parse_argument, &data);
 	if (data.done) return 0;
 	if (!argc) return 1;
+
+	/* Add extesion flags, case html_flags */
+	if (data.html_flags & HOEDOWN_HTML_FENCED_CODE_SCRIPT) {
+		data.extensions |= HOEDOWN_EXT_FENCED_CODE;
+	}
 
 	/* Open input file, if needed */
 	if (data.filename) {

@@ -1,0 +1,19 @@
+
+``` text/javascript
+alert("Example");
+```
+
+``` script@text/javascript
+alert("Example");
+```
+
+``` text/jumly+sequence
+@found "You", ->
+  @message "get", "JUMLY"
+```
+
+``` script@text/jumly+sequence
+@found "You", ->
+  @message "get", "JUMLY"
+```
+
