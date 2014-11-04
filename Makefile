@@ -1,4 +1,5 @@
 CFLAGS = -g -O3 -ansi -pedantic -Wall -Wextra -Wno-unused-parameter -Isrc
+PREFIX = /usr/local
 
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
@@ -58,6 +59,20 @@ clean:
 	$(RM) src/*.o bin/*.o
 	$(RM) libhoedown.so libhoedown.so.1 libhoedown.a
 	$(RM) hoedown smartypants hoedown.exe smartypants.exe
+
+# Installing
+
+install:
+	install -m755 -d $(DESTDIR)$(PREFIX)/lib
+	install -m755 -d $(DESTDIR)$(PREFIX)/bin
+	install -m755 -d $(DESTDIR)$(PREFIX)/include
+
+	install -m644 libhoedown.* $(DESTDIR)$(PREFIX)/lib
+	install -m755 hoedown $(DESTDIR)$(PREFIX)/bin
+	install -m755 smartypants $(DESTDIR)$(PREFIX)/bin
+
+	install -m755 -d $(DESTDIR)$(PREFIX)/include/hoedown
+	install -m644 src/*.h $(DESTDIR)$(PREFIX)/include/hoedown
 
 # Generic object compilations
 
