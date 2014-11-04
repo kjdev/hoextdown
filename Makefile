@@ -22,10 +22,10 @@ all:		libhoedown.so hoedown smartypants
 
 # Libraries
 
-libhoedown.so: libhoedown.so.1
+libhoedown.so: libhoedown.so.3
 	ln -f -s $^ $@
 
-libhoedown.so.1: $(HOEDOWN_SRC)
+libhoedown.so.3: $(HOEDOWN_SRC)
 	$(CC) -shared $^ $(LDFLAGS) -o $@
 
 libhoedown.a: $(HOEDOWN_SRC)
