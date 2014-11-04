@@ -49,19 +49,18 @@ def _test_func(test_case):
         HOEDOWN + flags + [os.path.join(TEST_ROOT, test_case['input'])],
         stdout=subprocess.PIPE,
     )
-    hoedown_proc.wait()
+    stdoutdata = hoedown_proc.communicate()[0]
+
     got_tidy_proc = subprocess.Popen(
-        TIDY, stdin=hoedown_proc.stdout, stdout=subprocess.PIPE,
+        TIDY, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
     )
-    got_tidy_proc.wait()
-    got = got_tidy_proc.stdout.read().strip()
+    got = got_tidy_proc.communicate(input=stdoutdata)[0].strip()
 
     expected_tidy_proc = subprocess.Popen(
         TIDY + [os.path.join(TEST_ROOT, test_case['output'])],
         stdout=subprocess.PIPE,
     )
-    expected_tidy_proc.wait()
-    expected = expected_tidy_proc.stdout.read().strip()
+    expected = expected_tidy_proc.communicate()[0].strip()
 
     # Cleanup.
     hoedown_proc.stdout.close()
