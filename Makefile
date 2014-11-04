@@ -1,6 +1,5 @@
 CFLAGS = -g -O3 -ansi -pedantic -Wall -Wextra -Wno-unused-parameter -Isrc
-PREFIX ?= /usr/local
-DESTDIR ?= /
+PREFIX = /usr/local
 
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
