@@ -58,7 +58,7 @@ test-pl: hoedown
 
 clean:
 	$(RM) src/*.o bin/*.o
-	$(RM) libhoedown.so libhoedown.so.1 libhoedown.a
+	$(RM) libhoedown.so libhoedown.so.3 libhoedown.a
 	$(RM) hoedown smartypants hoedown.exe smartypants.exe
 
 # Installing
