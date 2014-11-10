@@ -127,7 +127,7 @@ struct hoedown_document {
 	size_t max_nesting;
 	int in_link_body;
 
-	hoedown_is_user_block is_user_block;
+	hoedown_user_block user_block;
 };
 
 /***************************
@@ -473,8 +473,8 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 	while (i < size) {
 		size_t user_block = 0;
 		while (end < size) {
-			if (doc->is_user_block) {
-				user_block = doc->is_user_block(data+end, size - end, doc->md.opaque);
+			if (doc->user_block) {
+				user_block = doc->user_block(data+end, size - end, &doc->data);
 				if (user_block) {
 					break;
 				}
@@ -2648,7 +2648,7 @@ static size_t
 parse_userblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size)
 {
 	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
-	size_t len = doc->is_user_block(data, size, doc->md.opaque);
+	size_t len = doc->user_block(data, size, &doc->data);
 
 	if (!len) {
 		return 0;
@@ -2658,7 +2658,7 @@ parse_userblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 	work.size = len;
 
 	if (doc->md.user_block) {
-		doc->md.user_block(ob, &work, doc->md.opaque);
+		doc->md.user_block(ob, &work, &doc->data);
 	} else {
 		hoedown_buffer_put(ob, work.data, work.size);
 	}
@@ -2684,7 +2684,7 @@ parse_block(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t siz
 		if (is_atxheader(doc, txt_data, end))
 			beg += parse_atxheader(ob, doc, txt_data, end);
 
-		else if (doc->is_user_block &&
+		else if (doc->user_block &&
 				(i = parse_userblock(ob, doc, txt_data, end)) != 0)
 			beg += i;
 
@@ -3049,7 +3049,7 @@ hoedown_document_new(
 	const hoedown_renderer *renderer,
 	hoedown_extensions extensions,
 	size_t max_nesting,
-	hoedown_is_user_block is_user_block)
+	hoedown_user_block user_block)
 {
 	hoedown_document *doc = NULL;
 
@@ -3107,7 +3107,7 @@ hoedown_document_new(
 	doc->ext_flags = extensions;
 	doc->max_nesting = max_nesting;
 	doc->in_link_body = 0;
-	doc->is_user_block = is_user_block;
+	doc->user_block = user_block;
 
 	return doc;
 }

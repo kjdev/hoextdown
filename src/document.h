@@ -157,14 +157,14 @@ typedef struct hoedown_renderer hoedown_renderer;
  * FUNCTIONS *
  *************/
 
-typedef size_t (*hoedown_is_user_block)(uint8_t *context, size_t size, const hoedown_renderer_data *data);
+typedef size_t (*hoedown_user_block)(uint8_t *context, size_t size, const hoedown_renderer_data *data);
 
 /* hoedown_document_new: allocate a new document processor instance */
 hoedown_document *hoedown_document_new(
 	const hoedown_renderer *renderer,
 	hoedown_extensions extensions,
 	size_t max_nesting,
-	hoedown_is_user_block is_user_block
+	hoedown_user_block user_block
 ) __attribute__ ((malloc));
 
 /* hoedown_document_render: render regular Markdown using the document processor */
