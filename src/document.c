@@ -396,9 +396,42 @@ is_mail_autolink(uint8_t *data, size_t size)
 	return 0;
 }
 
+static size_t
+script_tag_length(uint8_t *data, size_t size)
+{
+	size_t i = 2;
+	char comment = 0;
+
+	if (size < 3 || data[0] != '<' || data[1] != '?') {
+		return 0;
+	}
+
+	i = 2;
+
+	while (i < size) {
+		if (data[i - 1] == '?' && data[i] == '>' && comment == 0) {
+			break;
+		}
+
+		if (data[i] == '\'' || data[i] == '"') {
+			if (comment != 0) {
+				if (data[i] == comment && data[i - 1] != '\\') {
+					comment = 0;
+				}
+			} else {
+				comment = data[i];
+			}
+			}
+
+		++i;
+	}
+
+	return i + 1;
+}
+
 /* tag_length • returns the length of the given tag, or 0 is it's not valid */
 static size_t
-tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink)
+tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink, int script_tag)
 {
 	size_t i, j;
 
@@ -409,8 +442,12 @@ tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink)
 	if (data[0] != '<') return 0;
 	i = (data[1] == '/') ? 2 : 1;
 
-	if (!isalnum(data[i]))
+	if (!isalnum(data[i])) {
+		if (script_tag) {
+			return script_tag_length(data, size);
+		}
 		return 0;
+	}
 
 	/* scheme test */
 	*autolink = HOEDOWN_AUTOLINK_NONE;
@@ -1070,7 +1107,7 @@ char_langle_tag(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 {
 	hoedown_buffer work = { NULL, 0, 0, 0, NULL, NULL, NULL };
 	hoedown_autolink_type altype = HOEDOWN_AUTOLINK_NONE;
-	size_t end = tag_length(data, size, &altype);
+	size_t end = tag_length(data, size, &altype, doc->ext_flags & HOEDOWN_EXT_SCRIPT_TAGS);
 	int ret = 0;
 
 	work.data = data;
@@ -2380,6 +2417,25 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 					return work.size;
 				}
 			}
+		}
+
+		/* Extension script tags */
+		if (doc->ext_flags & HOEDOWN_EXT_SCRIPT_TAGS) {
+			i = script_tag_length(data, size);
+			if (i) {
+				if (i < size) {
+					j = is_empty(data + i, size - i);
+				}
+
+				if (j) {
+					work.size = i + j;
+					if (do_render && doc->md.blockhtml) {
+						doc->md.blockhtml(ob, &work, &doc->data);
+					}
+					return work.size;
+				}
+			}
+
 		}
 
 		/* no special case recognised */

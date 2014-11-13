@@ -146,6 +146,11 @@
             "input": "Tests/extras/FencedCode_Script.text",
             "output": "Tests/extras/FencedCode_Script.html",
             "flags": ["--fenced-script"]
+        },
+        {
+            "input": "Tests/extras/Script_Tags.text",
+            "output": "Tests/extras/Script_Tags.html",
+            "flags": ["--script-tags"]
         }
     ]
 }

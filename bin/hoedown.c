@@ -57,6 +57,7 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_DISABLE_INDENTED_CODE, "disable-indented-code", "Don't parse indented code blocks."},
 
 	{HOEDOWN_EXT_SPECIAL_ATTRIBUTE, "special-attribute", "Parse special attributes."},
+	{HOEDOWN_EXT_SCRIPT_TAGS, "script-tags", "Parse script tags <?..?>."},
 };
 
 static struct html_flag_info html_flags_info[] = {
