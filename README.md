@@ -11,6 +11,14 @@ Extended the following functions.
 * [Fenced Script](#fenced-script)
 * [Script Tags](#script-tags)
 
+## RPM Package
+
+[Related article](http://hiden.samurai-factory.jp/c/hoextdown/download)
+
+* CentOS 6: [hoextdown-3.0.0.3-1.el6.sf.x86_64.rpm](http://hiden.samurai-factory.jp/download/rpm/el6/hoextdown-3.0.0.3-1.el6.sf.x86_64.rpm)
+* CentOS 7: [hoextdown-3.0.0.3-1.el7.sf.x86_64.rpm](http://hiden.samurai-factory.jp/download/rpm/el7/hoextdown-3.0.0.3-1.el7.sf.x86_64.rpm)
+* Fedora 20: [hoextdown-3.0.0.3-1.fc20.sf.x86_64.rpm](http://hiden.samurai-factory.jp/download/rpm/fc20/hoextdown-3.0.0.3-1.fc20.sf.x86_64.rpm)
+
 ## Special Attributes
 
 Add the `HOEDOWN_EXT_SPECIAL_ATTRIBUTE` to Hoedown document flags.
