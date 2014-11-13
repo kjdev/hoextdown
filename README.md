@@ -8,13 +8,8 @@ Extended the following functions.
 * [Task Lists](#task-lists)
 * [Line Continue](#line-continue)
 * [Header ID](#header-id)
-
-## RPM Package
-
-[Related article](http://hiden.samurai-factory.jp/c/hoextdown/download)
-
-* CentOS 6: [hoextdown-2.0.0.2-0.el6.sf.x86_64.rpm](http://hiden.samurai-factory.jp/download/rpm/el6/hoextdown-2.0.0.2-0.el6.sf.x86_64.rpm)
-* Fedora 20: [hoextdown-2.0.0.2-0.fc20.sf.x86_64.rpm](http://hiden.samurai-factory.jp/download/rpm/fc20/hoextdown-2.0.0.2-0.fc20.sf.x86_64.rpm)
+* [Fenced Script](#fenced-script)
+* [Script Tags](#script-tags)
 
 ## Special Attributes
 
@@ -119,4 +114,47 @@ becomes:
 
 ```
 <h1 id="header-1">Header 1</h1>
+```
+
+## Fenced Script
+
+Add the `HOEDOWN_HTML_FENCED_CODE_SCRIPT` to Hoedown html flags.
+(`HOEDOWN_EXT_FENCED_CODE` also need to be specified at the same time)
+
+Output the script tag in the fenced code style.
+
+    ``` script@text/javascript
+    alert("Example");
+    ```
+
+becomes:
+
+```
+<script type="text/javascript">
+alert("Example");
+</script>
+```
+
+## Script Tags
+
+Add the `HOEDOWN_EXT_SCRIPT_TAGS` to Hoedown document flags.
+
+Add the parsing process of script tags `<?..?>`.
+
+```
+This is <?php echo "an example" ?> test.
+
+<?php
+echo "Example";
+?>
+```
+
+becomes:
+
+```
+<p>This is <?php echo "an example? ?> test.</p>
+
+<?php
+echo "Example";
+?>
 ```
