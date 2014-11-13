@@ -1,5 +1,7 @@
 # Hoextdown
 
+[![Build Status](https://api.travis-ci.org/kjdev/hoextdown.png?branch=master)](https://travis-ci.org/kjdev/hoextdown)
+
 `Hoextdown` is an extension to [Hoedown](https://github.com/hoedown/hoedown).
 
 Extended the following functions.
