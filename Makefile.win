@@ -10,6 +10,7 @@ HOEDOWN_SRC = \
 	src\html_blocks.obj \
 	src\html_smartypants.obj \
 	src\stack.obj \
+	src\hash.obj \
 	src\version.obj
 
 all: hoedown.dll hoedown.exe smartypants.exe

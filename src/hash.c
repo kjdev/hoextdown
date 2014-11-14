@@ -8,7 +8,7 @@
 #define HOEDOWN_HASH_FNV_OFFSET_BASIS 0x811c9dc5
 
 static char *
-_strndup(const char* str, size_t n)
+hoedown_hash_strndup(const char* str, size_t n)
 {
     if (str) {
         char *s = (char *)malloc(sizeof(char) * (n + 1));
@@ -22,10 +22,10 @@ _strndup(const char* str, size_t n)
 }
 
 static char *
-_strdup(const char* str)
+hoedown_hash_strdup(const char* str)
 {
     if (str) {
-        return _strndup(str, strlen(str));
+        return hoedown_hash_strndup(str, strlen(str));
     }
     return NULL;
 }
@@ -110,9 +110,9 @@ hoedown_hash_item_push(hoedown_hash_item *item, const char *key, size_t key_len,
     }
 
     if (key_len > 0) {
-        entry->key = _strndup(key, key_len);
+        entry->key = hoedown_hash_strndup(key, key_len);
     } else {
-        entry->key = _strdup(key);
+        entry->key = hoedown_hash_strdup(key);
     }
     entry->value = value;
     entry->destruct = destruct;
