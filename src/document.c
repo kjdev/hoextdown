@@ -3076,10 +3076,10 @@ static void expand_tabs(hoedown_buffer *ob, const uint8_t *line, size_t size)
 		size_t org = i;
 
 		while (i < size && line[i] != '\t') {
-			i++;
 			/* ignore UTF-8 continuation bytes */
 			if ((line[i] & 0xc0) != 0x80)
 				tab++;
+			i++;
 		}
 
 		if (i > org)

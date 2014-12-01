@@ -93,6 +93,11 @@
             "output": "Tests/Escape character.html"
         },
         {
+            "input": "Tests/Formatting in Table of Contents.text",
+            "output": "Tests/Formatting in Table of Contents.html",
+            "flags": ["--html-toc", "-t", "3"]
+        },
+        {
             "input": "Tests/Math.text",
             "output": "Tests/Math.html",
             "flags": ["--math"]

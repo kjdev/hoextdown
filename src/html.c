@@ -962,7 +962,7 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		NULL,
 
 		NULL,
-		NULL,
+		rndr_normal_text,
 
 		toc_initialize,
 		toc_finalize,
