@@ -586,7 +586,7 @@ toc_header(hoedown_buffer *ob, const hoedown_buffer *content, int level, const h
 		}
 
 		hoedown_buffer_printf(ob, "<a href=\"#toc_%d\">", state->toc_data.header_count++);
-		if (content) escape_html(ob, content->data, content->size);
+		if (content) hoedown_buffer_put(ob, content->data, content->size);
 		HOEDOWN_BUFPUTSL(ob, "</a>\n");
 	}
 }
@@ -654,7 +654,7 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		NULL,
 
 		NULL,
-		NULL,
+		rndr_normal_text,
 
 		NULL,
 		toc_finalize
