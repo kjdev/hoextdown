@@ -25,6 +25,11 @@
             "output": "MarkdownTest_1.0.3/Tests/Code Spans.html"
         },
         {
+            "input": "MarkdownTest_1.0.3/Tests/Formatting in Table of Contents.text",
+            "output": "MarkdownTest_1.0.3/Tests/Formatting in Table of Contents.html",
+            "flags": ["--html-toc", "-t", "3"]
+        },
+        {
             "input": "MarkdownTest_1.0.3/Tests/Hard-wrapped paragraphs with list-like lines.text",
             "output": "MarkdownTest_1.0.3/Tests/Hard-wrapped paragraphs with list-like lines.html"
         },
