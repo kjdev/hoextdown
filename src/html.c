@@ -368,6 +368,10 @@ rndr_header_id(hoedown_buffer *ob, const uint8_t *source, size_t length, int esc
 			while (i < length && source[i] != ';') {
 				++i;
 			}
+		} else if (source[i] == '<') {
+			while (i < length && source[i] != '>') {
+				++i;
+			}
 		}
 		++i;
 	}
