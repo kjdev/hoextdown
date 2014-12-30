@@ -2406,7 +2406,6 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 			if (j) {
 				work.size = i + j;
 
-				/* hoge: meta */
 				if (doc->ext_flags & HOEDOWN_EXT_META_BLOCK &&
 					meta == 2 && doc->meta) {
 					size_t org, sz;
@@ -2421,7 +2420,6 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 						org++;
 					}
 
-					/* hoge: meta */
 					if (org < sz) {
 						hoedown_buffer_put(doc->meta, work.data + org, sz - org);
 						hoedown_buffer_putc(doc->meta, '\n');
