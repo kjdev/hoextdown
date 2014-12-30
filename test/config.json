@@ -156,6 +156,16 @@
             "input": "Tests/extras/Script_Tags.text",
             "output": "Tests/extras/Script_Tags.html",
             "flags": ["--script-tags"]
+        },
+        {
+            "input": "Tests/extras/Meta_Block.text",
+            "output": "Tests/extras/Meta_Block.html",
+            "flags": ["--meta-block"]
+        },
+        {
+            "input": "Tests/extras/Meta_Block_Multi.text",
+            "output": "Tests/extras/Meta_Block_Multi.html",
+            "flags": ["--meta-block"]
         }
     ]
 }

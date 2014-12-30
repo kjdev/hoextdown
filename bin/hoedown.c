@@ -58,6 +58,7 @@ static struct extension_info extensions_info[] = {
 
 	{HOEDOWN_EXT_SPECIAL_ATTRIBUTE, "special-attribute", "Parse special attributes."},
 	{HOEDOWN_EXT_SCRIPT_TAGS, "script-tags", "Parse script tags <?..?>."},
+	{HOEDOWN_EXT_META_BLOCK, "meta-block", "Parse meta block <!--*..*-->."},
 };
 
 static struct html_flag_info html_flags_info[] = {
@@ -371,7 +372,7 @@ main(int argc, char **argv)
 	struct option_data data;
 	/*struct timespec start, end;*/
 	FILE *file = stdin;
-	hoedown_buffer *ib, *ob;
+	hoedown_buffer *ib, *ob, *meta;
 	hoedown_renderer *renderer = NULL;
 	void (*renderer_free)(hoedown_renderer *) = NULL;
 	hoedown_document *document;
@@ -435,7 +436,8 @@ main(int argc, char **argv)
 
 	/* Perform Markdown rendering */
 	ob = hoedown_buffer_new(data.ounit);
-	document = hoedown_document_new(renderer, data.extensions, data.max_nesting, NULL);
+	meta = hoedown_buffer_new(data.ounit);
+	document = hoedown_document_new(renderer, data.extensions, data.max_nesting, NULL, meta);
 
 	/* toc_data */
 	if (data.toc_level > 0) {
@@ -467,9 +469,16 @@ main(int argc, char **argv)
 		*/
 	}
 
+	/* Meta block */
+	if (meta->size > 0) {
+		fprintf(stdout, "-- Meta Block --\n");
+		(void)fwrite(meta->data, 1, meta->size, stdout);
+	}
+
 	/* Cleanup */
 	hoedown_buffer_free(ib);
 	hoedown_buffer_free(ob);
+	hoedown_buffer_free(meta);
 
 	hoedown_document_free(document);
 	renderer_free(renderer);

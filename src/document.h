@@ -42,7 +42,10 @@ typedef enum hoedown_extensions {
 	HOEDOWN_EXT_SPECIAL_ATTRIBUTE = (1 << 15),
 
 	/* script tags */
-	HOEDOWN_EXT_SCRIPT_TAGS = (1 << 16)
+	HOEDOWN_EXT_SCRIPT_TAGS = (1 << 16),
+
+	/* meta block */
+	HOEDOWN_EXT_META_BLOCK = (1 << 17)
 } hoedown_extensions;
 
 #define HOEDOWN_EXT_BLOCK (\
@@ -64,7 +67,8 @@ typedef enum hoedown_extensions {
 	HOEDOWN_EXT_SPACE_HEADERS |\
 	HOEDOWN_EXT_MATH_EXPLICIT |\
 	HOEDOWN_EXT_SPECIAL_ATTRIBUTE |\
-	HOEDOWN_EXT_SCRIPT_TAGS )
+	HOEDOWN_EXT_SCRIPT_TAGS |\
+	HOEDOWN_EXT_META_BLOCK )
 
 #define HOEDOWN_EXT_NEGATIVE (\
 	HOEDOWN_EXT_DISABLE_INDENTED_CODE )
@@ -168,7 +172,8 @@ hoedown_document *hoedown_document_new(
 	const hoedown_renderer *renderer,
 	hoedown_extensions extensions,
 	size_t max_nesting,
-	hoedown_user_block user_block
+	hoedown_user_block user_block,
+	hoedown_buffer *meta
 ) __attribute__ ((malloc));
 
 /* hoedown_document_render: render regular Markdown using the document processor */

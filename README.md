@@ -12,6 +12,7 @@ Extended the following functions.
 * [Header ID](#header-id)
 * [Fenced Script](#fenced-script)
 * [Script Tags](#script-tags)
+* [Meta Block](#meta-block)
 
 ## RPM Package
 
@@ -167,4 +168,56 @@ becomes:
 <?php
 echo "Example";
 ?>
+```
+
+## Meta Block
+
+Add the `HOEDOWN_EXT_META_BLOCK` to Hoedown document flags.
+
+Add the parsing process of meta block `<!--*..*-->`.
+
+Get a meta block by running in the following program.
+
+```c
+/*
+  Allocate meta block buffer
+ */
+hoedown_buffer *meta;
+meta = hoedown_buffer_new(64);
+
+/*
+  Set HOEDOWN_EXT_META_BLOCK to hoedown_extensions.
+  Specifies the meta block buffer to fifth argument.
+ */
+document = hoedown_document_new(renderer, HOEDOWN_EXT_META_BLOCK, 6, NULL, meta);
+
+/*
+  Print meta block buffer
+ */
+if (meta->size > 0) {
+  fprintf(stdout, "-- Meta Block --\n");
+  (void)fwrite(meta->data, 1, meta->size, stdout);
+}
+
+hoedown_buffer_free(meta);
+```
+
+Execution parse result.
+
+```
+<!--*
+  author: user
+  title: Readme markdown parser
+*-->
+
+This is hoextdown example.
+```
+
+becomes:
+
+```
+<p>This is hoextdown example.</p>
+--- Meta Block --
+  author: user
+  title: Readme markdown parser
 ```

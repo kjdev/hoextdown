@@ -128,6 +128,7 @@ struct hoedown_document {
 	int in_link_body;
 
 	hoedown_user_block user_block;
+	hoedown_buffer *meta;
 };
 
 /***************************
@@ -2364,6 +2365,7 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 	hoedown_buffer work = { NULL, 0, 0, 0, NULL, NULL, NULL };
 	size_t i, j = 0, tag_len, tag_end;
 	const char *curtag = NULL;
+	int meta = 0;
 
 	work.data = data;
 
@@ -2385,8 +2387,16 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		if (size > 5 && data[1] == '!' && data[2] == '-' && data[3] == '-') {
 			i = 5;
 
+			if (data[4] == '*') {
+				meta++;
+			}
+
 			while (i < size && !(data[i - 2] == '-' && data[i - 1] == '-' && data[i] == '>'))
 				i++;
+
+			if (data[i - 3] == '*') {
+				meta++;
+			}
 
 			i++;
 
@@ -2395,8 +2405,30 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 
 			if (j) {
 				work.size = i + j;
-				if (do_render && doc->md.blockhtml)
+
+				/* hoge: meta */
+				if (doc->ext_flags & HOEDOWN_EXT_META_BLOCK &&
+					meta == 2 && doc->meta) {
+					size_t org, sz;
+
+					sz = work.size - 5;
+					while (sz > 0 && work.data[sz - 1] == '\n') {
+						sz--;
+					}
+
+					org = 5;
+					while (org < sz && work.data[org] == '\n') {
+						org++;
+					}
+
+					/* hoge: meta */
+					if (org < sz) {
+						hoedown_buffer_put(doc->meta, work.data + org, sz - org);
+						hoedown_buffer_putc(doc->meta, '\n');
+					}
+				} else if (do_render && doc->md.blockhtml) {
 					doc->md.blockhtml(ob, &work, &doc->data);
+				}
 				return work.size;
 			}
 		}
@@ -3105,7 +3137,8 @@ hoedown_document_new(
 	const hoedown_renderer *renderer,
 	hoedown_extensions extensions,
 	size_t max_nesting,
-	hoedown_user_block user_block)
+	hoedown_user_block user_block,
+	hoedown_buffer *meta)
 {
 	hoedown_document *doc = NULL;
 
@@ -3164,6 +3197,7 @@ hoedown_document_new(
 	doc->max_nesting = max_nesting;
 	doc->in_link_body = 0;
 	doc->user_block = user_block;
+	doc->meta = meta;
 
 	return doc;
 }
