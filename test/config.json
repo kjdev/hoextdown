@@ -101,6 +101,11 @@
             "input": "Tests/Math.text",
             "output": "Tests/Math.html",
             "flags": ["--math"]
+        },
+        {
+            "input": "Tests/Underline.text",
+            "output": "Tests/Underline.html",
+            "flags": ["--underline"]
         }
     ]
 }
