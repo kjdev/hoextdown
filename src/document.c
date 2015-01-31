@@ -2751,7 +2751,11 @@ hoedown_document_new(
 
 	memset(doc->active_char, 0x0, 256);
 
-	if (doc->md.emphasis || doc->md.double_emphasis || doc->md.triple_emphasis || doc->md.underline) {
+	if (extensions & HOEDOWN_EXT_UNDERLINE && doc->md.underline) {
+		doc->active_char['_'] = MD_CHAR_EMPHASIS;
+	}
+
+	if (doc->md.emphasis || doc->md.double_emphasis || doc->md.triple_emphasis) {
 		doc->active_char['*'] = MD_CHAR_EMPHASIS;
 		doc->active_char['_'] = MD_CHAR_EMPHASIS;
 		if (extensions & HOEDOWN_EXT_STRIKETHROUGH)
