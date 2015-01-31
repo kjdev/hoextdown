@@ -2766,7 +2766,7 @@ hoedown_document_new(
 	if (doc->md.linebreak)
 		doc->active_char['\n'] = MD_CHAR_LINEBREAK;
 
-	if (doc->md.image || doc->md.link)
+	if (doc->md.image || doc->md.link || doc->md.footnotes || doc->md.footnote_ref)
 		doc->active_char['['] = MD_CHAR_LINK;
 
 	doc->active_char['<'] = MD_CHAR_LANGLE;
