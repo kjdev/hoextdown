@@ -103,6 +103,11 @@
             "flags": ["--math"]
         },
         {
+            "input": "Tests/Underline.text",
+            "output": "Tests/Underline.html",
+            "flags": ["--underline"]
+        },
+        {
             "input": "Tests/extras/Special_Attribute_Headers.text",
             "output": "Tests/extras/Special_Attribute_Headers.html",
             "flags": ["--special-attribute"]

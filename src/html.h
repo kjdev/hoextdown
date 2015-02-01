@@ -42,6 +42,7 @@ struct hoedown_html_renderer_state {
 	void *opaque;
 
 	struct {
+		int header_count;
 		int current_level;
 		int level_offset;
 		int nesting_level;

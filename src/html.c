@@ -924,6 +924,8 @@ toc_finalize(hoedown_buffer *ob, int inline_render, const hoedown_renderer_data 
 	if (state->toc_data.footer) {
 		hoedown_buffer_printf(ob, "%s\n", state->toc_data.footer);
 	}
+
+	state->toc_data.header_count = 0;
 }
 
 hoedown_renderer *
