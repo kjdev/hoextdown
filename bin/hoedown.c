@@ -446,7 +446,6 @@ main(int argc, char **argv)
 		state->toc_data.current_level = 0;
 		state->toc_data.level_offset = 0;
 		state->toc_data.nesting_level = data.toc_level;
-		state->toc_data.unescape = 1;
 		state->toc_data.header = "<div class=\"toc\">";
 		state->toc_data.footer = "</div>";
 	}
