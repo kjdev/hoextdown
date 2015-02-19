@@ -877,11 +877,7 @@ toc_header(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buff
 		}
 
 		if (content) {
-			if (state->toc_data.unescape) {
-				hoedown_buffer_put(ob, content->data, content->size);
-			} else {
-				escape_html(ob, content->data, content->size);
-			}
+			hoedown_buffer_put(ob, content->data, content->size);
 		}
 		HOEDOWN_BUFPUTSL(ob, "</a>\n");
 	}

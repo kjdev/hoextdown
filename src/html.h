@@ -46,7 +46,6 @@ struct hoedown_html_renderer_state {
 		int current_level;
 		int level_offset;
 		int nesting_level;
-		int unescape;
 		char *header;
 		char *footer;
 	} toc_data;
