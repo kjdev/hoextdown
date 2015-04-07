@@ -2752,6 +2752,10 @@ hoedown_document_new(
 
 	memset(doc->active_char, 0x0, 256);
 
+	if (extensions & HOEDOWN_EXT_UNDERLINE && doc->md.underline) {
+		doc->active_char['_'] = MD_CHAR_EMPHASIS;
+	}
+
 	if (doc->md.emphasis || doc->md.double_emphasis || doc->md.triple_emphasis) {
 		doc->active_char['*'] = MD_CHAR_EMPHASIS;
 		doc->active_char['_'] = MD_CHAR_EMPHASIS;
@@ -2767,7 +2771,7 @@ hoedown_document_new(
 	if (doc->md.linebreak)
 		doc->active_char['\n'] = MD_CHAR_LINEBREAK;
 
-	if (doc->md.image || doc->md.link)
+	if (doc->md.image || doc->md.link || doc->md.footnotes || doc->md.footnote_ref)
 		doc->active_char['['] = MD_CHAR_LINK;
 
 	doc->active_char['<'] = MD_CHAR_LANGLE;
