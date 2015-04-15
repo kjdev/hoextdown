@@ -500,7 +500,7 @@ tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink, int scri
 static void
 parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size)
 {
-	size_t i = 0, end = 0;
+	size_t i = 0, end = 0, consumed = 0;
 	hoedown_buffer work = { 0, 0, 0, 0, NULL, NULL, NULL };
 	uint8_t *active_char = doc->active_char;
 
@@ -551,14 +551,16 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 			} else {
 				i += end;
 				end = i;
+				consumed = i;
 			}
 		} else {
-			end = markdown_char_ptrs[ (int)active_char[data[end]] ](ob, doc, data + i, i, size - i);
+			end = markdown_char_ptrs[ (int)active_char[data[end]] ](ob, doc, data + i, i - consumed, size - i);
 			if (!end) /* no action from the callback */
 				end = i + 1;
 			else {
 				i += end;
 				end = i;
+				consumed = i;
 			}
 		}
 	}

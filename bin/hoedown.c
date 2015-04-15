@@ -2,7 +2,7 @@
 #include "html.h"
 
 #include "common.h"
-/*#include <time.h>*/
+#include <time.h>
 
 
 /* FEATURES INFO / DEFAULTS */
@@ -370,7 +370,7 @@ int
 main(int argc, char **argv)
 {
 	struct option_data data;
-	/*struct timespec start, end;*/
+	clock_t t1, t2;
 	FILE *file = stdin;
 	hoedown_buffer *ib, *ob, *meta;
 	hoedown_renderer *renderer = NULL;
@@ -411,13 +411,9 @@ main(int argc, char **argv)
 	/* Read everything */
 	ib = hoedown_buffer_new(data.iunit);
 
-	while (!feof(file)) {
-		if (ferror(file)) {
-			fprintf(stderr, "I/O errors found while reading input.\n");
-			return 5;
-		}
-		hoedown_buffer_grow(ib, ib->size + data.iunit);
-		ib->size += fread(ib->data + ib->size, 1, data.iunit, file);
+	if (hoedown_buffer_putf(ib, file)) {
+		fprintf(stderr, "I/O errors found while reading input.\n");
+		return 5;
 	}
 
 	if (file != stdin) fclose(file);
@@ -450,22 +446,23 @@ main(int argc, char **argv)
 		state->toc_data.footer = "</div>";
 	}
 
-	/*clock_gettime(CLOCK_MONOTONIC, &start);*/
+	t1 = clock();
 	hoedown_document_render(document, ob, ib->data, ib->size);
-	/*clock_gettime(CLOCK_MONOTONIC, &end);*/
+	t2 = clock();
+
+	/* Cleanup */
+	hoedown_buffer_free(ib);
+	hoedown_document_free(document);
+	renderer_free(renderer);
 
 	/* Write the result to stdout */
 	(void)fwrite(ob->data, 1, ob->size, stdout);
+	hoedown_buffer_free(ob);
 
-	/* Show rendering time */
-	if (data.show_time) {
-		/*TODO: enable this
-		long long elapsed = (end.tv_sec - start.tv_sec)*1e9 + (end.tv_nsec - start.tv_nsec);
-		if (elapsed < 1e9)
-			fprintf(stderr, "Time spent on rendering: %.2f ms.\n", ((double)elapsed)/1e6);
-		else
-			fprintf(stderr, "Time spent on rendering: %.3f s.\n", ((double)elapsed)/1e9);
-		*/
+	if (ferror(stdout)) {
+		hoedown_buffer_free(meta);
+		fprintf(stderr, "I/O errors found while writing output.\n");
+		return 5;
 	}
 
 	/* Meta block */
@@ -473,18 +470,26 @@ main(int argc, char **argv)
 		fprintf(stdout, "-- Meta Block --\n");
 		(void)fwrite(meta->data, 1, meta->size, stdout);
 	}
-
-	/* Cleanup */
-	hoedown_buffer_free(ib);
-	hoedown_buffer_free(ob);
 	hoedown_buffer_free(meta);
-
-	hoedown_document_free(document);
-	renderer_free(renderer);
-
 	if (ferror(stdout)) {
 		fprintf(stderr, "I/O errors found while writing output.\n");
 		return 5;
+	}
+
+	/* Show rendering time */
+	if (data.show_time) {
+		double elapsed;
+
+		if (t1 == -1 || t2 == -1) {
+			fprintf(stderr, "Failed to get the time.\n");
+			return 1;
+		}
+
+		elapsed = (double)(t2 - t1) / CLOCKS_PER_SEC;
+		if (elapsed < 1)
+			fprintf(stderr, "Time spent on rendering: %7.2f ms.\n", elapsed*1e3);
+		else
+			fprintf(stderr, "Time spent on rendering: %6.3f s.\n", elapsed);
 	}
 
 	return 0;

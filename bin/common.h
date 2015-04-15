@@ -85,7 +85,7 @@ parse_options(
 					result = parse_short_option(arg[pos], next, opaque);
 					if (!result) return 0;
 					if (result == 2) {
-						i++;
+						if (next == next_arg) i++;
 						break;
 					}
 				}
