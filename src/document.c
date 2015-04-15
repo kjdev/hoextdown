@@ -2133,19 +2133,11 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 	if (*flags & HOEDOWN_LI_BLOCK) {
 		/* intermediate render of block li */
 		if (sublist && sublist < work->size) {
-			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-				len = parse_attributes(work->data, sublist, attr, attribute, 0);
-			} else {
-				len = sublist;
-			}
+			len = sublist;
 			parse_block(inter, doc, work->data, len);
 			parse_block(inter, doc, work->data + sublist, work->size - sublist);
 		} else {
-			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-				len = parse_attributes(work->data, work->size, attr, attribute, 0);
-			} else {
-				len = work->size;
-			}
+			len = work->size;
 			parse_block(inter, doc, work->data, len);
 		}
 	} else {
