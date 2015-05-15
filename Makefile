@@ -1,5 +1,8 @@
 CFLAGS = -g -O3 -ansi -pedantic -Wall -Wextra -Wno-unused-parameter
 PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
+LIBDIR = $(PREFIX)/lib
+INCLUDEDIR = $(PREFIX)/include
 
 HOEDOWN_CFLAGS = $(CFLAGS) -Isrc
 ifneq ($(OS),Windows_NT)
@@ -64,16 +67,19 @@ clean:
 # Installing
 
 install:
-	install -m755 -d $(DESTDIR)$(PREFIX)/lib
-	install -m755 -d $(DESTDIR)$(PREFIX)/bin
-	install -m755 -d $(DESTDIR)$(PREFIX)/include
+	install -m755 -d $(DESTDIR)$(LIBDIR)
+	install -m755 -d $(DESTDIR)$(BINDIR)
+	install -m755 -d $(DESTDIR)$(INCLUDEDIR)
 
-	install -m644 libhoedown.* $(DESTDIR)$(PREFIX)/lib
-	install -m755 hoedown $(DESTDIR)$(PREFIX)/bin
-	install -m755 smartypants $(DESTDIR)$(PREFIX)/bin
+	install -m644 libhoedown.a $(DESTDIR)$(LIBDIR)
+	install -m755 libhoedown.so.3 $(DESTDIR)$(LIBDIR)
+	ln -f -s libhoedown.so.3 $(DESTDIR)$(LIBDIR)/libhoedown.so
 
-	install -m755 -d $(DESTDIR)$(PREFIX)/include/hoedown
-	install -m644 src/*.h $(DESTDIR)$(PREFIX)/include/hoedown
+	install -m755 hoedown $(DESTDIR)$(BINDIR)
+	install -m755 smartypants $(DESTDIR)$(BINDIR)
+
+	install -m755 -d $(DESTDIR)$(INCLUDEDIR)/hoedown
+	install -m644 src/*.h $(DESTDIR)$(INCLUDEDIR)/hoedown
 
 # Generic object compilations
 
