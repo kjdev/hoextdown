@@ -18,7 +18,7 @@ HOEDOWN_SRC=\
 
 .PHONY:		all test test-pl clean
 
-all:		libhoedown.so hoedown smartypants
+all:		libhoedown.so libhoedown.a hoedown smartypants
 
 # Libraries
 
