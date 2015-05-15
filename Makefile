@@ -1,8 +1,9 @@
-CFLAGS = -g -O3 -ansi -pedantic -Wall -Wextra -Wno-unused-parameter -Isrc
+CFLAGS = -g -O3 -ansi -pedantic -Wall -Wextra -Wno-unused-parameter
 PREFIX = /usr/local
 
+HOEDOWN_CFLAGS = $(CFLAGS) -Isrc
 ifneq ($(OS),Windows_NT)
-	CFLAGS += -fPIC
+	HOEDOWN_CFLAGS += -fPIC
 endif
 
 HOEDOWN_SRC=\
@@ -77,7 +78,7 @@ install:
 # Generic object compilations
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(HOEDOWN_CFLAGS) -c -o $@ $<
 
 src/html_blocks.o: src/html_blocks.c
-	$(CC) $(CFLAGS) -Wno-static-in-inline -c -o $@ $<
+	$(CC) $(HOEDOWN_CFLAGS) -Wno-static-in-inline -c -o $@ $<
