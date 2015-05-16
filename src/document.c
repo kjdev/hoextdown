@@ -2231,7 +2231,7 @@ parse_table_row(
 		   2) The next pipe is right after the current one, i.e. empty cell.
 		   For case 1, we skip to the end of line; for case 2 we just continue.
 		*/
-		if (len == 0 && data[i] != '|')
+		if (len == 0 && i < size && data[i] != '|')
 			len = size - i;
 		i += len;
 
