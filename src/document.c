@@ -2225,7 +2225,15 @@ parse_table_row(
 		cell_start = i;
 
 		len = find_emph_char(data + i, size - i, '|');
-		i += len ? len : size - i;
+
+		/* Two possibilities for len == 0:
+		   1) No more pipe char found in the current line.
+		   2) The next pipe is right after the current one, i.e. empty cell.
+		   For case 1, we skip to the end of line; for case 2 we just continue.
+		*/
+		if (len == 0 && data[i] != '|')
+			len = size - i;
+		i += len;
 
 		cell_end = i - 1;
 
