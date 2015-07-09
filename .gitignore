@@ -7,3 +7,4 @@ hoedown.exp
 hoedown.lib
 smartypants
 libhoedown.so*
+libhoedown.a
