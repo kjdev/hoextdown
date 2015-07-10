@@ -2835,6 +2835,7 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 	size_t start = 0;
 
 	size_t id_offset, id_end;
+	size_t id_indent = 0, content_line = 0, content_indent = 0;
 
 	/* up to 3 optional leading spaces */
 	if (beg + 3 >= end) return 0;
@@ -2865,6 +2866,11 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 
 	start = i;
 
+	/* getting item indent size */
+	while (id_indent != start && data[start - id_indent] != '\n' && data[start - id_indent] != '\r') {
+		id_indent++;
+	}
+
 	/* process lines similar to a list item */
 	while (i < end) {
 		while (i < end && data[i] != '\n' && data[i] != '\r') i++;
@@ -2885,6 +2891,8 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		while (ind < 4 && start + ind < end && data[start + ind] == ' ')
 			ind++;
 
+		content_line++;
+
 		/* joining only indented stuff after empty lines;
 		 * note that now we only require 1 space of indentation
 		 * to continue, just like lists */
@@ -2897,6 +2905,19 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 		}
 
 		in_empty = 0;
+
+		/* re-calculating the indentation */
+		if (content_line == 2 && data[start + ind] == ' ') {
+			while (ind < id_indent && data[start + ind] == ' ') {
+				ind++;
+			}
+			content_indent = ind;
+		}
+		if (content_indent > ind) {
+			while (ind < content_indent && data[start + ind] == ' ') {
+				ind++;
+			}
+		}
 
 		/* adding the line into the content buffer */
 		hoedown_buffer_put(contents, data + start + ind, i - start - ind);

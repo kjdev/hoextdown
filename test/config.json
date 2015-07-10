@@ -176,6 +176,11 @@
             "input": "Tests/extras/Meta_Block_Multi.text",
             "output": "Tests/extras/Meta_Block_Multi.html",
             "flags": ["--meta-block"]
+        },
+        {
+            "input": "Tests/extras/Footnotes.text",
+            "output": "Tests/extras/Footnotes.html",
+            "flags": ["--footnotes"]
         }
     ]
 }
