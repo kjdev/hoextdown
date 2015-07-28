@@ -181,6 +181,10 @@
             "input": "Tests/extras/Footnotes.text",
             "output": "Tests/extras/Footnotes.html",
             "flags": ["--footnotes"]
+        },
+        {
+            "input": "Tests/extras/HTML_Block.text",
+            "output": "Tests/extras/HTML_Block.html"
         }
     ]
 }

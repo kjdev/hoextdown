@@ -2346,7 +2346,7 @@ htmlblock_find_end_strict(
 
 		if (data[mark] == ' ' && mark > 0) continue;
 		mark += htmlblock_find_end(tag, tag_len, doc, data + mark, i - mark);
-		if (mark == i && (is_empty(data + i, size - i) || i >= size)) break;
+		if (mark == i && (is_empty(data + i, size - i) || data[i] == '<' || i >= size)) break;
 	}
 
 	return i;
