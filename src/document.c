@@ -1149,7 +1149,11 @@ char_autolink_www(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size
 		HOEDOWN_BUFPUTSL(link_url, "http://");
 		hoedown_buffer_put(link_url, link->data, link->size);
 
-		ob->size -= rewind;
+		if (ob->size > rewind)
+			ob->size -= rewind;
+		else
+			ob->size = 0;
+
 		if (doc->md.normal_text) {
 			link_text = newbuf(doc, BUFFER_SPAN);
 			doc->md.normal_text(link_text, link, &doc->data);
@@ -1177,7 +1181,11 @@ char_autolink_email(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, si
 	link = newbuf(doc, BUFFER_SPAN);
 
 	if ((link_len = hoedown_autolink__email(&rewind, link, data, offset, size, 0)) > 0) {
-		ob->size -= rewind;
+		if (ob->size > rewind)
+			ob->size -= rewind;
+		else
+			ob->size = 0;
+
 		doc->md.autolink(ob, link, HOEDOWN_AUTOLINK_EMAIL, &doc->data);
 	}
 
@@ -1197,7 +1205,11 @@ char_autolink_url(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size
 	link = newbuf(doc, BUFFER_SPAN);
 
 	if ((link_len = hoedown_autolink__url(&rewind, link, data, offset, size, 0)) > 0) {
-		ob->size -= rewind;
+		if (ob->size > rewind)
+			ob->size -= rewind;
+		else
+			ob->size = 0;
+
 		doc->md.autolink(ob, link, HOEDOWN_AUTOLINK_NORMAL, &doc->data);
 	}
 
