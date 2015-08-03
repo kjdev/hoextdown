@@ -942,6 +942,7 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 {
 	hoedown_buffer work = { NULL, 0, 0, 0, NULL, NULL, NULL };
 	size_t end, nb = 0, i, f_begin, f_end;
+	int backtick_escaped = 0;
 
 	/* counting the number of backticks in the delimiter */
 	while (nb < size && data[nb] == '`')
@@ -950,7 +951,14 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 	/* finding the next delimiter */
 	i = 0;
 	for (end = nb; end < size && i < nb; end++) {
-		if (data[end] == '`') i++;
+		if (data[end] == '`') {
+			if (end + 1 == size || !is_escaped(data, end)) {
+				i++;
+			} else {
+				i = 0;
+				backtick_escaped = 1;
+			}
+		}
 		else i = 0;
 	}
 
@@ -968,10 +976,34 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 
 	/* real code span */
 	if (f_begin < f_end) {
+		hoedown_buffer *code = newbuf(doc, BUFFER_SPAN);
 		hoedown_buffer attr = { 0, 0, 0, 0, NULL, NULL, NULL };
 
 		work.data = data + f_begin;
 		work.size = f_end - f_begin;
+
+		if (backtick_escaped) {
+			char *p = NULL;
+			i = f_begin;
+			while ((p = (char *)memchr(data + i + 1, '`', f_end - i))) {
+				size_t pos = p - (char *)data;
+				size_t len = pos - i;
+
+				if (len) {
+					if (!is_escaped(data, pos)) {
+						hoedown_buffer_put(code, data + i, len);
+					} else if (len > 1) {
+						hoedown_buffer_put(code, data + i, len - 1);
+					}
+				}
+				i = pos;
+			}
+
+			if (code->size) {
+				work.data = code->data;
+				work.size = code->size;
+			}
+		}
 
 		if ((doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) &&
 			data[end] == '{') {
@@ -988,6 +1020,8 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 
 		if (!doc->md.codespan(ob, &work, &attr, &doc->data))
 			end = 0;
+
+		popbuf(doc, BUFFER_SPAN);
 	} else {
 		if (!doc->md.codespan(ob, 0, 0, &doc->data))
 			end = 0;
