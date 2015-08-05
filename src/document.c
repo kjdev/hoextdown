@@ -2092,6 +2092,13 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 	work = newbuf(doc, BUFFER_SPAN);
 	inter = newbuf(doc, BUFFER_SPAN);
 
+	/* calculating the indentation */
+	i = 0;
+	while (i < 4 && beg + i < end && data[beg + i] == ' ')
+		i++;
+
+	beg += i;
+
 	/* putting the first line into the working buffer */
 	hoedown_buffer_put(work, data + beg, end - beg);
 	beg = end;
