@@ -2618,9 +2618,12 @@ parse_table_header(
 	size_t i = 0, col, header_end, under_end;
 
 	pipes = 0;
-	while (i < size && data[i] != '\n')
-		if (data[i++] == '|')
+	while (i < size && data[i] != '\n') {
+		if (!is_escaped(data, i) && data[i] == '|') {
 			pipes++;
+		}
+		i++;
+	}
 
 	if (i == size || pipes == 0)
 		return 0;

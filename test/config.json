@@ -193,6 +193,11 @@
         {
             "input": "Tests/extras/List_Item_First_Line.text",
             "output": "Tests/extras/List_Item_First_Line.html"
+        },
+        {
+            "input": "Tests/extras/Table_Escape_Pipe.text",
+            "output": "Tests/extras/Table_Escape_Pipe.html",
+            "flags": ["--tables"]
         }
     ]
 }
