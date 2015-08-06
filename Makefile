@@ -12,6 +12,7 @@ endif
 HOEDOWN_SRC=\
 	src/autolink.o \
 	src/buffer.o \
+	src/context_test.o \
 	src/document.o \
 	src/escape.o \
 	src/html.o \

@@ -1,0 +1,27 @@
+Reference Definition: [bar]: /url/
+
+Reference Definition: [foo]: /url2/
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: no id HOEDOWN_LINK_INLINE
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: bar HOEDOWN_LINK_REFERENCE
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: foo HOEDOWN_LINK_EMPTY_REFERENCE
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: foo HOEDOWN_LINK_SHORTCUT
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: no id HOEDOWN_LINK_INLINE
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: bar HOEDOWN_LINK_REFERENCE
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: foo HOEDOWN_LINK_EMPTY_REFERENCE
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: foo HOEDOWN_LINK_SHORTCUT

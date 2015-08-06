@@ -202,6 +202,46 @@
         {
             "input": "Tests/extras/Header_Empty.text",
             "output": "Tests/extras/Header_Empty.html"
+		},
+		{
+            "input": "Tests/context/Escaping.input",
+            "output": "Tests/context/Escaping.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/Links.input",
+            "output": "Tests/context/Links.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/Footnotes.input",
+            "output": "Tests/context/Footnotes.output",
+            "flags": ["--context-test", "--footnotes"]
+        },
+        {
+            "input": "Tests/context/Headers.input",
+            "output": "Tests/context/Headers.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/HRules.input",
+            "output": "Tests/context/HRules.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/Blockcode.input",
+            "output": "Tests/context/Blockcode.output",
+            "flags": ["--context-test", "--fenced-code"]
+        },
+        {
+            "input": "Tests/context/Unordered_Lists.input",
+            "output": "Tests/context/Unordered_Lists.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/Depth.input",
+            "output": "Tests/context/Depth.output",
+            "flags": ["--context-test"]
         }
     ]
 }

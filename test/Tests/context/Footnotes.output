@@ -1,0 +1,8 @@
+Footnote Reference Definition: [^foo]: bar
+
+list depth: 0 blockquote depth: 0 paragraph:
+	id: foo
+
+id: foo list
+	depth: 0 blockquote depth: 0 paragraph:
+		bar

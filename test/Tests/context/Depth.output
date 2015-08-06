@@ -1,0 +1,20 @@
+* list depth: 1 blockquote depth: 0 paragraph: foo
+
+	* list depth: 2 blockquote depth: 0 paragraph: bar
+
+		* list depth: 3 blockquote depth: 0 paragraph: baz
+		  list depth: 3 blockquote depth: 0 paragraph: bat
+
+list depth: 0 blockquote depth: 1 paragraph: foo
+
+	list depth: 0 blockquote depth: 2 paragraph: bar
+
+		list depth: 0 blockquote depth: 3 paragraph: baz
+
+* list depth: 1 blockquote depth: 0 paragraph: foo
+
+	list depth: 1 blockquote depth: 1 paragraph: bar
+
+		* list depth: 2 blockquote depth: 1 paragraph: baz
+
+			list depth: 2 blockquote depth: 2 paragraph: bat

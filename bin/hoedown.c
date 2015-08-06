@@ -1,5 +1,6 @@
 #include "document.h"
 #include "html.h"
+#include "context_test.h"
 
 #include "common.h"
 #include <time.h>
@@ -9,7 +10,8 @@
 
 enum renderer_type {
 	RENDERER_HTML,
-	RENDERER_HTML_TOC
+	RENDERER_HTML_TOC,
+	RENDERER_CONTEXT_TEST
 };
 
 struct extension_category_info {
@@ -340,6 +342,11 @@ parse_long_option(char *opt, char *next, void *opaque)
 		data->renderer = RENDERER_HTML_TOC;
 		return 1;
 	}
+	/* this is intentionally omitted from usage, since it's for testing only */
+	if (strcmp(opt, "context-test")==0) {
+		data->renderer = RENDERER_CONTEXT_TEST;
+		return 1;
+	}
 
 	if (parse_category_option(opt, data) || parse_flag_option(opt, data) || parse_negative_option(opt, data))
 		return 1;
@@ -428,6 +435,10 @@ main(int argc, char **argv)
 			renderer = hoedown_html_toc_renderer_new(data.toc_level);
 			renderer_free = hoedown_html_renderer_free;
 			break;
+		case RENDERER_CONTEXT_TEST:
+			renderer = hoedown_context_test_renderer_new();
+			renderer_free = hoedown_context_test_renderer_free;
+			break;
 	};
 
 	/* Perform Markdown rendering */
@@ -444,6 +455,12 @@ main(int argc, char **argv)
 		state->toc_data.nesting_level = data.toc_level;
 		state->toc_data.header = "<div class=\"toc\">";
 		state->toc_data.footer = "</div>";
+	}
+
+	if (data.renderer == RENDERER_CONTEXT_TEST) {
+		hoedown_context_test_renderer_state *state;
+		state = (hoedown_context_test_renderer_state *)renderer->opaque;
+		state->doc = document;
 	}
 
 	t1 = clock();
