@@ -2766,11 +2766,11 @@ parse_table(
 			i++;
 		}
 
-        if (doc->md.table_header)
-            doc->md.table_header(work, header_work, &doc->data);
+		if (doc->md.table_header)
+			doc->md.table_header(work, header_work, &doc->data);
 
-        if (doc->md.table_body)
-            doc->md.table_body(work, body_work, &doc->data);
+		if (doc->md.table_body)
+			doc->md.table_body(work, body_work, &doc->data);
 
 		if (doc->md.table)
 			doc->md.table(ob, work, attr_work, &doc->data);
