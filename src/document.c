@@ -1707,17 +1707,20 @@ parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang, size_t *width,
 static int
 is_atxheader(hoedown_document *doc, uint8_t *data, size_t size)
 {
+	size_t level = 0;
+
 	if (data[0] != '#')
 		return 0;
 
-	if (doc->ext_flags & HOEDOWN_EXT_SPACE_HEADERS) {
-		size_t level = 0;
+	while (level < size && level < 6 && data[level] == '#')
+		level++;
 
-		while (level < size && level < 6 && data[level] == '#')
-			level++;
-
-		if (level < size && data[level] != ' ')
+	if (level >= size || data[level] == '\n') {
 			return 0;
+	}
+
+	if ((doc->ext_flags & HOEDOWN_EXT_SPACE_HEADERS) && level < size && data[level] != ' ') {
+		return 0;
 	}
 
 	return 1;
@@ -1900,8 +1903,13 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		if (is_empty(data + i, size - i))
 			break;
 
-		if ((level = is_headerline(data + i, size - i)) != 0)
+		if ((level = is_headerline(data + i, size - i)) != 0) {
+			if (i == 0) {
+				level = 0;
+				i = end;
+			}
 			break;
+		}
 
 		if (is_atxheader(doc, data + i, size - i) ||
 			is_hrule(data + i, size - i) ||
@@ -2284,6 +2292,8 @@ parse_atxheader(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 
 		popbuf(doc, BUFFER_SPAN);
 		popbuf(doc, BUFFER_ATTRIBUTE);
+	} else {
+		doc->md.header(ob, NULL, NULL, (int)level, &doc->data);
 	}
 
 	return skip;

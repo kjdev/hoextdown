@@ -198,6 +198,10 @@
             "input": "Tests/extras/Table_Escape_Pipe.text",
             "output": "Tests/extras/Table_Escape_Pipe.html",
             "flags": ["--tables"]
+        },
+        {
+            "input": "Tests/extras/Header_Empty.text",
+            "output": "Tests/extras/Header_Empty.html"
         }
     ]
 }
