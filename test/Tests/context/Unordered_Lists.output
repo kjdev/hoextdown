@@ -1,0 +1,8 @@
+* list depth: 1 blockquote depth: 0
+	paragraph: foo
+
+- list depth: 1 blockquote depth: 0
+	paragraph: bar
+
++ list depth: 1 blockquote depth: 0
+	paragraph: baz

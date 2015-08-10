@@ -94,6 +94,19 @@ typedef enum hoedown_autolink_type {
 	HOEDOWN_AUTOLINK_EMAIL		/* e-mail link without explit mailto: */
 } hoedown_autolink_type;
 
+typedef enum hoedown_header_type {
+	HOEDOWN_HEADER_NONE,   /* not a header */
+	HOEDOWN_HEADER_ATX,    /* e.g. "# Foo" */
+	HOEDOWN_HEADER_SETEXT  /* e.g. "Foo\n---" or "Foo\n===" */
+} hoedown_header_type;
+
+typedef enum hoedown_link_type {
+	HOEDOWN_LINK_NONE,            /* not in a link */
+	HOEDOWN_LINK_INLINE,          /* e.g. [foo](/bar/) */
+	HOEDOWN_LINK_REFERENCE,       /* e.g. [foo][bar] */
+	HOEDOWN_LINK_EMPTY_REFERENCE, /* e.g. [foo][] */
+	HOEDOWN_LINK_SHORTCUT         /* e.g. [foo] */
+} hoedown_link_type;
 
 /*********
  * TYPES *
@@ -157,6 +170,12 @@ struct hoedown_renderer {
 
 	/* user block */
 	void (*user_block)(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_renderer_data *data);
+
+	/* reference callbacks */
+	/* called when a link reference definition is parsed */
+	void (*ref)(hoedown_buffer *orig, const hoedown_renderer_data *data);
+	/* called when a footnote reference definition is parsed */
+	void (*footnote_ref_def)(hoedown_buffer *orig, const hoedown_renderer_data *data);
 };
 typedef struct hoedown_renderer hoedown_renderer;
 
@@ -185,6 +204,35 @@ void hoedown_document_render_inline(hoedown_document *doc, hoedown_buffer *ob, c
 /* hoedown_document_free: deallocate a document processor instance */
 void hoedown_document_free(hoedown_document *doc);
 
+/* returns a hoedown buffer containing the id of link or footnote reference being processed, or NULL if no link or footnote is being processed */
+const hoedown_buffer *hoedown_document_link_id(hoedown_document* document);
+
+/* returns the id of the footnote definition currently processed, or NULL if not processing a footnote */
+const hoedown_buffer *hoedown_document_footnote_id(hoedown_document *document);
+
+/* returns 1 if the currently processed buffer in normal text was escaped in the original document */
+int hoedown_document_is_escaped(hoedown_document* document);
+
+/* returns the header type of the currently processed header, or HOEDOWN_HEADER_NONE if not processing a header */
+hoedown_header_type hoedown_document_header_type(hoedown_document* document);
+
+/* returns the link type of the currently processed link, or HOEDOWN_LINK_NONE if not processing a link */
+hoedown_link_type hoedown_document_link_type(hoedown_document *document);
+
+/* returns the list depth of the currently processed element, 1 per level */
+int hoedown_document_list_depth(hoedown_document* document);
+
+/* returns the blockquote depth of the currently processed element, 1 per level */
+int hoedown_document_blockquote_depth(hoedown_document* document);
+
+/* returns the character used for the currently processing unordered list (+, *, or -), or 0 if not processing an unordered list */
+uint8_t hoedown_document_ul_item_char(hoedown_document* document);
+
+/* returns the character used for the currently processing hrule (-, *, or _), or 0 if not processing an hrule */
+uint8_t hoedown_document_hrule_char(hoedown_document* document);
+
+/* returns the character used for the currently processing fenced code block (` or ~), or 0 if not processing a fenced code block */
+uint8_t hoedown_document_fencedcode_char(hoedown_document* document);
 
 #ifdef __cplusplus
 }

@@ -977,6 +977,9 @@ hoedown_html_toc_renderer_new(int nesting_level)
 		toc_finalize,
 
 		NULL,
+
+		NULL,
+		NULL,
 	};
 
 	hoedown_html_renderer_state *state;
@@ -1043,6 +1046,9 @@ hoedown_html_renderer_new(hoedown_html_flags render_flags, int nesting_level)
 		NULL,
 		NULL,
 
+		NULL,
+
+		NULL,
 		NULL,
 	};
 
