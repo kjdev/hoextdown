@@ -1743,7 +1743,8 @@ parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang, size_t *width,
 static int
 is_atxheader(hoedown_document *doc, uint8_t *data, size_t size)
 {
-	size_t level = 0;
+	size_t level = 0, len = size, begin = 0;
+	uint8_t *p;
 
 	if (data[0] != '#')
 		return 0;
@@ -1755,8 +1756,31 @@ is_atxheader(hoedown_document *doc, uint8_t *data, size_t size)
 			return 0;
 	}
 
+	p = memchr(data + level, '\n', len);
+	if (p) {
+		len = (p - data) - level + 1;
+	}
+
+	/* if the header is only whitespace, it is not a header */
+	if (len && is_empty_all(data + level, len)) {
+		return 0;
+	}
+
 	if ((doc->ext_flags & HOEDOWN_EXT_SPACE_HEADERS) && level < size && data[level] != ' ') {
 		return 0;
+	}
+
+	/* if the header is only special attribute, it is not a header */
+	if (len && (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE)) {
+		p = memchr(data + level, '{', len);
+		if (p) {
+			begin = (p - data) - level;
+			if (memchr(data + begin, '}', len - begin)) {
+				if (!begin || is_empty_all(data + level, begin)) {
+					return 0;
+				}
+			}
+		}
 	}
 
 	return 1;

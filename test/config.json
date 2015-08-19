@@ -202,8 +202,24 @@
         {
             "input": "Tests/extras/Header_Empty.text",
             "output": "Tests/extras/Header_Empty.html"
-		},
-		{
+        },
+        {
+            "input": "Tests/extras/Header_Empty_Attribute.text",
+            "output": "Tests/extras/Header_Empty_Attribute.html",
+            "flags": ["--header-id", "--special-attribute"]
+        },
+
+        {
+            "input": "Tests/extras/Toc_Header_Empty.text",
+            "output": "Tests/extras/Toc_Header_Empty.html",
+            "flags": ["--html-toc", "-t", "1"]
+        },
+        {
+            "input": "Tests/extras/Toc_Header_Empty_Attribute.text",
+            "output": "Tests/extras/Toc_Header_Empty_Attribute.html",
+            "flags": ["--html-toc", "-t", "1", "--header-id", "--special-attribute"]
+        },
+        {
             "input": "Tests/context/Escaping.input",
             "output": "Tests/context/Escaping.output",
             "flags": ["--context-test"]
