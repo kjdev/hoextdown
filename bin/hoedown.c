@@ -497,7 +497,7 @@ main(int argc, char **argv)
 	if (data.show_time) {
 		double elapsed;
 
-		if (t1 == -1 || t2 == -1) {
+		if (t1 == ((clock_t) -1) || t2 == ((clock_t) -1)) {
 			fprintf(stderr, "Failed to get the time.\n");
 			return 1;
 		}
