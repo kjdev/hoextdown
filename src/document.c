@@ -141,6 +141,7 @@ struct hoedown_document {
 	uint8_t ul_item_char;
 	uint8_t hrule_char;
 	uint8_t fencedcode_char;
+	const hoedown_buffer *ol_numeral;
 
 	hoedown_user_block user_block;
 	hoedown_buffer *meta;
@@ -2150,6 +2151,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 	size_t beg = 0, end, pre, sublist = 0, orgpre = 0, i, len;
 	int in_empty = 0, has_inside_empty = 0, in_fence = 0;
 	uint8_t ul_item_char = '*';
+	hoedown_buffer *ol_numeral = NULL;
 
 	/* keeping track of the first indentation prefix */
 	while (orgpre < 3 && orgpre < size && data[orgpre] == ' ')
@@ -2157,8 +2159,14 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 
 	beg = prefix_uli(data, size);
 	if (beg) ul_item_char = data[beg - 2];
-	if (!beg)
+	if (!beg) {
 		beg = prefix_oli(data, size);
+		if (beg) {
+			ol_numeral = hoedown_buffer_new(1024);
+			/* -2 to eliminate the trailing ". " */
+			hoedown_buffer_put(ol_numeral, data, beg - 2);
+		}
+	}
 
 	if (!beg)
 		return 0;
@@ -2296,7 +2304,9 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 	/* render of li itself */
 	if (doc->md.listitem) {
 		doc->ul_item_char = ul_item_char;
+		doc->ol_numeral = ol_numeral;
 		doc->md.listitem(ob, inter, attr, flags, &doc->data);
+		doc->ol_numeral = NULL;
 		doc->ul_item_char = 0;
 	}
 
@@ -3389,6 +3399,7 @@ hoedown_document_new(
 	doc->ul_item_char = 0;
 	doc->hrule_char = 0;
 	doc->fencedcode_char = 0;
+	doc->ol_numeral = NULL;
 	doc->user_block = user_block;
 	doc->meta = meta;
 
@@ -3626,4 +3637,10 @@ uint8_t
 hoedown_document_fencedcode_char(hoedown_document* document)
 {
 	return document->fencedcode_char;
+}
+
+const hoedown_buffer*
+hoedown_document_ol_numeral(hoedown_document* document)
+{
+		return document->ol_numeral;
 }
