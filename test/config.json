@@ -255,6 +255,11 @@
             "flags": ["--context-test"]
         },
         {
+            "input": "Tests/context/Ordered_Lists.input",
+            "output": "Tests/context/Ordered_Lists.output",
+            "flags": ["--context-test"]
+        },
+        {
             "input": "Tests/context/Depth.input",
             "output": "Tests/context/Depth.output",
             "flags": ["--context-test"]

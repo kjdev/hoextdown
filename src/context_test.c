@@ -85,10 +85,20 @@ static void
 rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffer *attr, hoedown_list_flags *flags, const hoedown_renderer_data *data)
 {
 	uint8_t c;
+	const hoedown_buffer* ol_numeral;
 
-	c = hoedown_document_ul_item_char(((hoedown_context_test_renderer_state*) data->opaque)->doc);
-	hoedown_buffer_putc(ob, c);
-	hoedown_buffer_putc(ob, ' ');
+	ol_numeral = hoedown_document_ol_numeral(((hoedown_context_test_renderer_state*) data->opaque)->doc);
+	if (ol_numeral) {
+		hoedown_buffer_put(ob, ol_numeral->data, ol_numeral->size);
+		hoedown_buffer_puts(ob, ". ");
+	} else {
+		c = hoedown_document_ul_item_char(((hoedown_context_test_renderer_state*) data->opaque)->doc);
+		if (c) {
+			hoedown_buffer_putc(ob, c);
+			hoedown_buffer_putc(ob, ' ');
+		}
+	}
+
 	if (content) hoedown_buffer_put(ob, content->data, content->size);
 }
 

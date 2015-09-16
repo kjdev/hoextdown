@@ -234,6 +234,9 @@ uint8_t hoedown_document_hrule_char(hoedown_document* document);
 /* returns the character used for the currently processing fenced code block (` or ~), or 0 if not processing a fenced code block */
 uint8_t hoedown_document_fencedcode_char(hoedown_document* document);
 
+/* returns the text of the numeral that begins an ordered list item, or NULL if not processing an ordered list item */
+const hoedown_buffer* hoedown_document_ol_numeral(hoedown_document* document);
+
 #ifdef __cplusplus
 }
 #endif
