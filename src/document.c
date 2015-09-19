@@ -982,13 +982,13 @@ char_codespan(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t o
 	if (i < nb && end >= size)
 		return 0; /* no matching delimiter */
 
-	/* trimming outside spaces */
+	/* trimming outside whitespace */
 	f_begin = nb;
-	while (f_begin < end && data[f_begin] == ' ')
+	while (f_begin < end && (data[f_begin] == ' ' || data[f_begin] == '\n'))
 		f_begin++;
 
 	f_end = end - nb;
-	while (f_end > nb && data[f_end-1] == ' ')
+	while (f_end > nb && (data[f_end-1] == ' ' || data[f_end-1] == '\n'))
 		f_end--;
 
 	/* real code span */
