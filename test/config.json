@@ -220,6 +220,11 @@
             "flags": ["--html-toc", "-t", "1", "--header-id", "--special-attribute"]
         },
         {
+            "input": "Tests/extras/Codespans.text",
+            "output": "Tests/extras/Codespans.html",
+            "flags": []
+        },
+        {
             "input": "Tests/context/Escaping.input",
             "output": "Tests/context/Escaping.output",
             "flags": ["--context-test"]
