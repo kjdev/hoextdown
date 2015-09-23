@@ -2310,6 +2310,8 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 		doc->ul_item_char = 0;
 	}
 
+	if (ol_numeral) hoedown_buffer_free(ol_numeral);
+
 	popbuf(doc, BUFFER_SPAN);
 	popbuf(doc, BUFFER_SPAN);
 	popbuf(doc, BUFFER_ATTRIBUTE);
