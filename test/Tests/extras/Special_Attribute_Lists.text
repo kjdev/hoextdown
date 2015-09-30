@@ -34,3 +34,13 @@
 1. Blah:
 
         $ ls test/{foo,bar}
+
+---
+
+*  item {.foo}
+
+   *  item {#bar}
+
+      blah blah
+
+*  item {baz="goo"}
