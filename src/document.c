@@ -2247,31 +2247,35 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 
 	if (*flags & HOEDOWN_LI_BLOCK) {
 		/* intermediate render of block li */
+		pre = 0;
 		if (sublist && sublist < work->size) {
-			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-				i = 1;
-				while (i < sublist && data[i] != '\n') {
-					i++;
-				}
-				len = parse_attributes(work->data, --i, attr, attribute, 0);
-				parse_block(inter, doc, work->data, len);
-				parse_block(inter, doc, work->data + i, sublist - i);
-			} else {
-				parse_block(inter, doc, work->data, sublist);
-			}
-			parse_block(inter, doc, work->data + sublist, work->size - sublist);
+			end = sublist;
 		} else {
-			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-				i = 1;
-				while (i < work->size && data[i] != '\n') {
-					i++;
-				}
-				len = parse_attributes(work->data, --i, attr, attribute, 0);
-				parse_block(inter, doc, work->data, len);
-				parse_block(inter, doc, work->data + i, work->size - i);
-			} else {
-				parse_block(inter, doc, work->data, work->size);
+			end = work->size;
+		}
+
+		do {
+			if (!(doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE)) {
+				break;
 			}
+
+			i = 1;
+			while (i < end && data[i] != '\n') {
+				i++;
+			}
+
+			len = parse_attributes(work->data, --i, attr, attribute, 0);
+			if (i == (len + 1)) {
+				break;
+			}
+
+			pre = i;
+			parse_block(inter, doc, work->data, len);
+		} while (0);
+
+		parse_block(inter, doc, work->data + pre, end - pre);
+		if (end == sublist) {
+			parse_block(inter, doc, work->data + sublist, work->size - sublist);
 		}
 	} else {
 		/* intermediate render of inline li */
