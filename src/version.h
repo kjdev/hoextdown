@@ -12,11 +12,11 @@ extern "C" {
  * CONSTANTS *
  *************/
 
-#define HOEDOWN_VERSION "3.0.5.1"
+#define HOEDOWN_VERSION "3.0.5.2"
 #define HOEDOWN_VERSION_MAJOR 3
 #define HOEDOWN_VERSION_MINOR 0
 #define HOEDOWN_VERSION_REVISION 5
-#define HOEDOWN_VERSION_EXTRAS 1
+#define HOEDOWN_VERSION_EXTRAS 2
 
 
 /*************
