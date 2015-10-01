@@ -162,6 +162,9 @@ struct option_data {
 	/* parsing */
 	hoedown_extensions extensions;
 	size_t max_nesting;
+
+	/* link_attributes */
+	int link_attributes;
 };
 
 int
@@ -348,6 +351,11 @@ parse_long_option(char *opt, char *next, void *opaque)
 		return 1;
 	}
 
+	if (strcmp(opt, "link-attributes-test")==0) {
+		data->link_attributes = 1;
+		return 1;
+	}
+
 	if (parse_category_option(opt, data) || parse_flag_option(opt, data) || parse_negative_option(opt, data))
 		return 1;
 
@@ -370,6 +378,13 @@ parse_argument(int argn, char *arg, int is_forced, void *opaque)
 	return 0;
 }
 
+static void
+rndr_test_link_attributes(hoedown_buffer *ob, const hoedown_buffer *url, const hoedown_renderer_data *data)
+{
+	hoedown_buffer_puts(ob, " data-url=\"");
+	hoedown_buffer_put(ob, url->data, url->size);
+	hoedown_buffer_putc(ob, '\"');
+}
 
 /* MAIN LOGIC */
 
@@ -396,6 +411,7 @@ main(int argc, char **argv)
 	data.html_flags = 0;
 	data.extensions = 0;
 	data.max_nesting = DEF_MAX_NESTING;
+	data.link_attributes = 0;
 
 	argc = parse_options(argc, argv, parse_short_option, parse_long_option, parse_argument, &data);
 	if (data.done) return 0;
@@ -446,21 +462,26 @@ main(int argc, char **argv)
 	meta = hoedown_buffer_new(data.ounit);
 	document = hoedown_document_new(renderer, data.extensions, data.max_nesting, NULL, meta);
 
-	/* toc_data */
-	if (data.toc_level > 0) {
-		hoedown_html_renderer_state *state;
-		state = (hoedown_html_renderer_state *)renderer->opaque;
-		state->toc_data.current_level = 0;
-		state->toc_data.level_offset = 0;
-		state->toc_data.nesting_level = data.toc_level;
-		state->toc_data.header = "<div class=\"toc\">";
-		state->toc_data.footer = "</div>";
-	}
-
+  /* state */
 	if (data.renderer == RENDERER_CONTEXT_TEST) {
 		hoedown_context_test_renderer_state *state;
 		state = (hoedown_context_test_renderer_state *)renderer->opaque;
 		state->doc = document;
+	} else {
+		hoedown_html_renderer_state *state;
+		state = (hoedown_html_renderer_state *)renderer->opaque;
+		/* toc_data */
+		if (data.toc_level > 0) {
+			state->toc_data.current_level = 0;
+			state->toc_data.level_offset = 0;
+			state->toc_data.nesting_level = data.toc_level;
+			state->toc_data.header = "<div class=\"toc\">";
+			state->toc_data.footer = "</div>";
+		}
+		/* link_attributes */
+		if (data.link_attributes) {
+			state->link_attributes = rndr_test_link_attributes;
+		}
 	}
 
 	t1 = clock();

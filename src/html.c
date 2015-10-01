@@ -442,17 +442,14 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffe
 		escape_html(ob, title->data, title->size);
 	}
 
+	hoedown_buffer_putc(ob, '"');
 	if (state->link_attributes) {
-		hoedown_buffer_putc(ob, '\"');
 		state->link_attributes(ob, link, data);
-		hoedown_buffer_putc(ob, '>');
-	} else if (attr && attr->size) {
-		hoedown_buffer_putc(ob, '"');
-		rndr_attributes(ob, attr->data, attr->size, NULL, data);
-		hoedown_buffer_putc(ob, '>');
-	} else {
-		HOEDOWN_BUFPUTSL(ob, "\">");
 	}
+	if (attr && attr->size) {
+		rndr_attributes(ob, attr->data, attr->size, NULL, data);
+	}
+	hoedown_buffer_putc(ob, '>');
 
 	if (content && content->size) hoedown_buffer_put(ob, content->data, content->size);
 	HOEDOWN_BUFPUTSL(ob, "</a>");
