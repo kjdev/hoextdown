@@ -195,6 +195,11 @@
             "output": "Tests/extras/List_Item_First_Line.html"
         },
         {
+            "input": "Tests/extras/List_Item_FencedCode.text",
+            "output": "Tests/extras/List_Item_FencedCode.html",
+            "flags": ["--fenced-code"]
+        },
+        {
             "input": "Tests/extras/Table_Escape_Pipe.text",
             "output": "Tests/extras/Table_Escape_Pipe.html",
             "flags": ["--tables"]

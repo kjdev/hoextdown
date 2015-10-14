@@ -2122,7 +2122,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 {
 	hoedown_buffer *work = 0, *inter = 0;
 	hoedown_buffer *attr = 0;
-	size_t beg = 0, end, pre, sublist = 0, orgpre = 0, i, len;
+	size_t beg = 0, end, pre, sublist = 0, orgpre = 0, i, len, fence_pre = 0;
 	int in_empty = 0, has_inside_empty = 0, in_fence = 0;
 	uint8_t ul_item_char = '*';
 	hoedown_buffer *ol_numeral = NULL;
@@ -2188,11 +2188,18 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 		while (i < 4 && beg + i < end && data[beg + i] == ' ')
 			i++;
 
+		if (in_fence && i > fence_pre) {
+			i = fence_pre;
+		}
+
 		pre = i;
 
 		if (doc->ext_flags & HOEDOWN_EXT_FENCED_CODE) {
 			if (is_codefence(data + beg + i, end - beg - i, NULL, NULL))
 				in_fence = !in_fence;
+			if (in_fence && fence_pre == 0) {
+				fence_pre = pre;
+			}
 		}
 
 		/* Only check for new list items if we are **not** inside
