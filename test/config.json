@@ -125,7 +125,7 @@
         {
             "input": "Tests/extras/Special_Attribute_Lists.text",
             "output": "Tests/extras/Special_Attribute_Lists.html",
-            "flags": ["--special-attribute"]
+            "flags": ["--special-attribute", "--tables"]
         },
         {
             "input": "Tests/extras/Special_Attribute_FencedCode.text",

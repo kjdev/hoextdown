@@ -2267,12 +2267,12 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			}
 
 			i = 1;
-			while (i < end && data[i] != '\n') {
+			while (i < end && work->data[i] != '\n') {
 				i++;
 			}
 
-			len = parse_attributes(work->data, --i, attr, attribute, 0);
-			if (i == (len + 1)) {
+			len = parse_attributes(work->data, i, attr, attribute, 0);
+			if (i == len) {
 				break;
 			}
 
