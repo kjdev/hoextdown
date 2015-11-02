@@ -501,13 +501,13 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 			}
 			if (strncmp((char *)content->data + prefix, "[ ]", 3) == 0) {
 				hoedown_buffer_put(ob, content->data, prefix);
-				HOEDOWN_BUFPUTSL(ob, "<input type=\"checkbox\"");
+				HOEDOWN_BUFPUTSL(ob, "<input type=\"checkbox\" class=\"task-list-checkbox\"");
 				hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
 				prefix += 3;
 				*flags |= HOEDOWN_LI_TASK;
 			} else if (strncasecmp((char *)content->data + prefix, "[x]", 3) == 0) {
 				hoedown_buffer_put(ob, content->data, prefix);
-				HOEDOWN_BUFPUTSL(ob, "<input checked=\"\" type=\"checkbox\"");
+				HOEDOWN_BUFPUTSL(ob, "<input checked=\"\" type=\"checkbox\" class=\"task-list-checkbox\"");
 				hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
 				prefix += 3;
 				*flags |= HOEDOWN_LI_TASK;

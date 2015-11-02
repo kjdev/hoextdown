@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
                'Xavier Mendez, Devin Torres and the Hoedown authors' => '',
                'kjdev' => '',
                'Ashok Gelal (podspec)' => 'ashokgelal@gmail.com' }
-  s.source = { :git => 'https://github.com/kjdev/hoextdown', :tag => s.version }
+  s.source = { :git => 'https://github.com/kjdev/hoextdown.git', :tag => s.version }
   s.requires_arc = false
 
   s.default_subspec = 'standard'
