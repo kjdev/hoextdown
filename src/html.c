@@ -489,32 +489,34 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 		while (size && content->data[size - 1] == '\n')
 			size--;
 
-		HOEDOWN_BUFPUTSL(ob, "<li");
-		if (attr && attr->size) {
-			rndr_attributes(ob, attr->data, attr->size, NULL, data);
-		}
-		hoedown_buffer_putc(ob, '>');
-
+                if (*flags & HOEDOWN_LI_BLOCK) {
+                        prefix = 3;
+                }
 		if (USE_TASK_LIST(state) && size >= 3) {
-			if (*flags & HOEDOWN_LI_BLOCK) {
-				prefix = 3;
-			}
 			if (strncmp((char *)content->data + prefix, "[ ]", 3) == 0) {
+		                HOEDOWN_BUFPUTSL(ob, "<li class=\"task-list-item\">");
 				hoedown_buffer_put(ob, content->data, prefix);
-				HOEDOWN_BUFPUTSL(ob, "<input type=\"checkbox\"");
+				HOEDOWN_BUFPUTSL(ob, "<input type=\"checkbox\" class=\"task-list-checkbox\"");
 				hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
 				prefix += 3;
 				*flags |= HOEDOWN_LI_TASK;
 			} else if (strncasecmp((char *)content->data + prefix, "[x]", 3) == 0) {
+		                HOEDOWN_BUFPUTSL(ob, "<li class=\"task-list-item\">");
 				hoedown_buffer_put(ob, content->data, prefix);
-				HOEDOWN_BUFPUTSL(ob, "<input checked=\"\" type=\"checkbox\"");
+				HOEDOWN_BUFPUTSL(ob, "<input checked=\"\" type=\"checkbox\" class=\"task-list-checkbox\"");
 				hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
 				prefix += 3;
 				*flags |= HOEDOWN_LI_TASK;
 			} else {
 				prefix = 0;
 			}
-		}
+		} else {
+                   HOEDOWN_BUFPUTSL(ob, "<li");
+                   if (attr && attr->size) {
+                           rndr_attributes(ob, attr->data, attr->size, NULL, data);
+                   }
+                   hoedown_buffer_putc(ob, '>');
+                }
 
 		hoedown_buffer_put(ob, content->data+prefix, size-prefix);
 	} else {
