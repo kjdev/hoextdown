@@ -489,13 +489,8 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 		while (size && content->data[size - 1] == '\n')
 			size--;
 
-		HOEDOWN_BUFPUTSL(ob, "<li");
-		if (attr && attr->size) {
-			rndr_attributes(ob, attr->data, attr->size, NULL, data);
-		}
-		hoedown_buffer_putc(ob, '>');
-
 		if (USE_TASK_LIST(state) && size >= 3) {
+		        HOEDOWN_BUFPUTSL(ob, "<li class=\"task-list-item\">");
 			if (*flags & HOEDOWN_LI_BLOCK) {
 				prefix = 3;
 			}
@@ -514,7 +509,13 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 			} else {
 				prefix = 0;
 			}
-		}
+		} else {
+                   HOEDOWN_BUFPUTSL(ob, "<li");
+                   if (attr && attr->size) {
+                           rndr_attributes(ob, attr->data, attr->size, NULL, data);
+                   }
+                   hoedown_buffer_putc(ob, '>');
+                }
 
 		hoedown_buffer_put(ob, content->data+prefix, size-prefix);
 	} else {
