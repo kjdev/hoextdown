@@ -98,6 +98,10 @@
             "flags": ["--html-toc", "-t", "3"]
         },
         {
+            "input": "Tests/CommentsInMiddleOfLine.text",
+            "output": "Tests/CommentsInMiddleOfLine.html"
+        },
+        {
             "input": "Tests/Math.text",
             "output": "Tests/Math.html",
             "flags": ["--math"]

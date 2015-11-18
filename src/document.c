@@ -402,9 +402,23 @@ tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink)
 	/* a valid tag can't be shorter than 3 chars */
 	if (size < 3) return 0;
 
-	/* begins with a '<' optionally followed by '/', followed by letter or number */
 	if (data[0] != '<') return 0;
-	i = (data[1] == '/') ? 2 : 1;
+
+        /* HTML comment, laxist form */
+        if (size > 5 && data[1] == '!' && data[2] == '-' && data[3] == '-') {
+		i = 5;
+
+		while (i < size && !(data[i - 2] == '-' && data[i - 1] == '-' && data[i] == '>'))
+			i++;
+
+		i++;
+
+		if (i <= size)
+			return i;
+        }
+
+	/* begins with a '<' optionally followed by '/', followed by letter or number */
+        i = (data[1] == '/') ? 2 : 1;
 
 	if (!isalnum(data[i]))
 		return 0;
