@@ -1974,6 +1974,7 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 	} else {
 		hoedown_buffer *header_work;
 		hoedown_buffer *attr_work;
+		size_t len;
 
 		if (work.size) {
 			size_t beg;
@@ -2003,12 +2004,15 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 
 		header_work = newbuf(doc, BUFFER_SPAN);
 		attr_work = newbuf(doc, BUFFER_ATTRIBUTE);
-		parse_inline(header_work, doc, work.data, work.size);
+
+		len = work.size;
+		if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+			len = parse_attributes(work.data, work.size, attr_work, NULL, 1);
+		}
+
+		parse_inline(header_work, doc, work.data, len);
 
 		if (doc->md.header) {
-			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-				header_work->size = parse_attributes(header_work->data, header_work->size, attr_work, NULL, 1);
-			}
 			doc->header_type = HOEDOWN_HEADER_SETEXT;
 			doc->md.header(ob, header_work, attr_work, (int)level, &doc->data);
 			doc->header_type = HOEDOWN_HEADER_NONE;
@@ -2375,13 +2379,16 @@ parse_atxheader(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 	if (end > i) {
 		hoedown_buffer *work = newbuf(doc, BUFFER_SPAN);
 		hoedown_buffer *attr = newbuf(doc, BUFFER_ATTRIBUTE);
+		size_t len;
 
-		parse_inline(work, doc, data + i, end - i);
+		len = end - i;
+		if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+			len = parse_attributes(data + i, end - i, attr, NULL, 1);
+		}
+
+		parse_inline(work, doc, data + i, len);
 
 		if (doc->md.header) {
-			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-				work->size = parse_attributes(work->data, work->size, attr, NULL, 1);
-			}
 			doc->header_type = HOEDOWN_HEADER_ATX;
 			doc->md.header(ob, work, attr, (int)level, &doc->data);
 			doc->header_type = HOEDOWN_HEADER_NONE;
