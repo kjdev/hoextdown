@@ -115,6 +115,11 @@
             "input": "Tests/Table.text",
             "output": "Tests/Table.html",
             "flags": ["--tables"]
+        },
+        {
+            "input": "Tests/Images.text",
+            "output": "Tests/Images.html",
+            "flags": []
         }
     ]
 }
