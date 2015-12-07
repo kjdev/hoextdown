@@ -117,6 +117,11 @@
             "flags": ["--tables"]
         },
         {
+            "input": "Tests/Images.text",
+            "output": "Tests/Images.html",
+            "flags": []
+        },
+        {
             "input": "Tests/extras/Special_Attribute_Headers.text",
             "output": "Tests/extras/Special_Attribute_Headers.html",
             "flags": ["--special-attribute"]
