@@ -117,6 +117,11 @@
             "flags": ["--tables"]
         },
         {
+            "input": "Tests/Table.text",
+            "output": "Tests/Table.html",
+            "flags": ["--tables", "--multiline-tables"]
+        },
+        {
             "input": "Tests/Images.text",
             "output": "Tests/Images.html",
             "flags": []
@@ -150,6 +155,16 @@
             "input": "Tests/extras/Special_Attribute_Escaped.text",
             "output": "Tests/extras/Special_Attribute_Escaped.html",
             "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Tables.text",
+            "output": "Tests/extras/Special_Attribute_Tables.html",
+            "flags": ["--special-attribute", "--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Multiline_Table.text",
+            "output": "Tests/extras/Special_Attribute_Multiline_Table.html",
+            "flags": ["--special-attribute", "--tables", "--multiline-tables"]
         },
         {
             "input": "Tests/extras/Tasks.text",
@@ -247,6 +262,21 @@
             "input": "Tests/extras/Link_Attributes.text",
             "output": "Tests/extras/Link_Attributes.html",
             "flags": ["--special-attribute", "--autolink", "--link-attributes-test"]
+        },
+        {
+            "input": "Tests/extras/Multiline_Table.text",
+            "output": "Tests/extras/Multiline_Table.html",
+            "flags": ["--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/extras/More_Tables.text",
+            "output": "Tests/extras/More_Tables.html",
+            "flags": ["--tables"]
+        },
+        {
+            "input": "Tests/extras/More_Tables.text",
+            "output": "Tests/extras/More_Tables.html",
+            "flags": ["--tables", "--multiline-tables"]
         },
         {
             "input": "Tests/context/Escaping.input",

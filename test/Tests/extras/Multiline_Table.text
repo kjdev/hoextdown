@@ -1,0 +1,252 @@
+Minimal header and body row continuation, with interior row and end row:
+
+1 | 2
+: 3 : 4
+--- | ---
+5 | 6
+: 7 : 8
+9 | 10
+11 | 12
+: 13 : 14
+
+With leading pipes:
+
+| 1 | 2
+: 3 : 4
+--- | ---
+| 5 | 6
+: 7 : 8
+| 9 | 10
+| 11 | 12
+: 13 : 14
+
+With trailing pipes only:
+
+| 1 | 2 |
+: 3 : 4
+--- | ---
+| 5 | 6 |
+: 7 : 8
+| 9 | 10 |
+| 11 | 12 |
+: 13 : 14
+
+With trailing colons only:
+
+| 1 | 2
+: 3 : 4 :
+--- | ---
+| 5 | 6
+: 7 : 8 :
+| 9 | 10
+| 11 | 12
+: 13 : 14 :
+
+With trailing pipes and colons:
+
+| 1 | 2 |
+: 3 : 4 :
+--- | ---
+| 5 | 6 |
+: 7 : 8 :
+| 9 | 10 |
+| 11 | 12 |
+: 13 : 14 :
+
+Without body padding:
+
+| 1 | 2 |
+: 3 : 4 :
+---|---
+|5|6|
+:7:8:
+|9|10|
+|11|12|
+:13:14:
+
+Without header padding (except mandatory leading space):
+
+|1|2|
+: 3:4:
+--- | ---
+| 5 | 6 |
+: 7 : 8 :
+| 9 | 10 |
+| 11 | 12 |
+: 13 : 14 :
+
+Many continuation lines:
+
+| 1   | 2   |
+: 3   : 4   :
+: 5   : 6   :
+: 7   : 8   :
+| --- | --- |
+| 9   | 10  |
+: 11  : 12  :
+: 13  : 14  :
+: 15  : 16  :
+
+Single column:
+
+| 1
+: 2
+| ---
+| 3
+: 4
+| ---
+| 5
+: 6
+| 7
+
+Empty continued cells:
+
+1 | 2
+: 3 : :
+--- | ---
+5 | 6
+: : 8
+9 | 10
+11 | 12
+: 13 : :
+
+Empty then not empty continued cells:
+
+1 | 2
+: 3 : :
+: : 4
+--- | ---
+5 | 6
+: : 8
+: 7 : :
+9 | 10
+11 | 12
+: 13 : :
+: : 14 :
+
+Inside another element:
+
+* foo
+
+  1 | 2
+  : 3 : 4
+  --- | ---
+  5 | 6
+  : 7 : 8
+  9 | 10
+  11 | 12
+  : 13 : 14
+
+Pipes on continued lines:
+
+1 | 2
+: 3 | : 4 |
+--- | ---
+5 | 6
+: 7 | : | 8
+9 | 10
+11 | 12
+: 13 | : 14
+
+Colons on regular lines:
+
+1: | : 2
+: 3 : 4
+--- | ---
+5 : | :6
+: 7 : 8
+: 9 | 10
+11 :: | 12
+: 13 : 14
+
+Escaped colons on continued lines:
+
+1 | 2
+: 3\: : 4
+--- | ---
+5 | 6
+: \: 7 : 8 \:
+9 | 10
+11 | 12
+: 13 \: : \: 14
+
+Inline elements spanning multiple lines:
+
+1 | 2
+: 3 : 4
+--- | ---
+**5 | 6
+: 7** : 8
+9 | 10
+11 | [12]
+: 13 : (/14)
+
+Optional row separators:
+
+1 | 2
+: 3 : 4
+--- | ---
+5 | 6
+: 7 : 8
+--- | ---
+9 | 10
+--- | ---
+11 | 12
+: 13 : 14
+--- | ---
+
+Optional row separators with leading pipes:
+
+1 | 2
+: 3 : 4
+| --- | ---
+5 | 6
+: 7 : 8
+| --- | ---
+9 | 10
+| --- | ---
+11 | 12
+: 13 : 14
+| --- | ---
+
+Optional row separators with trailing pipes:
+
+1 | 2
+: 3 : 4
+--- | --- |
+5 | 6
+: 7 : 8
+--- | --- |
+9 | 10
+--- | --- |
+11 | 12
+: 13 : 14
+--- | --- |
+
+Optional row separators with leading and trailing pipes:
+
+1 | 2
+: 3 : 4
+| --- | --- |
+5 | 6
+: 7 : 8
+| --- | --- |
+9 | 10
+| --- | --- |
+11 | 12
+: 13 : 14
+| --- | --- |
+
+Optional row separators without padding:
+
+1 | 2
+: 3 : 4
+|---|---|
+5 | 6
+: 7 : 8
+|---|---|
+9 | 10
+|---|---|
+11 | 12
+: 13 : 14
+|---|---|

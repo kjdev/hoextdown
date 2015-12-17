@@ -2690,6 +2690,53 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 	return tag_end;
 }
 
+/* Common function to parse table main rows and continued rows. */
+static size_t
+parse_table_cell_line(
+		hoedown_buffer *ob,
+		uint8_t *data,
+		size_t size,
+		size_t offset,
+		char separator,
+		int is_continuation) {
+	size_t pos, line_end, cell_start, cell_end, len;
+
+	pos = offset;
+
+	while (pos < size && _isspace(data[pos])) pos++;
+
+	cell_start = pos;
+
+	line_end = pos;
+	while (line_end < size && data[line_end] != '\n') line_end++;
+	len = find_emph_char(data + pos, line_end - pos, separator);
+
+	/* Two possibilities for len == 0:
+	   1) No more separator char found in the current line.
+	   2) The next separator is right after the current one, i.e. empty cell.
+	   For case 1, we skip to the end of line; for case 2 we just continue.
+	*/
+	if (len == 0 && pos < size && data[pos] != separator) {
+		while (pos + len < size && data[pos + len] != '\n') len++;
+	}
+	pos += len;
+
+	cell_end = pos - 1;
+
+	while (cell_end > cell_start && _isspace(data[cell_end]))
+		cell_end--;
+
+	/* If this isn't the first line of the cell, add a new line before the
+	   extra cell contents, to separate them (and make backslash linebreaks
+	   work).
+	*/
+	if (is_continuation) hoedown_buffer_putc(ob, '\n');
+
+	hoedown_buffer_put(ob, data + cell_start, 1 + cell_end - cell_start);
+
+	return pos - offset;
+}
+
 static void
 parse_table_row(
 	hoedown_buffer *ob,
@@ -2697,10 +2744,11 @@ parse_table_row(
 	uint8_t *data,
 	size_t size,
 	size_t columns,
+	size_t rows,
 	hoedown_table_flags *col_data,
 	hoedown_table_flags header_flag)
 {
-	size_t i = 0, col, len;
+	size_t i = 0, col;
 	hoedown_buffer *row_work = 0;
 
 	if (!doc->md.table_cell || !doc->md.table_row)
@@ -2708,39 +2756,60 @@ parse_table_row(
 
 	row_work = newbuf(doc, BUFFER_SPAN);
 
+	/* skip optional first pipe */
 	if (i < size && data[i] == '|')
 		i++;
 
 	for (col = 0; col < columns && i < size; ++col) {
-		size_t cell_start, cell_end;
+		size_t pos, extra_rows_in_cell;
+		hoedown_buffer *cell_content;
 		hoedown_buffer *cell_work;
 
+		/* cell_content is the text that is inline parsed into cell_work. It
+		   consists of the values of this cell from each row, concatenated and
+		   separated by new lines.
+		*/
+		cell_content = newbuf(doc, BUFFER_SPAN);
 		cell_work = newbuf(doc, BUFFER_SPAN);
 
-		while (i < size && _isspace(data[i]))
-			i++;
+		i += parse_table_cell_line(cell_content, data, size, i, '|', 0 /* is_contination */);
 
-		cell_start = i;
+		/* Add extra rows of the cell. This only occurs if rows is greater than 0,
+		   which only happens when multiline tables are enabled.
 
-		len = find_emph_char(data + i, size - i, '|');
-
-		/* Two possibilities for len == 0:
-		   1) No more pipe char found in the current line.
-		   2) The next pipe is right after the current one, i.e. empty cell.
-		   For case 1, we skip to the end of line; for case 2 we just continue.
+		   Each extra row is a colon, followed by cell contents for the continued
+		   row, separated by colons.
 		*/
-		if (len == 0 && i < size && data[i] != '|')
-			len = size - i;
-		i += len;
+		extra_rows_in_cell = rows - 1;
+		pos = i;
+		while (extra_rows_in_cell > 0 && pos < size) {
+			size_t c;
 
-		cell_end = i - 1;
+			/* seek to the end of the current row */
+			while (pos < size && data[pos] != '\n') {
+				pos++;
+			}
 
-		while (cell_end > cell_start && _isspace(data[cell_end]))
-			cell_end--;
+			/* skip new line and leading colon */
+			pos += 2;
 
-		parse_inline(cell_work, doc, data + cell_start, 1 + cell_end - cell_start);
+			/* seek to the beginning of the correct column on the continuation line */
+			for (c = 0; c < col; c++) {
+				while (pos < size && (is_escaped(data, pos) || data[pos] != ':'))
+					pos++;
+				pos++;  /* skip colon */
+			}
+
+			parse_table_cell_line(cell_content, data, size, pos, ':', 1 /* is_contination */);
+
+			extra_rows_in_cell--;
+		}
+
+		parse_inline(cell_work, doc, cell_content->data, cell_content->size);
+
 		doc->md.table_cell(row_work, cell_work, col_data[col] | header_flag, &doc->data);
 
+		popbuf(doc, BUFFER_SPAN);
 		popbuf(doc, BUFFER_SPAN);
 		i++;
 	}
@@ -2765,8 +2834,9 @@ parse_table_header(
 	size_t *columns,
 	hoedown_table_flags **column_data)
 {
-	int pipes;
+	int pipes, rows;
 	size_t i = 0, col, header_end, under_end;
+	hoedown_buffer *header_contents = 0;
 
 	pipes = 0;
 	while (i < size && data[i] != '\n') {
@@ -2811,8 +2881,61 @@ parse_table_header(
 	if (pipes < 0)
 		return 0;
 
+	/* header_contents will have the lines of the header copied into it, and then
+	   is passed to parse_table_row. We need a separate buffer to avoid passing
+	   the attribute to parse_table_row.
+	*/
+	header_contents = newbuf(doc, BUFFER_SPAN);
+	hoedown_buffer_put(header_contents, data, header_end);
+
 	*columns = pipes + 1;
 	*column_data = hoedown_calloc(*columns, sizeof(hoedown_table_flags));
+
+	/* If the multiline table extension is enabled, check the next lines for
+	   continuation markers, to find the number of text rows that make up this
+	   logical row, and copy the contents of each row to header_contents,
+	   separated by new lines.
+	*/
+	rows = 1;
+	if ((doc->ext_flags & HOEDOWN_EXT_MULTILINE_TABLES) != 0) {
+		while (i < size) {
+			size_t j = i + 1;
+			int colons = 0;
+
+			/* Require that the continuation line starts with a colon */
+			if (j >= size || data[j] != ':') break;
+			/* Skip the leading colon to match the pipe counting behavior above */
+			j++;
+
+			/* Require that the continuation line start with ": ", to
+			   distinguish from ":-" which could start a left-aligned header
+			   bar.
+			*/
+			if (j >= size || data[j] != ' ') break;
+
+			while (j < size && data[j] != '\n') {
+				j++;
+				if (!is_escaped(data, j) && data[j] == ':')
+					colons++;
+			}
+
+			/* Allow a trailing colon to match the pipe counting behavior above */
+			if (!is_escaped(data, j - 1) && data[j - 1] == ':')
+				colons--;
+
+			if (colons != pipes) break;
+
+			hoedown_buffer_putc(header_contents, '\n');
+			/* data[i] is the previous new line, and data[j] is the next new
+			   line. This copies all the text between the new lines.
+			 */
+			hoedown_buffer_put(header_contents, data + i + 1, j - i - 1);
+
+			rows++;
+			i = j;
+			header_end = j;
+		}
+	}
 
 	/* Parse the header underline */
 	i++;
@@ -2855,16 +2978,23 @@ parse_table_header(
 		i++;
 	}
 
-	if (col < *columns)
+	if (col < *columns) {
+		/* clean up header_contents */
+		popbuf(doc, BUFFER_SPAN);
 		return 0;
+	}
 
 	parse_table_row(
-		ob, doc, data,
-		header_end,
+		ob, doc, header_contents->data,
+		header_contents->size,
 		*columns,
+		rows,
 		*column_data,
 		HOEDOWN_TABLE_HEADER
 	);
+
+	/* clean up header_contents */
+	popbuf(doc, BUFFER_SPAN);
 
 	return under_end + 1;
 }
@@ -2896,6 +3026,7 @@ parse_table(
 		while (i < size) {
 			size_t row_start;
 			int pipes = 0;
+			size_t rows = 1;
 
 			row_start = i;
 
@@ -2908,16 +3039,102 @@ parse_table(
 				break;
 			}
 
+			/* Don't count a leading pipe. */
+			if (data[row_start] == '|')
+				pipes--;
+
+			/* Don't count a trailing pipe. */
+			if (data[i - 1] == '|')
+				pipes--;
+
+			/* If the multiline table extension is enabled, check the next
+			   lines for continuation markers, to find the number of text rows
+			   that make up this logical row.
+			*/
+			if ((doc->ext_flags & HOEDOWN_EXT_MULTILINE_TABLES) != 0) {
+				while (i < size) {
+					size_t j = i + 1;
+					int colons = 0;
+
+					/* Require that a continued row starts with a colon. */
+					if (j >= size || data[j] != ':') break;
+
+					/* Don't count leading colon for comparison to pipes. */
+					j++;
+
+					while (j < size && data[j] != '\n') {
+						j++;
+						if (!is_escaped(data, j) && data[j] == ':')
+							colons++;
+					}
+
+					/* Don't count a trailing colon for comparison to pipes. */
+					if (!is_escaped(data, j - 1) && data[j - 1] == ':')
+						colons--;
+
+					if (colons != pipes) break;
+
+					rows++;
+					i = j;
+				}
+			}
+
 			parse_table_row(
 				body_work,
 				doc,
 				data + row_start,
 				i - row_start,
 				columns,
+				rows,
 				col_data, 0
 			);
 
 			i++;
+
+			/* Skip an optional row separator, if it's there. */
+			if ((doc->ext_flags & HOEDOWN_EXT_MULTILINE_TABLES) != 0) {
+				/* Use j instead of i, and set i to j only if this is actually a row separator. */
+				size_t j = i, next_line_end = i, col;
+
+				/* Seek next_line_end to the position of the terminating new line. */
+				while (next_line_end < size && data[next_line_end] != '\n')
+					next_line_end++;
+
+				/* Skip leading pipe, if any. */
+				if (j < next_line_end && data[j] == '|')
+					j++;
+
+				/* Ensure that there are at least columns pipe/plus separated
+				   runs of dashes, each at least 3 long. The pipes may be
+				   padded with spaces, and the line may end in a pipe.
+				*/
+				for (col = 0; col < columns && j < next_line_end; col++) {
+					size_t dashes = 0;
+
+					while (j < next_line_end && data[j] == ' ')
+						j++;
+
+					while (j < next_line_end && data[j] == '-') {
+						j++;
+						dashes++;
+					}
+
+					while (j < next_line_end && data[j] == ' ')
+						j++;
+
+					if (j < next_line_end && data[j] != '|' && data[j] != '+')
+						break;
+
+					if (dashes < 3)
+						break;
+
+					j++;
+				}
+
+				/* Skip i past the row separator, if it was valid. */
+				if (col == columns)
+					i = next_line_end + 1;
+			}
 		}
 
 		if (doc->md.table_header)

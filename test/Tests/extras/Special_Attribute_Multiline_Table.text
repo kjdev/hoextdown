@@ -1,0 +1,17 @@
+foo | bar {#table1}
+: baz : bat
+--- | ---
+foo | bar
+: baz : bat
+
+| foo | bar {#table2}
+: baz : bat
+| --- | ---
+| foo | bar
+: baz : bat
+
+| foo | bar | {#table3}
+: baz : bat :
+| --- | --- |
+| foo | bar |
+: baz : bat :
