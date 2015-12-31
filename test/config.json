@@ -147,6 +147,11 @@
             "flags": ["--special-attribute", "--tables"]
         },
         {
+            "input": "Tests/extras/Special_Attribute_Escaped.text",
+            "output": "Tests/extras/Special_Attribute_Escaped.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/extras/Tasks.text",
             "output": "Tests/extras/Tasks.html",
             "flags": ["--task", "--special-attribute"]

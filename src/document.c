@@ -632,6 +632,10 @@ static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer
 	}
 
 	if (begin && end && data[begin-1] == '{' && data[end] == '}') {
+		if (begin >=2 && data[begin-2] == '\\' && data[end-1] == '\\') {
+			return len;
+		}
+
 		if (block_attr && data[begin] == '@') {
 			while (data[begin] != ' ') {
 				begin++;
