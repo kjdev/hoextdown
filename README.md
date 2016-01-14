@@ -1,6 +1,7 @@
 # Hoextdown
 
 [![Build Status](https://api.travis-ci.org/kjdev/hoextdown.png?branch=master)](https://travis-ci.org/kjdev/hoextdown)
+[![codecov.io](https://codecov.io/github/kjdev/hoextdown/coverage.svg?branch=master)](https://codecov.io/github/kjdev/hoextdown?branch=master)
 
 `Hoextdown` is an extension to [Hoedown](https://github.com/hoedown/hoedown).
 
