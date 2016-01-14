@@ -1,0 +1,62 @@
+Minimal table:
+
+foo | bar | baz
+--- | --- | ---
+oof | rab | zab
+ofo | rba | bza
+
+Leading pipes only:
+
+| foo | bar | baz
+| --- | --- | ---
+| oof | rab | zab
+| ofo | rba | bza
+
+Trailing pipes only:
+
+foo | bar | baz |
+--- | --- | --- |
+oof | rab | zab |
+ofo | rba | bza |
+
+Leading and trailing pipes:
+
+| foo | bar | baz |
+| --- | --- | --- |
+| oof | rab | zab |
+| ofo | rba | bza |
+
+Extra padding:
+
+foo        |    bar      |    baz
+---    | ---    |     ---
+oof   |    rab  |    zab
+ofo    | rba  |   bza
+
+No padding:
+
+foo|bar|baz
+---|---|---
+oof|rab|zab
+ofo|rba|bza
+
+Single column, leading pipe style:
+
+| foo
+| ---
+| bar
+| baz
+
+Single column, trailing pipe style:
+
+foo |
+--- |
+bar |
+baz |
+
+With plus header separator:
+
+foo | bar | baz
+----+-----+----
+oof | rab | zab
+ofo | rba | bza
