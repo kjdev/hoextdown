@@ -9,6 +9,10 @@ ifneq ($(OS),Windows_NT)
 	HOEDOWN_CFLAGS += -fPIC
 endif
 
+ifdef COVERAGE
+HOEDOWN_CFLAGS := $(HOEDOWN_CFLAGS) -coverage
+endif
+
 SONAME = -soname
 ifeq ($(shell uname -s),Darwin)
 	SONAME = -install_name
@@ -45,10 +49,10 @@ libhoedown.a: $(HOEDOWN_SRC)
 # Executables
 
 hoedown: bin/hoedown.o $(HOEDOWN_SRC)
-	$(CC) $^ $(LDFLAGS) -o $@
+	$(CC) $(HOEDOWN_CFLAGS) $^ $(LDFLAGS) -o $@
 
 smartypants: bin/smartypants.o $(HOEDOWN_SRC)
-	$(CC) $^ $(LDFLAGS) -o $@
+	$(CC) $(HOEDOWN_CFLAGS) $^ $(LDFLAGS) -o $@
 
 # Perfect hashing
 
@@ -70,6 +74,7 @@ clean:
 	$(RM) src/*.o bin/*.o
 	$(RM) libhoedown.so libhoedown.so.3 libhoedown.a
 	$(RM) hoedown smartypants hoedown.exe smartypants.exe
+	$(RM) bin/*.gc* src/*.gc* *.gcov
 
 # Installing
 

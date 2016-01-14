@@ -6,4 +6,14 @@ perl:
   - "5.12"
 before_install:
   - sudo apt-get install -qq tidy
-script: make test
+  - pip install --user codecov
+script:
+  - make COVERAGE=1
+  - make test
+
+after_success:
+  # - bash <(curl -s https://codecov.io/bash)
+  # Fixed gcov 4.6.3 in codecov
+  - curl -s -o codecov https://codecov.io/bash
+  - sed -i "/\.gcno/c for f in \`find \$proj_root -type f -name '*.gcno' \$gcov_ignore\`; do o=\`dirname \$f\`; \$gcov_exe \$gcovargs -pb \$f -o \$o; done" codecov
+  - bash codecov
