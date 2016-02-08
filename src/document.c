@@ -670,6 +670,13 @@ is_escaped(uint8_t *data, size_t loc)
 	return (loc - i) % 2;
 }
 
+/* is_backslashed • returns whether special char at data[loc] is preceded by '\\', a stricter interpretation of escaping than is_escaped. */
+static int
+is_backslashed(uint8_t *data, size_t loc)
+{
+	return loc >= 1 && data[loc - 1] == '\\';
+}
+
 /* find_emph_char • looks for the next emph uint8_t, skipping other constructs */
 static size_t
 find_emph_char(uint8_t *data, size_t size, uint8_t c)
@@ -758,6 +765,31 @@ find_emph_char(uint8_t *data, size_t size, uint8_t c)
 
 			i++;
 		}
+	}
+
+	return 0;
+}
+
+/* find_separator_char • looks for the next unbackslashed separator character c */
+static size_t
+find_separator_char(uint8_t *data, size_t size, uint8_t c)
+{
+	size_t i = 0;
+
+	while (i < size) {
+		while (i < size && data[i] != c)
+			i++;
+
+		if (i == size)
+			return 0;
+
+		/* not counting backslashed separators */
+		if (is_backslashed(data, i)) {
+			i++; continue;
+		}
+
+		if (data[i] == c)
+			return i;
 	}
 
 	return 0;
@@ -2699,7 +2731,7 @@ parse_table_cell_line(
 		size_t offset,
 		char separator,
 		int is_continuation) {
-	size_t pos, line_end, cell_start, cell_end, len;
+	size_t pos, line_end, cell_start, cell_end, len, copy_start, copy_end;
 
 	pos = offset;
 
@@ -2709,7 +2741,7 @@ parse_table_cell_line(
 
 	line_end = pos;
 	while (line_end < size && data[line_end] != '\n') line_end++;
-	len = find_emph_char(data + pos, line_end - pos, separator);
+	len = find_separator_char(data + pos, line_end - pos, separator);
 
 	/* Two possibilities for len == 0:
 	   1) No more separator char found in the current line.
@@ -2732,7 +2764,16 @@ parse_table_cell_line(
 	*/
 	if (is_continuation) hoedown_buffer_putc(ob, '\n');
 
-	hoedown_buffer_put(ob, data + cell_start, 1 + cell_end - cell_start);
+	/* Remove escaping from pipes */
+	copy_start = copy_end = cell_start;
+	while (copy_end < cell_end + 1) {
+		if (data[copy_end] == separator && copy_end > copy_start && data[copy_end - 1] == '\\') {
+			hoedown_buffer_put(ob, data + copy_start, copy_end - copy_start - 1);
+			copy_start = copy_end;
+		}
+		copy_end++;
+	}
+	hoedown_buffer_put(ob, data + copy_start, copy_end - copy_start);
 
 	return pos - offset;
 }
@@ -2795,7 +2836,7 @@ parse_table_row(
 
 			/* seek to the beginning of the correct column on the continuation line */
 			for (c = 0; c < col; c++) {
-				while (pos < size && (is_escaped(data, pos) || data[pos] != ':'))
+				while (pos < size && (is_backslashed(data, pos) || data[pos] != ':'))
 					pos++;
 				pos++;  /* skip colon */
 			}
@@ -2840,7 +2881,7 @@ parse_table_header(
 
 	pipes = 0;
 	while (i < size && data[i] != '\n') {
-		if (!is_escaped(data, i) && data[i] == '|') {
+		if (!is_backslashed(data, i) && data[i] == '|') {
 			pipes++;
 		}
 		i++;
@@ -2857,7 +2898,7 @@ parse_table_header(
 	if (data[0] == '|')
 		pipes--;
 
-	if (header_end && data[header_end - 1] == '|')
+	if (header_end && data[header_end - 1] == '|' && !is_backslashed(data, header_end - 1))
 		pipes--;
 
 	if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
@@ -2868,10 +2909,10 @@ parse_table_header(
 
 			hoedown_buffer_put(attr, &data[n+1], header_end - n - 2);
 
-			while (n > 0 && _isspace(data[n-1]))
+			while (n > 0 && _isspace(data[n - 1]))
 				n--;
 
-			if (n && data[n - 1] == '|')
+			if (n && data[n - 1] == '|' && !is_backslashed(data, n - 1))
 				pipes--;
 
 			header_end = n + 1;
@@ -2915,12 +2956,12 @@ parse_table_header(
 
 			while (j < size && data[j] != '\n') {
 				j++;
-				if (!is_escaped(data, j) && data[j] == ':')
+				if (!is_backslashed(data, j) && data[j] == ':')
 					colons++;
 			}
 
 			/* Allow a trailing colon to match the pipe counting behavior above */
-			if (!is_escaped(data, j - 1) && data[j - 1] == ':')
+			if (!is_backslashed(data, j - 1) && data[j - 1] == ':')
 				colons--;
 
 			if (colons != pipes) break;
@@ -3031,7 +3072,7 @@ parse_table(
 			row_start = i;
 
 			while (i < size && data[i] != '\n')
-				if (data[i++] == '|')
+				if (data[i++] == '|' && !is_backslashed(data, i))
 					pipes++;
 
 			if (pipes == 0 || i == size) {
@@ -3044,7 +3085,7 @@ parse_table(
 				pipes--;
 
 			/* Don't count a trailing pipe. */
-			if (data[i - 1] == '|')
+			if (data[i - 1] == '|' && !is_backslashed(data, i - 1))
 				pipes--;
 
 			/* If the multiline table extension is enabled, check the next
@@ -3064,12 +3105,12 @@ parse_table(
 
 					while (j < size && data[j] != '\n') {
 						j++;
-						if (!is_escaped(data, j) && data[j] == ':')
+						if (!is_backslashed(data, j) && data[j] == ':')
 							colons++;
 					}
 
 					/* Don't count a trailing colon for comparison to pipes. */
-					if (!is_escaped(data, j - 1) && data[j - 1] == ':')
+					if (!is_backslashed(data, j - 1) && data[j - 1] == ':')
 						colons--;
 
 					if (colons != pipes) break;
