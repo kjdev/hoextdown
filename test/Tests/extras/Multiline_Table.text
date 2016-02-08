@@ -250,3 +250,11 @@ Optional row separators without padding:
 11 | 12
 : 13 : 14
 |---|---|
+
+Escaped colons in codespans:
+
+| foo  | bar   | baz    |
+: `\:` : `\\:` : `\\\:` :
+| ---- | ----- | ------ |
+| foo  | bar   | baz    |
+: `\:` : `\\:` : `\\\:` :
