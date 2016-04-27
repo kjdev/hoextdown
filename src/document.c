@@ -3071,9 +3071,10 @@ parse_table(
 
 			row_start = i;
 
-			while (i < size && data[i] != '\n')
-				if (data[i++] == '|' && !is_backslashed(data, i))
-					pipes++;
+			while (i < size && data[i] != '\n') {
+				if (data[i] == '|' && !is_backslashed(data, i)) pipes++;
+				i++;
+			}
 
 			if (pipes == 0 || i == size) {
 				i = row_start;
@@ -3104,9 +3105,9 @@ parse_table(
 					j++;
 
 					while (j < size && data[j] != '\n') {
-						j++;
 						if (!is_backslashed(data, j) && data[j] == ':')
 							colons++;
+						j++;
 					}
 
 					/* Don't count a trailing colon for comparison to pipes. */

@@ -110,6 +110,17 @@ Empty continued cells:
 11 | 12
 : 13 : :
 
+Squished empty continued cells:
+
+1 | 2
+: 3 ::
+--- | ---
+5 | 6
+:: 8
+9 | 10
+11 | 12
+: 13 ::
+
 Empty then not empty continued cells:
 
 1 | 2
@@ -157,6 +168,17 @@ Colons on regular lines:
 : 7 : 8
 : 9 | 10
 11 :: | 12
+: 13 : 14
+
+Escaped pipes with continued lines:
+
+1 \| | 2
+: 3 : 4
+--- | ---
+5 | 6 \|
+: 7 : 8
+9 | 10
+11 \| | 12 \|
 : 13 : 14
 
 Escaped colons on continued lines:
