@@ -1937,6 +1937,91 @@ prefix_uli(uint8_t *data, size_t size)
 	return i + 2;
 }
 
+/* prefix_dt • returns dictionary definition prefix
+ * this is in the form of /\s{0,3}:/ (e.g. "  :", where spacing is optional) */
+static size_t
+prefix_dt(uint8_t *data, size_t size)
+{
+	size_t i = 0;
+
+	/* skip up to 3 whitespaces (since it's an indented codeblock at 4) */
+	if (i < size && data[i] == ' ') i++;
+	if (i < size && data[i] == ' ') i++;
+	if (i < size && data[i] == ' ') i++;
+
+	/* if the first character after whitespaces isn't :, it isn't a dt */
+	if (i + 1 >= size ||
+		data[i] != ':' ||
+		data[i + 1] != ' ')
+		return 0;
+
+	if (is_next_headerline(data + i, size - i))
+		return 0;
+
+	return i + 2;
+}
+
+/* is_paragraph • returns if the next block is a paragraph (doesn't follow any
+ * other special rules for other types of blocks) */
+static int
+is_paragraph(hoedown_document *doc, uint8_t *txt_data, size_t end);
+
+/* prefix_dli • returns dictionary definition prefix
+ * a dli looks like a block of text, followed by optional whitespace, followed
+ * by another block with : as the first non-whitespace character */
+static size_t
+prefix_dli(hoedown_document *doc, uint8_t *data, size_t size)
+{
+	/* end is to keep track of the final return value */
+	size_t i = 0, j = 0, end = 0;
+	int empty = 0;
+
+	/* if the first line has a : in front of it, it can't be a definition list
+	 * that starts at this point */
+	if (prefix_dt(data, size)) {
+		return 0;
+	}
+
+	/* temporarily toggle definition lists off to prevent infinite loops */
+	doc->ext_flags &= ~HOEDOWN_EXT_DEFINITION_LISTS;
+
+	/* check if it is a block of text with no double newlines inside, followed by
+	 *  another block of text starting with : */
+	while (i < size) {
+		/* if the line we are on is empty, flip the empty flag to indicate that
+		 * the next block of text we see has to start with : to be considered
+		 * a definition list; then skip to the next line */
+		j = is_empty(data + i, size - i);
+		if(j != 0) {
+			empty = 1;
+			i += j;
+			continue;
+		}
+
+		/* if anything special is found while parsing the definition term part,
+		 * then return so that the main loop can deal with it */
+		if (!is_paragraph(doc, data + i, size - 1)) {
+			break;
+		}
+
+		/* check if the current line starts with :, returning the position of the
+		 * beginning of the line if it does */
+		j = prefix_dt(data + i, size - i);
+		if (j > 0) {
+			end = i;
+			break;
+		} else if(empty) {
+			/* if an empty newline has been found, then since : was not the first
+			 * character after whitespaces, it can't be a definition list */
+			break;
+		}
+		/* scan characters until the next newline */
+		for (i = i + 1; i < size && data[i - 1] != '\n'; i++);
+	}
+
+	doc->ext_flags |= HOEDOWN_EXT_DEFINITION_LISTS;
+	return end;
+}
 
 /* parse_block • parsing of one block, returning next uint8_t to parse */
 static void parse_block(hoedown_buffer *ob, hoedown_document *doc,
@@ -2210,6 +2295,10 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			/* -2 to eliminate the trailing ". " */
 			hoedown_buffer_put(ol_numeral, data, beg - 2);
 		}
+		if (*flags & HOEDOWN_LIST_DEFINITION) {
+			beg = prefix_dt(data, size);
+			if (beg) ul_item_char = data[beg - 2];
+		}
 	}
 
 	if (!beg)
@@ -2239,7 +2328,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 
 	/* process the following lines */
 	while (beg < size) {
-		size_t has_next_uli = 0, has_next_oli = 0;
+		size_t has_next_uli = 0, has_next_oli = 0, has_next_dli = 0;
 
 		end++;
 
@@ -2277,10 +2366,17 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 		if (!in_fence) {
 			has_next_uli = prefix_uli(data + beg + i, end - beg - i);
 			has_next_oli = prefix_oli(data + beg + i, end - beg - i);
+
+			/* only check for the next definition if it is same indentation or less
+			 * since embedded definition lists need terms, so finding just a
+			 * colon by itself does not mean anything */
+			if (pre <= orgpre)
+				has_next_dli = prefix_dt(data + beg + i, end - beg - i);
 		}
 
 		/* checking for a new item */
-		if ((has_next_uli && !is_hrule(data + beg + i, end - beg - i)) || has_next_oli) {
+		if ((has_next_uli && !is_hrule(data + beg + i, end - beg - i)) || 
+			has_next_oli || (*flags & HOEDOWN_LI_DD && has_next_dli)) {
 			if (in_empty)
 				has_inside_empty = 1;
 
@@ -2391,6 +2487,69 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 	return beg;
 }
 
+/* parse_definition • parsing of a term/definition pair, assuming starting
+ * at start of line */
+static size_t
+parse_definition(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, hoedown_list_flags *flags, hoedown_buffer *attribute)
+{
+	/* end represents the position of the first line where definitions start */
+	size_t j = 0, k = 0, len = 0, end = prefix_dli(doc, data, size);
+	if (end <= 0) {
+		return 0;
+	}
+	hoedown_buffer *work = 0, *attr_work;
+
+
+	/* scan all the definition terms, rendering them to the output buffer
+	 * the +1 is to account for the trailing newline on each term
+	 * j is a counter keeping track of the beginning of each new term */
+	*flags |= HOEDOWN_LI_DT;
+	while (j + 1 < end) {
+		/* find the end of the term (where the newline is) */
+		for(k = j + 1; k - 1 < end && data[k - 1] != '\n'; k++);
+
+		len = k - j;
+
+		if (is_empty(data + j, len)) {
+			j = k;
+			continue;
+		}
+
+		work = newbuf(doc, BUFFER_BLOCK);
+		attr_work = newbuf(doc, BUFFER_ATTRIBUTE);
+
+		if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+			len = parse_attributes(data + j, len, attr_work, NULL, 1);
+		}
+
+		parse_inline(work, doc, data + j, len);
+
+		if (doc->md.listitem) {
+			doc->md.listitem(ob, work, attr_work, flags, &doc->data);
+		}
+
+		j = k;
+
+		popbuf(doc, BUFFER_BLOCK);
+		popbuf(doc, BUFFER_ATTRIBUTE);
+	}
+	*flags &= ~HOEDOWN_LI_DT;
+
+	/* scan all the definitions, rendering it to the output buffer */
+	*flags |= HOEDOWN_LI_DD;
+	while (end < size) {
+		j = parse_listitem(ob, doc, data + end, size - end, flags, attribute);
+		if (j <= 0) {
+			break;
+		}
+		end += j;
+	}
+
+	*flags &= ~HOEDOWN_LI_DD;
+	*flags &= ~HOEDOWN_LI_END;
+
+	return end;
+}
 
 /* parse_list • parsing ordered or unordered list block */
 static size_t
@@ -2405,7 +2564,11 @@ parse_list(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size
 	work = newbuf(doc, BUFFER_BLOCK);
 
 	while (i < size) {
-		j = parse_listitem(work, doc, data + i, size - i, &flags, &attr);
+		if (flags & HOEDOWN_LIST_DEFINITION) {
+			j = parse_definition(work, doc, data + i, size - i, &flags, &attr);
+		} else {
+			j = parse_listitem(work, doc, data + i, size - i, &flags, &attr);
+		}
 		i += j;
 
 		if (!j || (flags & HOEDOWN_LI_END))
@@ -2636,7 +2799,7 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 			if (j) {
 				work.size = i + j;
 
-				if (doc->ext_flags & HOEDOWN_EXT_META_BLOCK &&
+				if (do_render && doc->ext_flags & HOEDOWN_EXT_META_BLOCK &&
 					meta == 2 && doc->meta) {
 					size_t org, sz;
 
@@ -3219,6 +3382,35 @@ parse_userblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 	return len;
 }
 
+/* is_paragraph • returns if the next block is a paragraph (doesn't follow any
+ * other special rules for other types of blocks) */
+static int
+is_paragraph(hoedown_document *doc, uint8_t *txt_data, size_t end)
+{
+	/* temporary buffer for results of checking special blocks */
+	hoedown_buffer *tmp = newbuf(doc, BUFFER_BLOCK);
+	/* these are all the if branches inside parse_block, wrapped into one bool,
+	 * with minimal parsing, and completely idempotent */
+	int result = !(is_atxheader(doc, txt_data, end) ||
+					(doc->user_block && parse_userblock(tmp, doc, txt_data, end)) ||
+					(txt_data[0] == '<' && doc->md.blockhtml &&
+						parse_htmlblock(tmp, doc, txt_data, end, 0)) ||
+					is_hrule(txt_data, end) ||
+					((doc->ext_flags & HOEDOWN_EXT_FENCED_CODE) &&
+						parse_fencedcode(tmp, doc, txt_data, end, doc->ext_flags)) ||
+					((doc->ext_flags & HOEDOWN_EXT_TABLES) &&
+						parse_table(tmp, doc, txt_data, end)) ||
+					prefix_quote(txt_data, end) ||
+					(!(doc->ext_flags & HOEDOWN_EXT_DISABLE_INDENTED_CODE) &&
+						prefix_code(txt_data, end)) ||
+					prefix_uli(txt_data, end) ||
+					prefix_oli(txt_data, end) ||
+					((doc->ext_flags & HOEDOWN_EXT_DEFINITION_LISTS) &&
+						prefix_dli(doc, txt_data, end)));
+	popbuf(doc, BUFFER_BLOCK);
+	return result;
+}
+
 /* parse_block • parsing of one block, returning next uint8_t to parse */
 static void
 parse_block(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size)
@@ -3281,6 +3473,9 @@ parse_block(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t siz
 
 		else if (prefix_oli(txt_data, end))
 			beg += parse_list(ob, doc, txt_data, end, HOEDOWN_LIST_ORDERED);
+
+		else if ((doc->ext_flags & HOEDOWN_EXT_DEFINITION_LISTS) && prefix_dli(doc, txt_data, end))
+			beg += parse_list(ob, doc, txt_data, end, HOEDOWN_LIST_DEFINITION);
 
 		else
 			beg += parse_paragraph(ob, doc, txt_data, end);

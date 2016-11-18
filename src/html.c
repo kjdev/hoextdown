@@ -463,20 +463,26 @@ rndr_list(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffe
 
 	if (flags & HOEDOWN_LIST_ORDERED) {
 		HOEDOWN_BUFPUTSL(ob, "<ol");
-		if (attr && attr->size) {
-			rndr_attributes(ob, attr->data, attr->size, NULL, data);
-		}
-		HOEDOWN_BUFPUTSL(ob, ">\n");
+	} else if (flags & HOEDOWN_LIST_DEFINITION) {
+		HOEDOWN_BUFPUTSL(ob, "<dl");
 	} else {
 		HOEDOWN_BUFPUTSL(ob, "<ul");
-		if (attr && attr->size) {
-			rndr_attributes(ob, attr->data, attr->size, NULL, data);
-		}
-		HOEDOWN_BUFPUTSL(ob, ">\n");
+	}
+	if (attr && attr->size) {
+		rndr_attributes(ob, attr->data, attr->size, NULL, data);
 	}
 
+	HOEDOWN_BUFPUTSL(ob, ">\n");
+
 	if (content) hoedown_buffer_put(ob, content->data, content->size);
-	hoedown_buffer_put(ob, (const uint8_t *)(flags & HOEDOWN_LIST_ORDERED ? "</ol>\n" : "</ul>\n"), 6);
+
+	if (flags & HOEDOWN_LIST_ORDERED) {
+		HOEDOWN_BUFPUTSL(ob, "</ol>\n");
+	} else if (flags & HOEDOWN_LIST_DEFINITION) {
+		HOEDOWN_BUFPUTSL(ob, "</dl>\n");
+	} else {
+		HOEDOWN_BUFPUTSL(ob, "</ul>\n");
+	}
 }
 
 static void
@@ -489,7 +495,14 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 		while (size && content->data[size - 1] == '\n')
 			size--;
 
-		HOEDOWN_BUFPUTSL(ob, "<li");
+		if (*flags & HOEDOWN_LI_DD) {
+			HOEDOWN_BUFPUTSL(ob, "<dd");
+		} else  if (*flags & HOEDOWN_LI_DT) {
+			HOEDOWN_BUFPUTSL(ob, "<dt");
+		} else {
+			HOEDOWN_BUFPUTSL(ob, "<li");
+		}
+
 		if (attr && attr->size) {
 			rndr_attributes(ob, attr->data, attr->size, NULL, data);
 		}
@@ -518,9 +531,21 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 
 		hoedown_buffer_put(ob, content->data+prefix, size-prefix);
 	} else {
-		HOEDOWN_BUFPUTSL(ob, "<li>");
+		if (*flags & HOEDOWN_LI_DD) {
+			HOEDOWN_BUFPUTSL(ob, "<dd>");
+		} else if (*flags & HOEDOWN_LI_DT) {
+			HOEDOWN_BUFPUTSL(ob, "<dt>");
+		} else {
+			HOEDOWN_BUFPUTSL(ob, "<li>");
+		}
 	}
-	HOEDOWN_BUFPUTSL(ob, "</li>\n");
+	if (*flags & HOEDOWN_LI_DD) {
+		HOEDOWN_BUFPUTSL(ob, "</dd>\n");
+	} else if (*flags & HOEDOWN_LI_DT) {
+		HOEDOWN_BUFPUTSL(ob, "</dt>\n");
+	} else {
+		HOEDOWN_BUFPUTSL(ob, "</li>\n");
+	}
 }
 
 static void
