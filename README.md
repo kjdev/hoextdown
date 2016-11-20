@@ -14,6 +14,7 @@ Extended the following functions.
 * [Fenced Script](#fenced-script)
 * [Script Tags](#script-tags)
 * [Meta Block](#meta-block)
+* [Definition Lists](#definition-lists)
 
 ## Special Attributes
 
@@ -213,4 +214,42 @@ becomes:
 --- Meta Block --
   author: user
   title: Readme markdown parser
+```
+
+## Definition Lists
+
+Add the `HOEXTDOWN_EXT_DEFINITION_LISTS` to Hoedown document flags.
+
+Add to support definition lists. Syntax follows [PHP Markdown Extra's syntax](https://michelf.ca/projects/php-markdown/extra/#def-list).
+
+```
+Term
+: Definition
+
+Term 1
+Term 2
+: Definition 2
+
+Term 3
+: Definition Line 1
+  Definition Line 2
+
+    Extra paragraphs need four spaces.
+```
+
+becomes:
+
+```
+<dl>
+<dt>Term</dt>
+<dd>Definition</dd>
+<dt>Term 1</dt>
+<dt>Term 2</dt>
+<dd>Definition 2</dd>
+<dt>Term 3</dt>
+<dd>
+<p>Definition Line 1 Definition Line 2</p>
+<p>Extra paragraphs need four spaces.</p>
+</dd>
+</dl>
 ```

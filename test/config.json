@@ -279,6 +279,11 @@
             "flags": ["--tables", "--multiline-tables"]
         },
         {
+            "input": "Tests/extras/Definition_Lists.text",
+            "output": "Tests/extras/Definition_Lists.html",
+            "flags": ["--definition-lists", "--tables", "--multiline-tables", "--fenced-code", "--special-attribute"]
+        },
+        {
             "input": "Tests/context/Escaping.input",
             "output": "Tests/context/Escaping.output",
             "flags": ["--context-test"]

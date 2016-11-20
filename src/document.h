@@ -15,13 +15,14 @@ extern "C" {
  * CONSTANTS *
  *************/
 
-/* Next offset: 19 */
+/* Next offset: 20 */
 typedef enum hoedown_extensions {
 	/* block-level extensions */
 	HOEDOWN_EXT_TABLES = (1 << 0),
 	HOEDOWN_EXT_MULTILINE_TABLES = (1 << 18),
 	HOEDOWN_EXT_FENCED_CODE = (1 << 1),
 	HOEDOWN_EXT_FOOTNOTES = (1 << 2),
+	HOEDOWN_EXT_DEFINITION_LISTS = (1 << 19),
 
 	/* span-level extensions */
 	HOEDOWN_EXT_AUTOLINK = (1 << 3),
@@ -54,7 +55,8 @@ typedef enum hoedown_extensions {
 	HOEDOWN_EXT_TABLES |\
 	HOEDOWN_EXT_MULTILINE_TABLES |\
 	HOEDOWN_EXT_FENCED_CODE |\
-	HOEDOWN_EXT_FOOTNOTES )
+	HOEDOWN_EXT_FOOTNOTES |\
+	HOEDOWN_EXT_DEFINITION_LISTS )
 
 #define HOEDOWN_EXT_SPAN (\
 	HOEDOWN_EXT_AUTOLINK |\
@@ -80,7 +82,10 @@ typedef enum hoedown_list_flags {
 	HOEDOWN_LIST_ORDERED = (1 << 0),
 	HOEDOWN_LI_BLOCK = (1 << 1),	/* <li> containing block data */
 	HOEDOWN_LI_TASK = (1 << 2),
-	HOEDOWN_LI_END = (1 << 3)	/* internal list flag */
+	HOEDOWN_LI_END = (1 << 3),	/* internal list flag */
+	HOEDOWN_LIST_DEFINITION = (1 << 4),
+	HOEDOWN_LI_DT = (1 << 5),
+	HOEDOWN_LI_DD = (1 << 6)
 } hoedown_list_flags;
 
 typedef enum hoedown_table_flags {

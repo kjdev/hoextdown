@@ -62,6 +62,8 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_SPECIAL_ATTRIBUTE, "special-attribute", "Parse special attributes."},
 	{HOEDOWN_EXT_SCRIPT_TAGS, "script-tags", "Parse script tags <?..?>."},
 	{HOEDOWN_EXT_META_BLOCK, "meta-block", "Parse meta block <!--*..*-->."},
+
+	{HOEDOWN_EXT_DEFINITION_LISTS, "definition-lists", "Parse definition lists."},
 };
 
 static struct html_flag_info html_flags_info[] = {
