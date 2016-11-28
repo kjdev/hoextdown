@@ -3389,11 +3389,20 @@ is_paragraph(hoedown_document *doc, uint8_t *txt_data, size_t end)
 {
 	/* temporary buffer for results of checking special blocks */
 	hoedown_buffer *tmp = newbuf(doc, BUFFER_BLOCK);
+	/* temporary renderer that has no rendering function */
+	hoedown_renderer temp_renderer;
+	/* ensure all callbacks are NULL */
+	memset(&temp_renderer, 0, sizeof(hoedown_renderer));
+	/* store the old renderer */
+	hoedown_renderer old_renderer;
+	memcpy(&old_renderer, &doc->md, sizeof(hoedown_renderer));
+	/* copy the new renderer over to the document */
+	memcpy(&doc->md, &temp_renderer, sizeof(hoedown_renderer));
 	/* these are all the if branches inside parse_block, wrapped into one bool,
 	 * with minimal parsing, and completely idempotent */
 	int result = !(is_atxheader(doc, txt_data, end) ||
 					(doc->user_block && parse_userblock(tmp, doc, txt_data, end)) ||
-					(txt_data[0] == '<' && doc->md.blockhtml &&
+					(txt_data[0] == '<' &&
 						parse_htmlblock(tmp, doc, txt_data, end, 0)) ||
 					is_hrule(txt_data, end) ||
 					((doc->ext_flags & HOEDOWN_EXT_FENCED_CODE) &&
@@ -3408,6 +3417,7 @@ is_paragraph(hoedown_document *doc, uint8_t *txt_data, size_t end)
 					((doc->ext_flags & HOEDOWN_EXT_DEFINITION_LISTS) &&
 						prefix_dli(doc, txt_data, end)));
 	popbuf(doc, BUFFER_BLOCK);
+	memcpy(&doc->md, &old_renderer, sizeof(hoedown_renderer));
 	return result;
 }
 
