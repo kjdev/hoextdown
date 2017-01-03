@@ -65,6 +65,7 @@ At this time, special attribute blocks can be used with
 * links
 * images
 * tables
+* paragraphs
 
 For image and links, put the special attribute block immediately after the
 parenthesis containing the address:
@@ -82,6 +83,13 @@ definition line like this:
 ![img][linkref]
 
 [linkref]: url "optional title" {#id .class}
+```
+
+For paragraphs, put the special identifier `@paragraph` after the attribute.
+This helps prevent accidental parsing.
+
+```
+This is a paragraph. {@paragraph #id}
 ```
 
 ## Task Lists

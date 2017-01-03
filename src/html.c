@@ -549,7 +549,7 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 }
 
 static void
-rndr_paragraph(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_renderer_data *data)
+rndr_paragraph(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffer *attr, const hoedown_renderer_data *data)
 {
 	hoedown_html_renderer_state *state = data->opaque;
 	size_t i = 0;
@@ -564,7 +564,14 @@ rndr_paragraph(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_
 	if (i == content->size)
 		return;
 
-	HOEDOWN_BUFPUTSL(ob, "<p>");
+	HOEDOWN_BUFPUTSL(ob, "<p");
+
+	if (attr && attr->size) {
+		rndr_attributes(ob, attr->data, attr->size, NULL, data);
+	}
+
+	HOEDOWN_BUFPUTSL(ob, ">");
+
 	if (state->flags & HOEDOWN_HTML_HARD_WRAP) {
 		size_t org;
 		while (i < content->size) {

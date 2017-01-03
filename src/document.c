@@ -600,12 +600,13 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 	}
 }
 
-static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer *attr, struct hoedown_buffer *block_attr, int is_header)
+/* parse_attributes • parses special attributes at the end of the data */
+static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer *attr, struct hoedown_buffer *block_attr, const uint8_t *block_id, size_t block_id_size, int is_header)
 {
 	size_t i, len, begin = 0, end = 0;
 
 	i = size;
-	while (data[i-1] == '\n') {
+	while (i && data[i-1] == '\n') {
 		i--;
 	}
 	len = i;
@@ -637,14 +638,29 @@ static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer
 		}
 
 		if (block_attr && data[begin] == '@') {
-			while (data[begin] != ' ') {
+			/* skip the @ by incrementing past it */
+			begin++;
+			size_t j = 0;
+			while (begin < end && data[begin] != ' ') {
+				/* if a block_id was fed in, check to make sure the string until the
+				 * space is identical */
+				if (block_id_size != 0 &&
+				   (j >= block_id_size || block_id[j] != data[begin])) {
+					return len;
+				}
 				begin++;
+				j++;
+			}
+			/* it might have matched only the first portion of block_id; make sure
+			 * there's no more to it here */
+			if (j != block_id_size) {
+				return len;
 			}
 			block_attr->data = data + begin;
 			block_attr->size = end - begin;
 			len = i;
 			if (attr) {
-				len = parse_attributes(data, len, attr, NULL, is_header);
+				len = parse_attributes(data, len, attr, NULL, "", 0, is_header);
 			}
 		} else if (attr) {
 			if (attr->size) {
@@ -2117,10 +2133,22 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		work.size--;
 
 	if (!level) {
+		hoedown_buffer attr = { NULL, 0, 0, 0, NULL, NULL, NULL };
+		if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
+			parse_attributes(work.data, work.size, NULL, &attr, "paragraph", 9, 1);
+			if (attr.size > 0) {
+				/* remove the length of the attribute from the work size - the 12 comes
+				* from the leading space (1), the paragraph (9), the @ symbol (1), and
+				* the {} (2) (any extra spaces in the attribute are included inside
+				* the attribute) */
+				work.size -= attr.size + 12;
+			}
+		}
+
 		hoedown_buffer *tmp = newbuf(doc, BUFFER_BLOCK);
 		parse_inline(tmp, doc, work.data, work.size);
 		if (doc->md.paragraph)
-			doc->md.paragraph(ob, tmp, &doc->data);
+			doc->md.paragraph(ob, tmp, &attr, &doc->data);
 		popbuf(doc, BUFFER_BLOCK);
 	} else {
 		hoedown_buffer *header_work;
@@ -2144,7 +2172,7 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 				parse_inline(tmp, doc, work.data, work.size);
 
 				if (doc->md.paragraph)
-					doc->md.paragraph(ob, tmp, &doc->data);
+					doc->md.paragraph(ob, tmp, NULL, &doc->data);
 
 				popbuf(doc, BUFFER_BLOCK);
 				work.data += beg;
@@ -2158,7 +2186,7 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 
 		len = work.size;
 		if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-			len = parse_attributes(work.data, work.size, attr_work, NULL, 1);
+			len = parse_attributes(work.data, work.size, attr_work, NULL, "", 0, 1);
 		}
 
 		parse_inline(header_work, doc, work.data, len);
@@ -2258,7 +2286,7 @@ parse_blockcode(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		work->size -= 1;
 
 	if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-		work->size = parse_attributes(work->data, work->size, NULL, &attr, 0);
+		work->size = parse_attributes(work->data, work->size, NULL, &attr, "", 0, 0);
 	}
 
 	hoedown_buffer_putc(work, '\n');
@@ -2437,7 +2465,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 				i++;
 			}
 
-			len = parse_attributes(work->data, i, attr, attribute, 0);
+			len = parse_attributes(work->data, i, attr, attribute, "list", 4, 0);
 			if (i == len) {
 				break;
 			}
@@ -2454,7 +2482,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 		/* intermediate render of inline li */
 		if (sublist && sublist < work->size) {
 			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-				len = parse_attributes(work->data, sublist, attr, attribute, 0);
+				len = parse_attributes(work->data, sublist, attr, attribute, "list", 4, 0);
 			} else {
 				len = sublist;
 			}
@@ -2462,7 +2490,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 			parse_block(inter, doc, work->data + sublist, work->size - sublist);
 		} else {
 			if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-				len = parse_attributes(work->data, work->size, attr, attribute, 0);
+				len = parse_attributes(work->data, work->size, attr, attribute, "list", 4, 0);
 			} else {
 				len = work->size;
 			}
@@ -2519,7 +2547,7 @@ parse_definition(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 		attr_work = newbuf(doc, BUFFER_ATTRIBUTE);
 
 		if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-			len = parse_attributes(data + j, len, attr_work, NULL, 1);
+			len = parse_attributes(data + j, len, attr_work, NULL, "", 0, 1);
 		}
 
 		parse_inline(work, doc, data + j, len);
@@ -2612,7 +2640,7 @@ parse_atxheader(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 
 		len = end - i;
 		if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-			len = parse_attributes(data + i, end - i, attr, NULL, 1);
+			len = parse_attributes(data + i, end - i, attr, NULL, "", 0, 1);
 		}
 
 		parse_inline(work, doc, data + i, len);
