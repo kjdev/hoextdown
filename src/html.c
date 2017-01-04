@@ -410,17 +410,25 @@ rndr_header(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buf
 	if (ob->size)
 		hoedown_buffer_putc(ob, '\n');
 
+	hoedown_buffer *merged_attr = hoedown_buffer_new(sizeof(hoedown_buffer));
+
 	if (attr && attr->size) {
+		hoedown_buffer_put(merged_attr, attr->data, attr->size);
+	}
+	if ((state->flags & HOEDOWN_HTML_HEADER_ID) || (level <= state->toc_data.nesting_level)) {
+		hoedown_buffer_puts(merged_attr, " #");
+		rndr_header_id(merged_attr, content->data, content->size, 0, data);
+	}
+
+	if (merged_attr && merged_attr->size) {
 		hoedown_buffer_printf(ob, "<h%d", level);
-		rndr_attributes(ob, attr->data, attr->size, NULL, data);
+		rndr_attributes(ob, merged_attr->data, merged_attr->size, NULL, data);
 		hoedown_buffer_putc(ob, '>');
-	} else if ((state->flags & HOEDOWN_HTML_HEADER_ID) || (level <= state->toc_data.nesting_level)) {
-		hoedown_buffer_printf(ob, "<h%d id=\"", level);
-		rndr_header_id(ob, content->data, content->size, 0, data);
-		hoedown_buffer_puts(ob, "\">");
 	} else {
 		hoedown_buffer_printf(ob, "<h%d>", level);
 	}
+
+	hoedown_buffer_free(merged_attr);
 
 	if (content) hoedown_buffer_put(ob, content->data, content->size);
 	hoedown_buffer_printf(ob, "</h%d>\n", level);

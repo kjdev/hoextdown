@@ -242,6 +242,11 @@
             "output": "Tests/extras/Header_Empty_Attribute.html",
             "flags": ["--header-id", "--special-attribute"]
         },
+        {
+            "input": "Tests/extras/Header_ID.text",
+            "output": "Tests/extras/Header_ID.html",
+            "flags": ["--header-id", "--special-attribute"]
+        },
 
         {
             "input": "Tests/extras/Toc_Header_Empty.text",
