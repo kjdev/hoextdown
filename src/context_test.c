@@ -103,7 +103,7 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 }
 
 static void
-rndr_paragraph(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_renderer_data *data)
+rndr_paragraph(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffer *attr, const hoedown_renderer_data *data)
 {
 	int list_depth, blockquote_depth;
 

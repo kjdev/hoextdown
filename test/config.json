@@ -172,6 +172,11 @@
             "flags": ["--task", "--special-attribute"]
         },
         {
+            "input": "Tests/extras/Special_Attribute_Paragraphs.text",
+            "output": "Tests/extras/Special_Attribute_Paragraphs.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/extras/Line_Continue.text",
             "output": "Tests/extras/Line_Continue.html",
             "flags": ["--line-continue"]
