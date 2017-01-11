@@ -199,6 +199,7 @@ hoedown_document *hoedown_document_new(
 	const hoedown_renderer *renderer,
 	hoedown_extensions extensions,
 	size_t max_nesting,
+	uint8_t attr_activation,
 	hoedown_user_block user_block,
 	hoedown_buffer *meta
 ) __attribute__ ((malloc));

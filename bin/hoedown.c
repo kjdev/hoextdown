@@ -104,6 +104,7 @@ print_help(const char *basename)
 	printf("Main options:\n");
 	print_option('n', "max-nesting=N", "Maximum level of block nesting parsed. Default is " str(DEF_MAX_NESTING) ".");
 	print_option('t', "toc-level=N", "Maximum level for headers included in the TOC. Zero disables TOC (the default).");
+	print_option('a', "attr-activation=C", "Character prefix to activate special attributes if the extension is turned on. Cannot be @. EX: With '-a=?', '# h {? .class}' becomes '<h1 class=\"class\">h</h1>'.");
 	print_option(  0, "html", "Render (X)HTML. The default.");
 	print_option(  0, "html-toc", "Render the Table of Contents in (X)HTML.");
 	print_option('T', "time", "Show time spent in rendering.");
@@ -162,6 +163,9 @@ struct option_data {
 	int toc_level;
 	hoedown_html_flags html_flags;
 
+	/* document */
+	uint8_t attr_activation;
+
 	/* parsing */
 	hoedown_extensions extensions;
 	size_t max_nesting;
@@ -214,6 +218,11 @@ parse_short_option(char opt, char *next, void *opaque)
 
 	if (opt == 'o' && isNum) {
 		data->ounit = num;
+		return 2;
+	}
+
+	if (opt == 'a' && !isNum && next) {
+		data->attr_activation = next[0];
 		return 2;
 	}
 
@@ -331,6 +340,10 @@ parse_long_option(char *opt, char *next, void *opaque)
 		data->toc_level = num;
 		return 2;
 	}
+	if (strcmp(opt, "attr-activation")==0 && !isNum && next) {
+		data->attr_activation = next[0];
+		return 2;
+	}
 	if (strcmp(opt, "input-unit")==0 && isNum) {
 		data->iunit = num;
 		return 2;
@@ -411,6 +424,7 @@ main(int argc, char **argv)
 	data.filename = NULL;
 	data.renderer = RENDERER_HTML;
 	data.toc_level = 0;
+	data.attr_activation = 0;
 	data.html_flags = 0;
 	data.extensions = 0;
 	data.max_nesting = DEF_MAX_NESTING;
@@ -463,7 +477,7 @@ main(int argc, char **argv)
 	/* Perform Markdown rendering */
 	ob = hoedown_buffer_new(data.ounit);
 	meta = hoedown_buffer_new(data.ounit);
-	document = hoedown_document_new(renderer, data.extensions, data.max_nesting, NULL, meta);
+	document = hoedown_document_new(renderer, data.extensions, data.max_nesting, data.attr_activation, NULL, meta);
 
   /* state */
 	if (data.renderer == RENDERER_CONTEXT_TEST) {
