@@ -215,12 +215,10 @@ rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buf
 		}
 		HOEDOWN_BUFPUTSL(ob, "<pre><code");
 		if (attr && attr->size) {
-			size_t len = 0;
 			hoedown_buffer *lang_class = hoedown_buffer_new(lang->size + 9);
-			while (len < lang->size && lang->data[len] != '{') len++;
-			if (len) {
+			if (lang->size) {
 				HOEDOWN_BUFPUTSL(lang_class, "language-");
-				escape_html(lang_class, lang->data, len);
+				escape_html(lang_class, lang->data, lang->size);
 				if (lang_class->data[lang_class->size-1] != ' ') {
 					hoedown_buffer_putc(lang_class, ' ');
 				}
