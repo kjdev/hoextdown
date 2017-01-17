@@ -2017,7 +2017,7 @@ prefix_dli(hoedown_document *doc, uint8_t *data, size_t size)
 
 		/* if anything special is found while parsing the definition term part,
 		 * then return so that the main loop can deal with it */
-		if (!is_paragraph(doc, data + i, size - 1)) {
+		if (!is_paragraph(doc, data + i, size - i)) {
 			break;
 		}
 
