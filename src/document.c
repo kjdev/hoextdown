@@ -608,10 +608,6 @@ parse_inline(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t si
 static size_t parse_inline_attributes(uint8_t *data, size_t size, struct hoedown_buffer *attr, uint8_t attr_activation)
 {
 	size_t attr_start, i = 0;
-	/* skip leading whitespace */
-	while (i < size && _isspace(data[i])) {
-		i++;
-	}
 
 	if (data[i] == '{' && (!attr_activation || (i + 1 < size && data[i + 1] == attr_activation))) {
 		attr_start = i + 1;

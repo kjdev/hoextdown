@@ -6,6 +6,8 @@ See my [About](/about/){#about .about} page for details.
 
 This is the [simple case]{.example}
 
+This is the [simple case with space] {.example}
+
 This is the [simple case]{#link}
 
 This is the [simple case]{#about .abount}
