@@ -609,6 +609,9 @@ static size_t parse_inline_attributes(uint8_t *data, size_t size, struct hoedown
 {
 	size_t attr_start, i = 0;
 
+	if (size < 1)
+		return 0;
+
 	if (data[i] == '{' && (!attr_activation || (i + 1 < size && data[i + 1] == attr_activation))) {
 		attr_start = i + 1;
 		/* skip an extra character to skip over the activation character if any */
@@ -638,6 +641,9 @@ static size_t parse_inline_attributes(uint8_t *data, size_t size, struct hoedown
 static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer *attr, struct hoedown_buffer *block_attr, const uint8_t *block_id, size_t block_id_size, int is_header, uint8_t attr_activation)
 {
 	size_t i, len, begin = 0, end = 0;
+
+	if (size < 1)
+		return 0;
 
 	i = size;
 	while (i && data[i-1] == '\n') {
