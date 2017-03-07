@@ -1839,11 +1839,9 @@ is_atxheader(hoedown_document *doc, uint8_t *data, size_t size)
 			if (begin > 0 && !is_empty_all(data + level, begin)) {
 				return 1;
 			}
-			/* check for special attributes after the level */
+			/* check for special attributes after the # */
 			begin += level;
-			if (parse_inline_attributes(data + begin, len - begin, NULL, doc->attr_activation) > 0) {
-				return 0;
-			}
+			return !parse_inline_attributes(data + begin, len - begin, NULL, doc->attr_activation);
 		}
 	}
 
