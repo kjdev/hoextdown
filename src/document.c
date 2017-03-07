@@ -1834,11 +1834,15 @@ is_atxheader(hoedown_document *doc, uint8_t *data, size_t size)
 	if (len && (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE)) {
 		p = memchr(data + level, '{', len);
 		if (p) {
+			/* get number of characters from # to { */
 			begin = (p - data) - level;
-			if (memchr(data + begin, '}', len - begin)) {
-				if (!begin || is_empty_all(data + level, begin)) {
-					return 0;
-				}
+			if (begin > 0 && !is_empty_all(data + level, begin)) {
+				return 1;
+			}
+			/* check for special attributes after the level */
+			begin += level;
+			if (parse_inline_attributes(data + begin, len - begin, NULL, doc->attr_activation) > 0) {
+				return 0;
 			}
 		}
 	}
