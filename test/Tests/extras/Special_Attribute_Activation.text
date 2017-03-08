@@ -1,5 +1,9 @@
 # Not {.activated}
 
+# {.activated}
+
+# {{.activated}} content
+
 # Is {: .activated}
 
 This tests [links](notreal.com){.link-me} and `block code`{.code-me}
