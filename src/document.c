@@ -20,6 +20,7 @@
 #define BUFFER_ATTRIBUTE 2
 
 const char *hoedown_find_block_tag(const char *str, unsigned int len);
+const char *hoedown_find_html5_block_tag(const char *str, unsigned int len);
 
 /***************
  * LOCAL TYPES *
@@ -2809,8 +2810,12 @@ parse_htmlblock(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 	while (i < size && data[i] != '>' && data[i] != ' ')
 		i++;
 
-	if (i < size)
-		curtag = hoedown_find_block_tag((char *)data + 1, (int)i - 1);
+	if (i < size) {
+		if (doc->ext_flags & HOEDOWN_EXT_HTML5_BLOCKS)
+			curtag = hoedown_find_html5_block_tag((char *)data + 1, (int)i - 1);
+		else
+			curtag = hoedown_find_block_tag((char *)data + 1, (int)i - 1);
+	}	
 
 	/* handling of special cases */
 	if (!curtag) {
