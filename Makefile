@@ -26,6 +26,7 @@ HOEDOWN_SRC=\
 	src/escape.o \
 	src/html.o \
 	src/html_blocks.o \
+	src/html5_blocks.o \
 	src/html_smartypants.o \
 	src/stack.o \
 	src/hash.o \
@@ -58,6 +59,9 @@ smartypants: bin/smartypants.o $(HOEDOWN_SRC)
 
 src/html_blocks.c: html_block_names.gperf
 	gperf -L ANSI-C -N hoedown_find_block_tag -c -C -E -S 1 --ignore-case -m100 $^ > $@
+
+src/html5_blocks.c: html5_block_names.gperf
+	gperf -L ANSI-C -N hoedown_find_html5_block_tag -c -C -E -S 1 --ignore-case -m100 $^ > $@
 
 # Testing
 

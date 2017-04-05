@@ -231,6 +231,11 @@
             "output": "Tests/extras/HTML_Block.html"
         },
         {
+            "input": "Tests/extras/HTML5_Block.text",
+            "output": "Tests/extras/HTML5_Block.html",
+            "flags": ["--html5-blocks"]
+        },
+        {
             "input": "Tests/extras/Escape_Backticks.text",
             "output": "Tests/extras/Escape_Backticks.html"
         },
