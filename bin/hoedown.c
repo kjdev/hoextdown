@@ -65,6 +65,7 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_META_BLOCK, "meta-block", "Parse meta block <!--*..*-->."},
 
 	{HOEDOWN_EXT_DEFINITION_LISTS, "definition-lists", "Parse definition lists."},
+	{HOEDOWN_EXT_BLOCKQUOTE_EMPTY_LINE, "blockquote-empty-line", "Parse blockquote is done empty line."},
 };
 
 static struct html_flag_info html_flags_info[] = {

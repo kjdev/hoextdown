@@ -309,6 +309,11 @@
             "flags": ["--definition-lists", "--tables", "--multiline-tables", "--fenced-code", "--special-attribute"]
         },
         {
+            "input": "Tests/extras/Blockquote_Empty_Line.text",
+            "output": "Tests/extras/Blockquote_Empty_Line.html",
+            "flags": ["--blockquote-empty-line"]
+        },
+        {
             "input": "Tests/context/Escaping.input",
             "output": "Tests/context/Escaping.output",
             "flags": ["--context-test"]

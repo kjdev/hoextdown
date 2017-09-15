@@ -2070,6 +2070,11 @@ parse_blockquote(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 		if (pre)
 			beg += pre; /* skipping prefix */
 
+		/* empty line finished */
+		else if ((doc->ext_flags & HOEDOWN_EXT_BLOCKQUOTE_EMPTY_LINE) &&
+				(is_empty(data + beg, end - beg)))
+			break;
+
 		/* empty line followed by non-quote line */
 		else if (is_empty(data + beg, end - beg) &&
 				(end >= size || (prefix_quote(data + end, size - end) == 0 &&
