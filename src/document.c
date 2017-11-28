@@ -494,14 +494,14 @@ tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink, int scri
 	while (i < size && (isalnum(data[i]) || data[i] == '.' || data[i] == '+' || data[i] == '-'))
 		i++;
 
-	if (i > 1 && data[i] == '@') {
+	if (i > 1 && i < size && data[i] == '@') {
 		if ((j = is_mail_autolink(data + i, size - i)) != 0) {
 			*autolink = HOEDOWN_AUTOLINK_EMAIL;
 			return i + j;
 		}
 	}
 
-	if (i > 2 && data[i] == ':') {
+	if (i > 2 && i < size && data[i] == ':') {
 		*autolink = HOEDOWN_AUTOLINK_NORMAL;
 		i++;
 	}
@@ -3163,7 +3163,7 @@ parse_table_header(
 
 			while (j < size && data[j] != '\n') {
 				j++;
-				if (!is_backslashed(data, j) && data[j] == ':')
+				if (j < size && !is_backslashed(data, j) && data[j] == ':')
 					colons++;
 			}
 
@@ -3200,7 +3200,7 @@ parse_table_header(
 		while (i < under_end && data[i] == ' ')
 			i++;
 
-		if (data[i] == ':') {
+		if (i < under_end && data[i] == ':') {
 			i++; (*column_data)[col] |= HOEDOWN_TABLE_ALIGN_LEFT;
 			dashes++;
 		}
@@ -3579,6 +3579,7 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 	i++;
 	if (i >= end || data[i] != ':') return 0;
 	i++;
+	if (i >= end) return 0;
 
 	/* getting content and name buffers */
 	contents = hoedown_buffer_new(64);
