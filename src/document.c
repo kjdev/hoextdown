@@ -875,7 +875,8 @@ parse_emph1(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t siz
 
 		if (data[i] == c && !_isspace(data[i - 1])) {
 
-			if (doc->ext_flags & HOEDOWN_EXT_NO_INTRA_EMPHASIS) {
+			if (doc->ext_flags & HOEDOWN_EXT_NO_INTRA_EMPHASIS ||
+				(doc->ext_flags & HOEDOWN_EXT_NO_INTRA_UNDERLINE_EMPHASIS && c == '_')) {
 				if (i + 1 < size && isalnum(data[i + 1]))
 					continue;
 			}

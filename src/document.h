@@ -15,7 +15,7 @@ extern "C" {
  * CONSTANTS *
  *************/
 
-/* Next offset: 21 */
+/* Next offset: 22 */
 typedef enum hoedown_extensions {
 	/* block-level extensions */
 	HOEDOWN_EXT_TABLES = (1 << 0),
@@ -39,6 +39,7 @@ typedef enum hoedown_extensions {
 	HOEDOWN_EXT_SPACE_HEADERS = (1 << 12),
 	HOEDOWN_EXT_MATH_EXPLICIT = (1 << 13),
 	HOEDOWN_EXT_HTML5_BLOCKS = (1 << 20),
+	HOEDOWN_EXT_NO_INTRA_UNDERLINE_EMPHASIS = (1 << 21),
 
 	/* negative flags */
 	HOEDOWN_EXT_DISABLE_INDENTED_CODE = (1 << 14),
