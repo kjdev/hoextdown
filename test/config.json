@@ -309,6 +309,11 @@
             "flags": ["--definition-lists", "--tables", "--multiline-tables", "--fenced-code", "--special-attribute"]
         },
         {
+            "input": "Tests/extras/Emphases_Intra_Underline.text",
+            "output": "Tests/extras/Emphases_Intra_Underline.html",
+            "flags": ["--disable-intra-underline-emphasis"]
+        },
+        {
             "input": "Tests/extras/Blockquote_Empty_Line.text",
             "output": "Tests/extras/Blockquote_Empty_Line.html",
             "flags": ["--blockquote-empty-line"]

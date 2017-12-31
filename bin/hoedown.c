@@ -57,6 +57,7 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_SPACE_HEADERS, "space-headers", "Require a space after '#' in headers."},
 	{HOEDOWN_EXT_MATH_EXPLICIT, "math-explicit", "Instead of guessing by context, parse $inline math$ and $$always block math$$ (requires --math)."},
 	{HOEDOWN_EXT_HTML5_BLOCKS, "html5-blocks", "Interpret HTML5 blocks, such as <section> as block elements (don't consider as text)."},
+	{HOEDOWN_EXT_NO_INTRA_UNDERLINE_EMPHASIS, "disable-intra-underline-emphasis", "Disable emphasis_between_words, but only for underscores."},
 
 	{HOEDOWN_EXT_DISABLE_INDENTED_CODE, "disable-indented-code", "Don't parse indented code blocks."},
 
