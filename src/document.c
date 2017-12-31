@@ -2788,7 +2788,6 @@ htmlblock_find_end_strict(
 		if (i < size) i++;
 		if (i == mark) return 0;
 
-		if (data[mark] == ' ' && mark > 0) continue;
 		mark += htmlblock_find_end(tag, tag_len, doc, data + mark, i - mark);
 		if (mark == i && (is_empty(data + i, size - i) || data[i] == '<' || i >= size)) break;
 	}
