@@ -1,0 +1,7 @@
+Link should go to example.com but goes to Wikipedia: [foo]
+
+[foo]: http://example.com/foo
+
+<!-- commented-out link definition
+[foo]: https://en.wikipedia.org/wiki/foo
+-->

@@ -3672,6 +3672,30 @@ is_footnote(const uint8_t *data, size_t beg, size_t end, size_t *last, struct fo
 	return 1;
 }
 
+/* is_html_comment • returns whether a html comment or not */
+static int
+is_html_comment(const uint8_t *data, size_t beg, size_t end, size_t *last)
+{
+	size_t i = 0;
+
+	if (beg + 5 >= end) return 0;
+	if (!(data[beg] == '<'  && data[beg + 1] == '!' && data[beg + 2] == '-' && data[beg + 3] == '-')) return 0;
+
+	i = 5;
+	while (i < end && !(data[beg + i - 2] == '-' && data[beg + i - 1] == '-' && data[beg + i] == '>')) i++;
+	i++;
+
+	if (i < end && (data[beg + i] == '\n' || data[beg + i] == '\r')) {
+		i++;
+		if (i < end && data[beg + i] == '\r' && data[beg + i - 1] == '\n') i++;
+	}
+
+	if (last)
+		*last = beg + i;
+
+	return 1;
+}
+
 /* is_ref • returns whether a line is a reference or not */
 static int
 is_ref(const uint8_t *data, size_t beg, size_t end, size_t *last, struct link_ref **refs)
@@ -4005,6 +4029,17 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 				original.data = (uint8_t*) (data + beg);
 				original.size = end - beg;
 				doc->md.footnote_ref_def(&original, &doc->data);
+			}
+			beg = end;
+		} else if (is_html_comment(data, beg, size, &end)) {
+			size_t  i = 0;
+			while (i < (end - beg)) {
+				if (data[beg + i] == '\t' && (data[beg + i] & 0xc0) != 0x80) {
+					hoedown_buffer_put(text, (uint8_t*)"    ", 4);
+				} else {
+					hoedown_buffer_putc(text, data[beg + i]);
+				}
+				i++;
 			}
 			beg = end;
 		} else if (is_ref(data, beg, size, &end, doc->refs)) {
