@@ -3684,6 +3684,8 @@ is_html_comment(const uint8_t *data, size_t beg, size_t end, size_t *last)
 
 	i = 5;
 	while (i < end && !(data[beg + i - 2] == '-' && data[beg + i - 1] == '-' && data[beg + i] == '>')) i++;
+	/* i can only ever be beyond the end if the ending --> is not found */
+	if (i >= end) return 0;
 	i++;
 
 	if (i < end && (data[beg + i] == '\n' || data[beg + i] == '\r')) {
