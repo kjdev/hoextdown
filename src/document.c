@@ -2771,7 +2771,7 @@ htmlblock_find_end(
 }
 
 /* htmlblock_find_end_strict • try to find end of HTML block in strict mode */
-/*	(it must be an unindented line, and have a blank line afterwads) */
+/*	(it must have a blank line or a new HTML tag afterwards) */
 /*	returns the length on match, 0 otherwise */
 static size_t
 htmlblock_find_end_strict(
@@ -2790,7 +2790,7 @@ htmlblock_find_end_strict(
 		if (i == mark) return 0;
 
 		mark += htmlblock_find_end(tag, tag_len, doc, data + mark, i - mark);
-		if (mark == i && (is_empty(data + i, size - i) || data[i] == '<' || i >= size)) break;
+		if (mark == i && (is_empty(data + i, size - i) || (i + 1 < size && data[i] == '<' && data[i + 1] != '/') || i >= size)) break;
 	}
 
 	return i;
