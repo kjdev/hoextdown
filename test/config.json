@@ -327,6 +327,10 @@
             "output": "Tests/extras/issues_47.html"
         },
         {
+            "input": "Tests/extras/HTML_Nested.text",
+            "output": "Tests/extras/HTML_Nested.html"
+        },
+        {
             "input": "Tests/context/Escaping.input",
             "output": "Tests/context/Escaping.output",
             "flags": ["--context-test"]

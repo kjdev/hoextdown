@@ -2790,7 +2790,7 @@ htmlblock_find_end_strict(
 		if (i == mark) return 0;
 
 		mark += htmlblock_find_end(tag, tag_len, doc, data + mark, i - mark);
-		if (mark == i && (is_empty(data + i, size - i) || data[i] == '<' || i >= size)) break;
+		if (mark == i && (is_empty(data + i, size - i) || (i + 1 < size && data[i] == '<' && data[i + 1] != '/') || i >= size)) break;
 	}
 
 	return i;
