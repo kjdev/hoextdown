@@ -348,7 +348,7 @@
         {
             "input": "Tests/context/Links.input",
             "output": "Tests/context/Links.output",
-            "flags": ["--context-test"]
+            "flags": ["--context-test", "--special-attribute"]
         },
         {
             "input": "Tests/context/Footnotes.input",

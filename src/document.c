@@ -138,6 +138,8 @@ struct hoedown_document {
 
 	/* extra information provided to callbacks */
 	const hoedown_buffer *link_id;
+	const hoedown_buffer *link_inline_attr;
+	const hoedown_buffer *link_ref_attr;
 	int is_escape_char;
 	hoedown_header_type header_type;
 	hoedown_link_type link_type;
@@ -1377,11 +1379,14 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 	hoedown_buffer *link = NULL;
 	hoedown_buffer *title = NULL;
 	hoedown_buffer *u_link = NULL;
+	hoedown_buffer *inline_attr = NULL;
+	hoedown_buffer *ref_attr = NULL;
 	hoedown_buffer *attr = NULL;
 	hoedown_buffer *id = NULL;
 	size_t org_work_size = doc->work_bufs[BUFFER_SPAN].size;
 	int ret = 0, in_title = 0, qtype = 0;
 	hoedown_link_type link_type = HOEDOWN_LINK_NONE;
+	int ref_attr_exists = 0, inline_attr_exists = 0;
 
 	/* checking whether the correct renderer exists */
 	if ((is_footnote && !doc->md.footnote_ref) || (is_img && !doc->md.image)
@@ -1545,7 +1550,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		/* keeping link and title from link_ref */
 		link = lr->link;
 		title = lr->title;
-		attr = lr->attr;
+		ref_attr = lr->attr;
 		i++;
 	}
 
@@ -1568,7 +1573,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		/* keeping link and title from link_ref */
 		link = lr->link;
 		title = lr->title;
-		attr = lr->attr;
+		ref_attr = lr->attr;
 
 		/* rewinding the spacing */
 		i = txt_e + 1;
@@ -1593,34 +1598,66 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 		unscape_text(u_link, link);
 	}
 
+	/* if special attributes are enabled, attempt to parse an inline one from
+	 * the link */
 	if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-		if (!attr) {
-			/* attr is a span because cleanup code depends on it being span */
-			attr = newbuf(doc, BUFFER_SPAN);
-		}
-		i += parse_inline_attributes(data + i, size - i, attr, doc->attr_activation);
-		if (attr->size > 0) {
-			if (attr->size > 1) {
-				/* remove optional < and > around special attributes */
-				if (attr->data[0] == '<') {
-					attr->data++;
-					attr->size--;
-				}
-				if (attr->data[attr->size - 1] == '>') {
-					attr->size--;
-				}
+		/* attr is a span because cleanup code depends on it being span */
+		inline_attr = newbuf(doc, BUFFER_SPAN);
+		i += parse_inline_attributes(data + i, size - i, inline_attr, doc->attr_activation);
+	}
+
+	/* remove optional < and > around inline and ref special attributes */
+	if (ref_attr && ref_attr->size > 0) {
+		if (ref_attr->size > 1) {
+			if (ref_attr->data[0] == '<') {
+				hoedown_buffer_slurp(ref_attr, 1);
 			}
+			if (ref_attr->data[ref_attr->size - 1] == '>') {
+				ref_attr->size--;
+			}
+		}
+	}
+	if (inline_attr && inline_attr->size > 0) {
+		if (inline_attr->size > 1) {
+			if (inline_attr->data[0] == '<') {
+				hoedown_buffer_slurp(inline_attr, 1);
+			}
+			if (inline_attr->data[inline_attr->size - 1] == '>') {
+				inline_attr->size--;
+			}
+		}
+	}
+
+	/* construct the final attr that is actually applied to the link */
+	ref_attr_exists = ref_attr && ref_attr->size > 0;
+	inline_attr_exists = inline_attr && inline_attr->size > 0;
+	if (ref_attr_exists || inline_attr_exists) {
+		attr = newbuf(doc, BUFFER_SPAN);
+		if (ref_attr_exists) {
+			hoedown_buffer_put(attr, ref_attr->data, ref_attr->size);
+		}
+		/* if both inline and ref attrs exist, join them with a space to prevent
+		 * conflicts */
+		if (ref_attr_exists && inline_attr_exists) {
+			hoedown_buffer_putc(attr, ' ');
+		}
+		if (inline_attr_exists) {
+			hoedown_buffer_put(attr, inline_attr->data, inline_attr->size);
 		}
 	}
 
 	/* calling the relevant rendering function */
 	doc->link_id = id;
 	doc->link_type = link_type;
+	doc->link_ref_attr = ref_attr;
+	doc->link_inline_attr = inline_attr;
 	if (is_img) {
 		ret = doc->md.image(ob, u_link, title, content, attr, &doc->data);
 	} else {
 		ret = doc->md.link(ob, content, u_link, title, attr, &doc->data);
 	}
+	doc->link_inline_attr = NULL;
+	doc->link_ref_attr = NULL;
 	doc->link_type = HOEDOWN_LINK_NONE;
 	doc->link_id = NULL;
 
@@ -3975,6 +4012,8 @@ hoedown_document_new(
 	doc->attr_activation = attr_activation;
 	doc->in_link_body = 0;
 	doc->link_id = NULL;
+	doc->link_ref_attr = NULL;
+	doc->link_inline_attr = NULL;
 	doc->is_escape_char = 0;
 	doc->header_type = HOEDOWN_HEADER_NONE;
 	doc->link_type = HOEDOWN_LINK_NONE;
@@ -4179,6 +4218,18 @@ const hoedown_buffer*
 hoedown_document_link_id(hoedown_document* document)
 {
 	return document->link_id;
+}
+
+const hoedown_buffer*
+hoedown_document_link_ref_attr(hoedown_document* document)
+{
+	return document->link_ref_attr;
+}
+
+const hoedown_buffer*
+hoedown_document_link_inline_attr(hoedown_document* document)
+{
+	return document->link_inline_attr;
 }
 
 int
