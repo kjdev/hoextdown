@@ -127,6 +127,11 @@
             "flags": ["--special-attribute"]
         },
         {
+            "input": "Tests/EmptyHeaders.text",
+            "output": "Tests/EmptyHeaders.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/Images.text",
             "output": "Tests/Images.html",
             "flags": []

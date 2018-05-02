@@ -413,7 +413,7 @@ rndr_header(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buf
 	if (attr && attr->size) {
 		hoedown_buffer_put(merged_attr, attr->data, attr->size);
 	}
-	if (content && ((state->flags & HOEDOWN_HTML_HEADER_ID) || (level <= state->toc_data.nesting_level))) {
+	if (content && content->size && ((state->flags & HOEDOWN_HTML_HEADER_ID) || (level <= state->toc_data.nesting_level))) {
 		hoedown_buffer_puts(merged_attr, " #");
 		rndr_header_id(merged_attr, content->data, content->size, 0, data);
 	}
