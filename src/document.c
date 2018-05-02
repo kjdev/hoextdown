@@ -2253,7 +2253,7 @@ parse_fencedcode(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_
 			is_empty(data + (line_start+w), i - (line_start+w)))
 			break;
 
-		i++;
+		if (i < size) i++;
 	}
 
 	text.data = data + text_start;
