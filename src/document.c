@@ -3683,14 +3683,14 @@ is_html_comment(const uint8_t *data, size_t beg, size_t end, size_t *last)
 	if (!(data[beg] == '<'  && data[beg + 1] == '!' && data[beg + 2] == '-' && data[beg + 3] == '-')) return 0;
 
 	i = 5;
-	while (i < end && !(data[beg + i - 2] == '-' && data[beg + i - 1] == '-' && data[beg + i] == '>')) i++;
+	while (beg + i < end && !(data[beg + i - 2] == '-' && data[beg + i - 1] == '-' && data[beg + i] == '>')) i++;
 	/* i can only ever be beyond the end if the ending --> is not found */
-	if (i >= end) return 0;
+	if (beg + i >= end) return 0;
 	i++;
 
-	if (i < end && (data[beg + i] == '\n' || data[beg + i] == '\r')) {
+	if (beg + i < end && (data[beg + i] == '\n' || data[beg + i] == '\r')) {
 		i++;
-		if (i < end && data[beg + i] == '\r' && data[beg + i - 1] == '\n') i++;
+		if (beg + i < end && data[beg + i] == '\r' && data[beg + i - 1] == '\n') i++;
 	}
 
 	if (last)
@@ -4036,7 +4036,7 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 			beg = end;
 		} else if (is_html_comment(data, beg, size, &end)) {
 			size_t  i = 0;
-			while (i < (end - beg)) {
+			while (i < (end - beg) && beg + i < size) {
 				if (data[beg + i] == '\t' && (data[beg + i] & 0xc0) != 0x80) {
 					hoedown_buffer_put(text, (uint8_t*)"    ", 4);
 				} else {
