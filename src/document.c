@@ -1371,7 +1371,7 @@ static size_t
 char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offset, size_t size)
 {
 	int is_img = (offset && data[-1] == '!' && !is_escaped(data - offset, offset - 1));
-	int is_footnote = (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && data[1] == '^');
+	int is_footnote = (doc->ext_flags & HOEDOWN_EXT_FOOTNOTES && size > 1 && data[1] == '^');
 	size_t i = 1, txt_e, link_b = 0, link_e = 0, title_b = 0, title_e = 0;
 	hoedown_buffer *content = NULL;
 	hoedown_buffer *link = NULL;
