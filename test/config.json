@@ -294,6 +294,11 @@
             "flags": []
         },
         {
+            "input": "Tests/extras/Attributes.text",
+            "output": "Tests/extras/Attributes.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/extras/Link_Attributes.text",
             "output": "Tests/extras/Link_Attributes.html",
             "flags": ["--special-attribute", "--autolink", "--link-attributes-test"]
