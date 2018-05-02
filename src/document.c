@@ -2478,7 +2478,7 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 				break;
 			}
 
-			i = 1;
+			i = 0;
 			while (i < end && work->data[i] != '\n') {
 				i++;
 			}
