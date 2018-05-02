@@ -1,0 +1,11 @@
+# A level 1 header
+
+## {#not-a-header .only-attributes}
+
+###{
+
+### {
+
+The two cases above are headers with incomplete attributes.
+
+####{ I'm a header, too...

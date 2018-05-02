@@ -122,6 +122,11 @@
             "flags": ["--tables", "--multiline-tables"]
         },
         {
+            "input": "Tests/Headers.text",
+            "output": "Tests/Headers.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/Images.text",
             "output": "Tests/Images.html",
             "flags": []

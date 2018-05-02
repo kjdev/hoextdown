@@ -1805,7 +1805,7 @@ parse_codefence(hoedown_document *doc, uint8_t *data, size_t size, hoedown_buffe
 static int
 is_atxheader(hoedown_document *doc, uint8_t *data, size_t size)
 {
-	size_t level = 0, len = size, begin = 0;
+	size_t level = 0, begin = 0, len;
 	uint8_t *p;
 
 	if (data[0] != '#')
@@ -1818,9 +1818,10 @@ is_atxheader(hoedown_document *doc, uint8_t *data, size_t size)
 			return 0;
 	}
 
+	len = size - level;
 	p = memchr(data + level, '\n', len);
 	if (p) {
-		len = (p - data) - level + 1;
+		len = p - (data + level) + 1;
 	}
 
 	/* if the header is only whitespace, it is not a header */
@@ -1837,13 +1838,12 @@ is_atxheader(hoedown_document *doc, uint8_t *data, size_t size)
 		p = memchr(data + level, '{', len);
 		if (p) {
 			/* get number of characters from # to { */
-			begin = (p - data) - level;
+			begin = p - (data + level);
 			if (begin > 0 && !is_empty_all(data + level, begin)) {
 				return 1;
 			}
 			/* check for special attributes after the # */
-			begin += level;
-			return !parse_inline_attributes(data + begin, len - begin, NULL, doc->attr_activation);
+			return !parse_inline_attributes(data + level + begin, len - begin, NULL, doc->attr_activation);
 		}
 	}
 
