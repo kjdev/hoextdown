@@ -10,3 +10,13 @@
 * [ ] Red {#1 .red}
     * [x] Green {#2 .green}
         * [ ] Blue  {#3 .blue}
+
+1. [ ] A loose list
+
+  ... can also ...
+
+2. [x] contain tasks
+3. ... mixed with other items ...
+
+Definition lists
+: [ ] cannot contain tasks (this renders as `[ ]`).

@@ -498,6 +498,7 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 		hoedown_html_renderer_state *state = data->opaque;
 		size_t prefix = 0;
 		size_t size = content->size;
+		int is_li_tag = 0;
 		while (size && content->data[size - 1] == '\n')
 			size--;
 
@@ -507,6 +508,7 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 			HOEDOWN_BUFPUTSL(ob, "<dt");
 		} else {
 			HOEDOWN_BUFPUTSL(ob, "<li");
+			is_li_tag = 1;
 		}
 
 		if (attr && attr->size) {
@@ -514,24 +516,25 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 		}
 		hoedown_buffer_putc(ob, '>');
 
-		if (USE_TASK_LIST(state) && size >= 3) {
+		if (USE_TASK_LIST(state) && is_li_tag && size >= 3) {
+			/* Block list items are wrapped in <p> tags. Output the opening tag now,
+			 * then check for a task list. */
 			if (*flags & HOEDOWN_LI_BLOCK) {
 				prefix = 3;
+				hoedown_buffer_put(ob, content->data, prefix);
 			}
-			if (strncmp((char *)content->data + prefix, "[ ]", 3) == 0) {
-				hoedown_buffer_put(ob, content->data, prefix);
-				HOEDOWN_BUFPUTSL(ob, "<input type=\"checkbox\"");
-				hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
-				prefix += 3;
-				*flags |= HOEDOWN_LI_TASK;
-			} else if (strncasecmp((char *)content->data + prefix, "[x]", 3) == 0) {
-				hoedown_buffer_put(ob, content->data, prefix);
-				HOEDOWN_BUFPUTSL(ob, "<input checked=\"\" type=\"checkbox\"");
-				hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
-				prefix += 3;
-				*flags |= HOEDOWN_LI_TASK;
-			} else {
-				prefix = 0;
+			if (size >= prefix + 3) {
+				if (strncmp((char *)content->data + prefix, "[ ]", 3) == 0) {
+					HOEDOWN_BUFPUTSL(ob, "<input type=\"checkbox\"");
+					hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
+					prefix += 3;
+					*flags |= HOEDOWN_LI_TASK;
+				} else if (strncasecmp((char *)content->data + prefix, "[x]", 3) == 0) {
+					HOEDOWN_BUFPUTSL(ob, "<input checked=\"\" type=\"checkbox\"");
+					hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
+					prefix += 3;
+					*flags |= HOEDOWN_LI_TASK;
+				}
 			}
 		}
 

@@ -189,7 +189,7 @@
         {
             "input": "Tests/extras/Tasks.text",
             "output": "Tests/extras/Tasks.html",
-            "flags": ["--task", "--special-attribute"]
+            "flags": ["--task", "--special-attribute", "--definition-lists"]
         },
         {
             "input": "Tests/extras/Special_Attribute_Paragraphs.text",
