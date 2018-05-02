@@ -309,6 +309,11 @@
             "flags": ["--tables", "--multiline-tables"]
         },
         {
+            "input": "Tests/extras/Multiline_Table_Malformed.text",
+            "output": "Tests/extras/Multiline_Table_Malformed.html",
+            "flags": ["--tables", "--multiline-tables"]
+        },
+        {
             "input": "Tests/extras/More_Tables.text",
             "output": "Tests/extras/More_Tables.html",
             "flags": ["--tables"]

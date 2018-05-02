@@ -3081,13 +3081,17 @@ parse_table_row(
 			}
 
 			/* skip new line and leading colon */
-			pos += 2;
+			if (pos < size) pos++;
+			if (pos < size) pos++;
 
-			/* seek to the beginning of the correct column on the continuation line */
+			/* Seek to the beginning of the correct column on the continuation line.
+			 * The continuation line should have the expected number of columns, and
+			 * so we never expect pos >= size or data[pos] == '\n'. These checks serve
+			 * as defense in depth against wrong preconditions. */
 			for (c = 0; c < col; c++) {
-				while (pos < size && (is_backslashed(data, pos) || data[pos] != ':'))
+				while (pos < size && data[pos] != '\n' && (is_backslashed(data, pos) || data[pos] != ':'))
 					pos++;
-				pos++;  /* skip colon */
+				if (pos < size && data[pos] == ':') pos++;  /* skip colon */
 			}
 
 			parse_table_cell_line(cell_content, data, size, pos, ':', 1 /* is_contination */);
@@ -3358,7 +3362,11 @@ parse_table(
 					if (!is_backslashed(data, j - 1) && data[j - 1] == ':')
 						colons--;
 
-					if (colons != pipes) break;
+					/* Hoedown allows table rows where the number of cells is different
+					 * from `columns`. In this case, `parse_table_row` will add empty
+					 * cells. However, the code does not work in the multi-line case, so
+					 * we require the right number of columns. */
+					if (colons != pipes || colons != columns - 1) break;
 
 					rows++;
 					i = j;
