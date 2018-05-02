@@ -4081,7 +4081,7 @@ hoedown_document_render(hoedown_document *doc, hoedown_buffer *ob, const uint8_t
 
 	if (text->size) {
 		/* adding a final newline if not already present */
-		if (text->data[text->size - 1] != '\n' &&  text->data[text->size - 1] != '\r')
+		if (text->data[text->size - 1] != '\n')
 			hoedown_buffer_putc(text, '\n');
 
 		parse_block(ob, doc, text->data, text->size);
