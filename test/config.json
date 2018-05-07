@@ -122,6 +122,16 @@
             "flags": ["--tables", "--multiline-tables"]
         },
         {
+            "input": "Tests/Headers.text",
+            "output": "Tests/Headers.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/EmptyHeaders.text",
+            "output": "Tests/EmptyHeaders.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/Images.text",
             "output": "Tests/Images.html",
             "flags": []
@@ -179,7 +189,7 @@
         {
             "input": "Tests/extras/Tasks.text",
             "output": "Tests/extras/Tasks.html",
-            "flags": ["--task", "--special-attribute"]
+            "flags": ["--task", "--special-attribute", "--definition-lists"]
         },
         {
             "input": "Tests/extras/Special_Attribute_Paragraphs.text",
@@ -284,6 +294,11 @@
             "flags": []
         },
         {
+            "input": "Tests/extras/Attributes.text",
+            "output": "Tests/extras/Attributes.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/extras/Link_Attributes.text",
             "output": "Tests/extras/Link_Attributes.html",
             "flags": ["--special-attribute", "--autolink", "--link-attributes-test"]
@@ -291,6 +306,11 @@
         {
             "input": "Tests/extras/Multiline_Table.text",
             "output": "Tests/extras/Multiline_Table.html",
+            "flags": ["--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/extras/Multiline_Table_Malformed.text",
+            "output": "Tests/extras/Multiline_Table_Malformed.html",
             "flags": ["--tables", "--multiline-tables"]
         },
         {
@@ -338,7 +358,7 @@
         {
             "input": "Tests/context/Links.input",
             "output": "Tests/context/Links.output",
-            "flags": ["--context-test"]
+            "flags": ["--context-test", "--special-attribute"]
         },
         {
             "input": "Tests/context/Footnotes.input",

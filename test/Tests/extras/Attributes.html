@@ -1,0 +1,38 @@
+<h3>Basic attributes</h3>
+
+<ul>
+<li id="id" foo="bar" class="class">basic test</li>
+<li id="id" foo="bar" bar="baz" class="cls">valid and invalid cases</li>
+</ul>
+
+<h3>Class support</h3>
+
+<ul>
+<li>empty class</li>
+<li class="a">single-letter class</li>
+<li class="ab">two-letter class</li>
+<li class="abc">quoted class</li>
+<li class="foo abc bar def">a mix of classes</li>
+</ul>
+
+<h3>ID support</h3>
+
+<ul>
+<li>empty id</li>
+<li id="w">single-letter id</li>
+<li id="x">quoted id</li>
+<li id="y">id with hash</li>
+<li id="z">multiple ids, should take the first</li>
+<li w="xy" id="z">mixed with other attrs</li>
+</ul>
+
+<h3>Corner cases</h3>
+
+<ul>
+<li>this is not supported :( {foo=&quot;bar</li>
+<li foo="bar \" x="y">escaping quotes does not work :(</li>
+<li foo="bar baz" a="b" width="200">quotes for args containing spaces</li>
+<li foo="bar &quot;quotes in quotes&quot; baz">single quotes work, too</li>
+<li this="works" so="does   this" class="with-spaces">we support extra spaces between attrs</li>
+<li !="width=200">we allow lots of chars for keys/values :/</li>
+</ul>
