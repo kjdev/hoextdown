@@ -212,7 +212,7 @@ rndr_blockcode(hoedown_buffer *ob, const hoedown_buffer *text, const hoedown_buf
 	if (lang) {
 		hoedown_html_renderer_state *state = data->opaque;
 		if ((state->flags & HOEDOWN_HTML_FENCED_CODE_SCRIPT) &&
-		    lang->size > 7 && memcmp(lang->data, "script@", 7) == 0) {
+		    lang->size > 7 && memcmp(lang->data, "script@", 7) == 0 && text) {
 			HOEDOWN_BUFPUTSL(ob, "<script type=\"");
 			escape_html(ob, lang->data + 7, lang->size - 7);
 			HOEDOWN_BUFPUTSL(ob, "\">\n");
