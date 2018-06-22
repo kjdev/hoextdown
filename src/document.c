@@ -447,7 +447,7 @@ script_tag_length(uint8_t *data, size_t size)
 			} else {
 				comment = data[i];
 			}
-			}
+		}
 
 		++i;
 	}
@@ -468,8 +468,8 @@ tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink, int scri
 
 	if (data[0] != '<') return 0;
 
-        /* HTML comment, laxist form */
-        if (size > 5 && data[1] == '!' && data[2] == '-' && data[3] == '-') {
+	/* HTML comment, laxist form */
+	if (size > 5 && data[1] == '!' && data[2] == '-' && data[3] == '-') {
 		i = 5;
 
 		while (i < size && !(data[i - 2] == '-' && data[i - 1] == '-' && data[i] == '>'))
@@ -479,10 +479,10 @@ tag_length(uint8_t *data, size_t size, hoedown_autolink_type *autolink, int scri
 
 		if (i <= size)
 			return i;
-        }
+	}
 
 	/* begins with a '<' optionally followed by '/', followed by letter or number */
-        i = (data[1] == '/') ? 2 : 1;
+	i = (data[1] == '/') ? 2 : 1;
 
 	if (!isalnum(data[i])) {
 		if (script_tag) {
