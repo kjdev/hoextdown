@@ -452,6 +452,8 @@ script_tag_length(uint8_t *data, size_t size)
 		++i;
 	}
 
+	if (i >= size) return i;
+
 	return i + 1;
 }
 
@@ -2384,8 +2386,10 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 		}
 	}
 
-	if (!beg)
+	if (!beg) {
+		if (ol_numeral) hoedown_buffer_free(ol_numeral);
 		return 0;
+	}
 
 	/* skipping to the beginning of the following line */
 	end = beg;
