@@ -701,8 +701,12 @@ static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer
 			if (j != block_id_size) {
 				return len;
 			}
-			block_attr->data = data + begin;
-			block_attr->size = end - begin;
+			if (block_attr) {
+				if (block_attr->size) {
+					hoedown_buffer_reset(block_attr);
+				}
+				hoedown_buffer_put(block_attr, data + begin, end - begin);
+			}
 			len = i;
 			if (attr) {
 				len = parse_attributes(data, len, attr, NULL, "", 0, is_header, attr_activation);
@@ -2184,23 +2188,24 @@ parse_paragraph(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		work.size--;
 
 	if (!level) {
-		hoedown_buffer attr = { NULL, 0, 0, 0, NULL, NULL, NULL };
+		hoedown_buffer *attr = newbuf(doc, BUFFER_ATTRIBUTE);
 		if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-			parse_attributes(work.data, work.size, NULL, &attr, "paragraph", 9, 1, doc->attr_activation);
-			if (attr.size > 0) {
+			parse_attributes(work.data, work.size, NULL, attr, "paragraph", 9, 1, doc->attr_activation);
+			if (attr->size > 0) {
 				/* remove the length of the attribute from the work size - the 12 comes
 				* from the leading space (1), the paragraph (9), the @ symbol (1), and
 				* the {} (2) (any extra spaces in the attribute are included inside
 				* the attribute) */
-				work.size -= attr.size + 12;
+				work.size -= attr->size + 12;
 			}
 		}
 
 		hoedown_buffer *tmp = newbuf(doc, BUFFER_BLOCK);
 		parse_inline(tmp, doc, work.data, work.size);
 		if (doc->md.paragraph)
-			doc->md.paragraph(ob, tmp, &attr, &doc->data);
+			doc->md.paragraph(ob, tmp, attr, &doc->data);
 		popbuf(doc, BUFFER_BLOCK);
+		popbuf(doc, BUFFER_ATTRIBUTE);
 	} else {
 		hoedown_buffer *header_work;
 		hoedown_buffer *attr_work;
@@ -2314,9 +2319,10 @@ parse_blockcode(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 {
 	size_t beg, end, pre;
 	hoedown_buffer *work = 0;
-	hoedown_buffer attr = { 0, 0, 0, 0, NULL, NULL, NULL };
+	hoedown_buffer *attr = 0;
 
 	work = newbuf(doc, BUFFER_BLOCK);
+	attr = newbuf(doc, BUFFER_ATTRIBUTE);
 
 	beg = 0;
 	while (beg < size) {
@@ -2343,15 +2349,16 @@ parse_blockcode(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t
 		work->size -= 1;
 
 	if (doc->ext_flags & HOEDOWN_EXT_SPECIAL_ATTRIBUTE) {
-		work->size = parse_attributes(work->data, work->size, NULL, &attr, "", 0, 0, doc->attr_activation);
+		work->size = parse_attributes(work->data, work->size, NULL, attr, "", 0, 0, doc->attr_activation);
 	}
 
 	hoedown_buffer_putc(work, '\n');
 
 	if (doc->md.blockcode)
-		doc->md.blockcode(ob, work, NULL, &attr, &doc->data);
+		doc->md.blockcode(ob, work, NULL, attr, &doc->data);
 
 	popbuf(doc, BUFFER_BLOCK);
+	popbuf(doc, BUFFER_ATTRIBUTE);
 	return beg;
 }
 
@@ -2643,18 +2650,19 @@ static size_t
 parse_list(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size, hoedown_list_flags flags)
 {
 	hoedown_buffer *work = 0;
-	hoedown_buffer attr = { 0, 0, 0, 0, NULL, NULL, NULL };
+	hoedown_buffer *attr = 0;
 	size_t i = 0, j;
 
 	doc->list_depth++;
 
 	work = newbuf(doc, BUFFER_BLOCK);
+	attr = newbuf(doc, BUFFER_ATTRIBUTE);
 
 	while (i < size) {
 		if (flags & HOEDOWN_LIST_DEFINITION) {
-			j = parse_definition(work, doc, data + i, size - i, &flags, &attr);
+			j = parse_definition(work, doc, data + i, size - i, &flags, attr);
 		} else {
-			j = parse_listitem(work, doc, data + i, size - i, &flags, &attr);
+			j = parse_listitem(work, doc, data + i, size - i, &flags, attr);
 		}
 		i += j;
 
@@ -2663,8 +2671,9 @@ parse_list(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t size
 	}
 
 	if (doc->md.list)
-		doc->md.list(ob, work, &attr, flags, &doc->data);
+		doc->md.list(ob, work, attr, flags, &doc->data);
 	popbuf(doc, BUFFER_BLOCK);
+	popbuf(doc, BUFFER_ATTRIBUTE);
 
 	doc->list_depth--;
 
