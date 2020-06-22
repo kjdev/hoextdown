@@ -1,0 +1,103 @@
+<h1>Not {.activated}</h1>
+
+<h1>{.activated}</h1>
+
+<h1>{{.activated}} content</h1>
+
+<h1 class="activated">Is</h1>
+
+<p>
+  This tests <a href="notreal.com">links</a>{.link-me} and
+<code>block code</code>{.code-me}
+</p>
+
+<p>
+  This tests <a href="notreal.com" class="link-me">links</a> and
+<code class="code-me">block code</code>
+</p>
+
+<ul>
+  <li>list {.do-nothing}</li>
+  <li class="do-something">list</li>
+</ul>
+
+<pre><code class="language-{.codefence-me}">print "hello"
+</code></pre>
+
+<pre><code class="codefence-me">print "hello"
+</code></pre>
+
+<h2>hello {.not-title}</h2>
+
+<h2 class="title">hello</h2>
+
+<table><thead>
+<tr>
+<th>Name</th>
+<th>Age {.not-table}</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Fred</td>
+<td>29</td>
+</tr>
+<tr>
+<td>Jim</td>
+<td>47</td>
+</tr>
+<tr>
+<td>Harry</td>
+<td>32</td>
+</tr>
+</tbody></table>
+
+<table class="table"><thead>
+<tr>
+<th>Name</th>
+<th>Age</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Fred</td>
+<td>29</td>
+</tr>
+<tr>
+<td>Jim</td>
+<td>47</td>
+</tr>
+<tr>
+<td>Harry</td>
+<td>32</td>
+</tr>
+</tbody></table>
+
+<table>
+  <thead>
+    <tr>
+      <th>foo baz</th>
+      <th>bar {.not-table} bat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>foo baz</td>
+      <td>bar bat</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>foo baz</th>
+      <th>bar bat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>foo baz</td>
+      <td>bar bat</td>
+    </tr>
+  </tbody>
+</table>

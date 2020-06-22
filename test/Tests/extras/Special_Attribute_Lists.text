@@ -1,0 +1,78 @@
+* Red {.red}
+* Green {.green}
+* Blue  {.blue}
+
+1. Bird {#bird .list .1}
+2. McHale {#mchale .list .2}
+3. Parish {#parish .list .3}
+
+* Red {#1 .red}
+    * Green {#2 .green}
+        * Blue  {#3 .blue}
+
+---
+
+* Red {.red}
+* Green {.green}
+* Blue {.blue}
+{@list .class-list .ul}
+
+1. Bird {#bird .list .1}
+2. McHale {#mchale .list .2}
+3. Parish {#parish .list .3}
+{@list .class-list .ol}
+
+* Red {#1 .red}
+{@list .class-list .level-1}
+    * Green {#2 .green}
+    {@list .class-list .level-2}
+        * Blue  {#3 .blue}
+        {@list .class-list .level-3}
+
+1. Alpha
+2. Beta
+3. Gamma {@random #not-real}
+
+---
+
+1. Blah:
+
+        $ ls test/{foo,bar}
+
+---
+
+*  item {.foo}
+
+   *  item {#bar}
+
+      blah blah
+
+*  item {baz="goo"}
+
+---
+
+* foo
+bar
+
+* foo
+bar
+
+---
+
+*   foo
+
+    bar
+
+---
+
+*   foo
+
+    foo | bar
+    --- | ---
+    foo | bar
+
+---
+
+*   foo {.attr}
+
+    bar

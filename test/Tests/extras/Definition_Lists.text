@@ -1,0 +1,301 @@
+## Tight Definition List
+
+Apple
+: A fruit
+: An apple
+
+Orange
+: A citrus fruit
+: An orange
+
+## Tight Definition Lists, Variant
+
+Apple
+
+: A fruit
+: An apple
+
+Orange
+
+: A citrus fruit
+: An orange
+
+## Loose Definition List
+
+Apple
+
+: A fruit
+
+: An apple
+
+Orange
+
+: A citrus fruit
+
+: An orange
+
+## Tight Tabs
+
+Apple
+
+:	A fruit
+:	An apple
+
+Orange
+
+:	A citrus fruit
+:	An orange
+
+## Tight Tabs, Variant
+
+Apple
+:	A fruit
+:	An apple
+
+Orange
+:	A citrus fruit
+:	An orange
+
+## Multiple Paragraphs
+
+Apple
+
+: An apples
+
+    An apple is an apple. Sometimes apples are necessary and sometimes not.
+    Sometimes apples can also have `code` inside them for various reasons.
+
+    Situations involving apples include doctors and orchards.
+
+: A fruit
+
+    Fruits are fruity.
+
+Orange
+
+: An orange
+
+    Oranges live in the city, unlike apples which live on orchards.
+
+    Many skyscrapers bare oranges, but only some cities allow picking without a license.
+
+Multiple Terms
+Are also Allowed
+No limits
+
+: Multiple implies more than one.
+
+## Special Attributes
+
+Apples {#apple .apple-class}
+
+: A lifestyle. {.apples}
+
+    The Apple lifestyle is a type of lifestyle commonly found in the lifestyle forests.
+
+: A fruit. {.fruit}
+
+    Sometimes fruits are bought and then sold to fruit vendors who then buy and sell from other fruit vendors.
+    Many fruit vendors buy fruit and sell them but sometimes the fruits are the ones buying vendors.
+
+This is {.apple-class}
+Another {#apple-id}
+Three Things
+Four Things {#id .classy}
+
+: Orange
+
+## Just colon things.
+
+: thing
+: a thing
+: another thing
+
+Another test
+## of
+Header interference
+: Check that your headers are on different bands before contacting support.
+
+Thing should not be
+---
+: a list
+
+but
+---
+this is
+: okay
+
+## Unordered Lists
+
++ Test Me
++ Nothing should interfere here
+
+- Definitely nothing
+
+## Ordered Lists
+
+1. Apples
+1. Apples
+1. Apples
+
+2. Apples
+
+## Example in Readme
+
+Term
+: Definition
+
+Term 1
+Term 2
+: Definition 2
+
+Term 3
+: Definition Line 1
+  Definition Line 2
+
+    Extra paragraphs need four spaces.
+
+## PHP Markdown Examples
+
+Term 1
+
+:   This is a definition with two paragraphs. Lorem ipsum 
+    dolor sit amet, consectetuer adipiscing elit. Aliquam 
+    hendrerit mi posuere lectus.
+
+    Vestibulum enim wisi, viverra nec, fringilla in, laoreet
+    vitae, risus.
+
+:   Second definition for term 1, also wrapped in a paragraph
+    because of the blank line preceding it.
+
+Term 2
+
+:   This definition has a code block, a blockquote and a list.
+
+        code block.
+
+    > block quote
+    > on two lines.
+
+    1.  first list item
+    2.  second list item
+
+## Indentation Fun
+
+1. Ordered Item 1
+
+   Indented Term 1
+
+   : Definition
+
+   : Definition 2
+
+2. Ordered Term 1
+   : Definition 1
+   : Definition 2
+
+3. Ordered Term 2
+   Ordered Term 3
+
+   : Definition 1
+
+## Blockquotes
+
+> This line is a blockquote
+: and it is a definition list
+
+> This should also
+> Play rather
+> : nicely
+
+> This is actually
+> > Pretty cool that it
+> > Automagically works
+> > : Pretty cool, huh?
+
+> Embedded List
+> : This is a definition
+>
+> > Another block quote
+
+> Why would
+> : > Anyone do this?
+> > Is this reality?
+
+1. In any case, that wasn't supported
+2. > Because this isn't supported and it isn't specced
+3. Blockquotes are also
+> Not supported
+> Inside list items
+
+This *is* a term
+
+: This will be a para
+
+  > a blockquote
+
+  # A header
+
+## Tables
+
+This is a definition list
+
+: Example11
+
+    11 | 12
+    : 13 : :
+    --- | ---
+    15 | 16
+    : : 18
+    19 | 110
+    111 | 112
+    : 113 : :
+
+
+: This is another definition
+
+This is another term
+: Example22
+
+  | 21   | 22   |
+  : 23   : 24   :
+  : 25   : 26   :
+  : 27   : 28   :
+  | --- | --- |
+  | 29   | 210  |
+  : 211  : 212  :
+  : 213  : 214  :
+  : 215  : 216  :
+
+Term me more
+Term me 3
+: Example33
+
+1 | 2
+: 3 : :
+--- | ---
+5 | 6
+: : 8
+9 | 10
+11 | 12
+: 13 : :
+
+## HTML and Codeblocks
+
+hey whats this
+what about this
+<div>is this html</div>
+```
+: maybe
+```
+
+do this thing
+```
+: maybe
+```
+
+```
+neither should
+: this really work
+```

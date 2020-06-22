@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+
+This is <?php echo "an example" ?> inline link.
+
+<?php
+echo "This link:";
+echo "http://example.net/";
+?>
+
+See my [About](/about/) page for details.
+
+This is the <?=$example?>
+
+This is the <?= $example ?>
+
+This is the <?=
+$example ?>
+
+This is the <?php
+echo 'simple case';
+?>

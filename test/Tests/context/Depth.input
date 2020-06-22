@@ -1,0 +1,21 @@
+* foo
+
+    * bar
+
+        * baz
+
+		  bat
+
+> foo
+>
+> > bar
+> >
+> > > baz
+
+* foo
+
+  > bar
+  >
+  > * baz
+  >
+  >   > bat

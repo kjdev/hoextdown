@@ -1,6 +1,9 @@
 *.o
 *.obj
 *.exe
+*.gcda
+*.gcno
+*.gcov
 hoedown
 hoedown.dll
 hoedown.exp

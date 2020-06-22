@@ -1,0 +1,12 @@
+Link should go to example.com but goes to Wikipedia: [foo]
+
+Link should go to example2.com: [bar]
+
+[foo]: http://example.com/foo
+
+<!-- commented-out link definition
+[foo]: https://en.wikipedia.org/wiki/foo
+-->
+
+<!-- this shouldn't break references
+[bar]: http://example2.com/bar

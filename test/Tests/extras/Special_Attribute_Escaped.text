@@ -1,0 +1,10 @@
+# Test case
+
+*   It does not repro in the first bullet in a list.
+
+*   This is a \{@link com.example.Class link\}
+    that does not work. The link must be at the end of a line.
+
+This is a \{@link com.example.Class link\} that does work.
+
+Another link at the end of the line works: \{@link com.example.Class link\}

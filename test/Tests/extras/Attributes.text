@@ -1,0 +1,31 @@
+### Basic attributes
+
+- basic test {#id .class foo=bar}
+- valid and invalid cases {#id .cls foo=bar bar="baz" = !yippie =quux =}
+
+### Class support
+
+- empty class {class=}
+- single-letter class {class=a}
+- two-letter class {class=ab}
+- quoted class {class="abc"}
+- a mix of classes {.foo class="abc" .bar class=def}
+
+### ID support
+
+- empty id {id=}
+- single-letter id {id=w}
+- quoted id {id="x"}
+- id with hash {#y}
+- multiple ids, should take the first {#z id=foo}
+- mixed with other attrs {w=xy #z}
+
+### Corner cases
+
+- this is not supported :( {foo="bar {} baz"}
+- escaping quotes does not work :( {foo="bar \" baz" x=y}
+- quotes for args containing spaces {foo="bar baz" a=b c width=200}
+- single quotes work, too {foo='bar "quotes in quotes" baz'}
+- we support extra spaces between attrs
+	{   this=works   so="does   this" .with-spaces }
+- we allow lots of chars for keys/values :/ {!=width=200}

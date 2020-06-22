@@ -1,0 +1,53 @@
+# Not {.activated}
+
+# {.activated}
+
+# {{.activated}} content
+
+# Is {: .activated}
+
+This tests [links](notreal.com){.link-me} and `block code`{.code-me}
+
+This tests [links](notreal.com){: .link-me} and `block code`{: .code-me}
+
+* list {.do-nothing}
+* list {:.do-something}
+
+```{.codefence-me}
+print "hello"
+```
+
+```{:.codefence-me}
+print "hello"
+```
+
+hello {.not-title}
+-----
+
+hello {:.title}
+-----
+
+Name    |  Age {.not-table}
+--------|------
+Fred    |   29
+Jim     |   47
+Harry   |   32
+
+
+Name    |  Age  {:.table}
+--------|------
+Fred    |   29
+Jim     |   47
+Harry   |   32
+
+foo | bar {.not-table}
+: baz : bat
+--- | ---
+foo | bar
+: baz : bat
+
+foo | bar {:.table}
+: baz : bat
+--- | ---
+foo | bar
+: baz : bat

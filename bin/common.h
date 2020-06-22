@@ -43,7 +43,9 @@ print_option(char short_opt, const char *long_opt, const char *description)
 void
 print_version()
 {
-	printf("Built with Hoedown " HOEDOWN_VERSION ".\n");
+	int major, minor, revision, extras;
+	hoedown_version(&major, &minor, &revision, &extras);
+	printf("Built with Hoedown v%d.%d.%d.%d.\n", major, minor, revision, extras);
 }
 
 int

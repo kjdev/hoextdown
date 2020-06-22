@@ -9,6 +9,10 @@ ifneq ($(OS),Windows_NT)
 	HOEDOWN_CFLAGS += -fPIC
 endif
 
+ifdef COVERAGE
+HOEDOWN_CFLAGS := $(HOEDOWN_CFLAGS) -coverage
+endif
+
 SONAME = -soname
 ifeq ($(shell uname -s),Darwin)
 	SONAME = -install_name
@@ -17,12 +21,15 @@ endif
 HOEDOWN_SRC=\
 	src/autolink.o \
 	src/buffer.o \
+	src/context_test.o \
 	src/document.o \
 	src/escape.o \
 	src/html.o \
 	src/html_blocks.o \
+	src/html5_blocks.o \
 	src/html_smartypants.o \
 	src/stack.o \
+	src/hash.o \
 	src/version.o
 
 .PHONY:		all test test-pl clean
@@ -43,15 +50,18 @@ libhoedown.a: $(HOEDOWN_SRC)
 # Executables
 
 hoedown: bin/hoedown.o $(HOEDOWN_SRC)
-	$(CC) $^ $(LDFLAGS) -o $@
+	$(CC) $(HOEDOWN_CFLAGS) $^ $(LDFLAGS) -o $@
 
 smartypants: bin/smartypants.o $(HOEDOWN_SRC)
-	$(CC) $^ $(LDFLAGS) -o $@
+	$(CC) $(HOEDOWN_CFLAGS) $^ $(LDFLAGS) -o $@
 
 # Perfect hashing
 
 src/html_blocks.c: html_block_names.gperf
 	gperf -L ANSI-C -N hoedown_find_block_tag -c -C -E -S 1 --ignore-case -m100 $^ > $@
+
+src/html5_blocks.c: html5_block_names.gperf
+	gperf -L ANSI-C -N hoedown_find_html5_block_tag -c -C -E -S 1 --ignore-case -m100 $^ > $@
 
 # Testing
 
@@ -66,8 +76,9 @@ test-pl: hoedown
 
 clean:
 	$(RM) src/*.o bin/*.o
-	$(RM) libhoedown.so libhoedown.so.1 libhoedown.a
+	$(RM) libhoedown.so libhoedown.so.3 libhoedown.a
 	$(RM) hoedown smartypants hoedown.exe smartypants.exe
+	$(RM) bin/*.gc* src/*.gc* *.gcov
 
 # Installing
 
