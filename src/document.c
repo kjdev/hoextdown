@@ -1436,7 +1436,7 @@ is_hrule(uint8_t *data, size_t size)
 static size_t
 is_codefence(uint8_t *data, size_t size, size_t *width, uint8_t *chr)
 {
-	size_t i = 0, n = 1;
+	size_t i = 0, n = 1, j;
 	uint8_t c;
 
 	/* skipping initial spaces */
@@ -1458,6 +1458,16 @@ is_codefence(uint8_t *data, size_t size, size_t *width, uint8_t *chr)
 
 	if (n < 3)
 		return 0;
+
+	for (j = i; j < size; ++j) {
+		if (data[j] == c) {
+			/* Avoid parsing codespan as fence. */
+			return 0;
+		}
+		if (data[j] == '\n') {
+			break;
+		}
+	}
 
 	if (width) *width = n;
 	if (chr) *chr = c;
@@ -1484,11 +1494,6 @@ parse_codefence(uint8_t *data, size_t size, hoedown_buffer *lang, size_t *width,
 
 	lang->data = data + lang_start;
 	lang->size = i - lang_start;
-
-	/* Avoid parsing a codespan as a fence */
-	i = lang_start + 2;
-	while (i < size && !(data[i] == *chr && data[i-1] == *chr && data[i-2] == *chr)) i++;
-	if (i < size) return 0;
 
 	return w;
 }
@@ -1866,7 +1871,6 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 	if (doc->ext_flags & HOEDOWN_EXT_FENCED_CODE) {
 		if (is_codefence(data + beg, end - beg, NULL, NULL)) {
 			in_fence = 1;
-			fence_pre = beg;
 		}
 	}
 

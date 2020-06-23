@@ -10,6 +10,16 @@
 
    There is code here.
 
-1. Third item.
+1. ```Triple quoted code``` is not fenced code.
+
+1. ```Some ``nested `quotes` code`` may``` require it.
+
+1. Having some
+
+   ```triple quoted code```
+
+   inside your item should work, too.
+
+1. This last item is still in the same list.
 
 End of this list.
