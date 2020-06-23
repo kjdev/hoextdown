@@ -1,5 +1,6 @@
 #include "document.h"
 #include "html.h"
+#include "context_test.h"
 
 #include "common.h"
 #include <time.h>
@@ -9,7 +10,8 @@
 
 enum renderer_type {
 	RENDERER_HTML,
-	RENDERER_HTML_TOC
+	RENDERER_HTML_TOC,
+	RENDERER_CONTEXT_TEST
 };
 
 struct extension_category_info {
@@ -39,6 +41,7 @@ static struct extension_category_info categories_info[] = {
 
 static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_TABLES, "tables", "Parse PHP-Markdown style tables."},
+	{HOEDOWN_EXT_MULTILINE_TABLES, "multiline-tables", "Parse continuation-style multiline tables (only has an effect if --tables is also used)."},
 	{HOEDOWN_EXT_FENCED_CODE, "fenced-code", "Parse fenced code blocks."},
 	{HOEDOWN_EXT_FOOTNOTES, "footnotes", "Parse footnotes."},
 
@@ -53,8 +56,17 @@ static struct extension_info extensions_info[] = {
 	{HOEDOWN_EXT_NO_INTRA_EMPHASIS, "disable-intra-emphasis", "Disable emphasis_between_words."},
 	{HOEDOWN_EXT_SPACE_HEADERS, "space-headers", "Require a space after '#' in headers."},
 	{HOEDOWN_EXT_MATH_EXPLICIT, "math-explicit", "Instead of guessing by context, parse $inline math$ and $$always block math$$ (requires --math)."},
+	{HOEDOWN_EXT_HTML5_BLOCKS, "html5-blocks", "Interpret HTML5 blocks, such as <section> as block elements (don't consider as text)."},
+	{HOEDOWN_EXT_NO_INTRA_UNDERLINE_EMPHASIS, "disable-intra-underline-emphasis", "Disable emphasis_between_words, but only for underscores."},
 
 	{HOEDOWN_EXT_DISABLE_INDENTED_CODE, "disable-indented-code", "Don't parse indented code blocks."},
+
+	{HOEDOWN_EXT_SPECIAL_ATTRIBUTE, "special-attribute", "Parse special attributes."},
+	{HOEDOWN_EXT_SCRIPT_TAGS, "script-tags", "Parse script tags <?..?>."},
+	{HOEDOWN_EXT_META_BLOCK, "meta-block", "Parse meta block <!--*..*-->."},
+
+	{HOEDOWN_EXT_DEFINITION_LISTS, "definition-lists", "Parse definition lists."},
+	{HOEDOWN_EXT_BLOCKQUOTE_EMPTY_LINE, "blockquote-empty-line", "Parse blockquote is done empty line."},
 };
 
 static struct html_flag_info html_flags_info[] = {
@@ -62,6 +74,10 @@ static struct html_flag_info html_flags_info[] = {
 	{HOEDOWN_HTML_ESCAPE, "escape", "Escape all HTML."},
 	{HOEDOWN_HTML_HARD_WRAP, "hard-wrap", "Render each linebreak as <br>."},
 	{HOEDOWN_HTML_USE_XHTML, "xhtml", "Render XHTML."},
+	{HOEDOWN_HTML_USE_TASK_LIST, "task", "Render task lists."},
+	{HOEDOWN_HTML_LINE_CONTINUE, "line-continue", "Render line continue."},
+	{HOEDOWN_HTML_HEADER_ID, "header-id", "Render header id."},
+	{HOEDOWN_HTML_FENCED_CODE_SCRIPT, "fenced-script", "Render fenced code blocks as script tag."},
 };
 
 static const char *category_prefix = "all-";
@@ -91,6 +107,7 @@ print_help(const char *basename)
 	printf("Main options:\n");
 	print_option('n', "max-nesting=N", "Maximum level of block nesting parsed. Default is " str(DEF_MAX_NESTING) ".");
 	print_option('t', "toc-level=N", "Maximum level for headers included in the TOC. Zero disables TOC (the default).");
+	print_option('a', "attr-activation=C", "Character prefix to activate special attributes if the extension is turned on. Cannot be @. EX: With '-a=?', '# h {? .class}' becomes '<h1 class=\"class\">h</h1>'.");
 	print_option(  0, "html", "Render (X)HTML. The default.");
 	print_option(  0, "html-toc", "Render the Table of Contents in (X)HTML.");
 	print_option('T', "time", "Show time spent in rendering.");
@@ -149,9 +166,15 @@ struct option_data {
 	int toc_level;
 	hoedown_html_flags html_flags;
 
+	/* document */
+	uint8_t attr_activation;
+
 	/* parsing */
 	hoedown_extensions extensions;
 	size_t max_nesting;
+
+	/* link_attributes */
+	int link_attributes;
 };
 
 int
@@ -198,6 +221,11 @@ parse_short_option(char opt, char *next, void *opaque)
 
 	if (opt == 'o' && isNum) {
 		data->ounit = num;
+		return 2;
+	}
+
+	if (opt == 'a' && !isNum && next) {
+		data->attr_activation = next[0];
 		return 2;
 	}
 
@@ -315,6 +343,10 @@ parse_long_option(char *opt, char *next, void *opaque)
 		data->toc_level = num;
 		return 2;
 	}
+	if (strcmp(opt, "attr-activation")==0 && !isNum && next) {
+		data->attr_activation = next[0];
+		return 2;
+	}
 	if (strcmp(opt, "input-unit")==0 && isNum) {
 		data->iunit = num;
 		return 2;
@@ -330,6 +362,16 @@ parse_long_option(char *opt, char *next, void *opaque)
 	}
 	if (strcmp(opt, "html-toc")==0) {
 		data->renderer = RENDERER_HTML_TOC;
+		return 1;
+	}
+	/* this is intentionally omitted from usage, since it's for testing only */
+	if (strcmp(opt, "context-test")==0) {
+		data->renderer = RENDERER_CONTEXT_TEST;
+		return 1;
+	}
+
+	if (strcmp(opt, "link-attributes-test")==0) {
+		data->link_attributes = 1;
 		return 1;
 	}
 
@@ -355,6 +397,13 @@ parse_argument(int argn, char *arg, int is_forced, void *opaque)
 	return 0;
 }
 
+static void
+rndr_test_link_attributes(hoedown_buffer *ob, const hoedown_buffer *url, const hoedown_renderer_data *data)
+{
+	hoedown_buffer_puts(ob, " data-url=\"");
+	hoedown_buffer_put(ob, url->data, url->size);
+	hoedown_buffer_putc(ob, '\"');
+}
 
 /* MAIN LOGIC */
 
@@ -364,7 +413,7 @@ main(int argc, char **argv)
 	struct option_data data;
 	clock_t t1, t2;
 	FILE *file = stdin;
-	hoedown_buffer *ib, *ob;
+	hoedown_buffer *ib, *ob, *meta;
 	hoedown_renderer *renderer = NULL;
 	void (*renderer_free)(hoedown_renderer *) = NULL;
 	hoedown_document *document;
@@ -378,13 +427,20 @@ main(int argc, char **argv)
 	data.filename = NULL;
 	data.renderer = RENDERER_HTML;
 	data.toc_level = 0;
+	data.attr_activation = 0;
 	data.html_flags = 0;
 	data.extensions = 0;
 	data.max_nesting = DEF_MAX_NESTING;
+	data.link_attributes = 0;
 
 	argc = parse_options(argc, argv, parse_short_option, parse_long_option, parse_argument, &data);
 	if (data.done) return 0;
 	if (!argc) return 1;
+
+	/* Add extesion flags, case html_flags */
+	if (data.html_flags & HOEDOWN_HTML_FENCED_CODE_SCRIPT) {
+		data.extensions |= HOEDOWN_EXT_FENCED_CODE;
+	}
 
 	/* Open input file, if needed */
 	if (data.filename) {
@@ -415,11 +471,38 @@ main(int argc, char **argv)
 			renderer = hoedown_html_toc_renderer_new(data.toc_level);
 			renderer_free = hoedown_html_renderer_free;
 			break;
+		case RENDERER_CONTEXT_TEST:
+			renderer = hoedown_context_test_renderer_new();
+			renderer_free = hoedown_context_test_renderer_free;
+			break;
 	};
 
 	/* Perform Markdown rendering */
 	ob = hoedown_buffer_new(data.ounit);
-	document = hoedown_document_new(renderer, data.extensions, data.max_nesting);
+	meta = hoedown_buffer_new(data.ounit);
+	document = hoedown_document_new(renderer, data.extensions, data.max_nesting, data.attr_activation, NULL, meta);
+
+  /* state */
+	if (data.renderer == RENDERER_CONTEXT_TEST) {
+		hoedown_context_test_renderer_state *state;
+		state = (hoedown_context_test_renderer_state *)renderer->opaque;
+		state->doc = document;
+	} else {
+		hoedown_html_renderer_state *state;
+		state = (hoedown_html_renderer_state *)renderer->opaque;
+		/* toc_data */
+		if (data.toc_level > 0) {
+			state->toc_data.current_level = 0;
+			state->toc_data.level_offset = 0;
+			state->toc_data.nesting_level = data.toc_level;
+			state->toc_data.header = "<div class=\"toc\">";
+			state->toc_data.footer = "</div>";
+		}
+		/* link_attributes */
+		if (data.link_attributes) {
+			state->link_attributes = rndr_test_link_attributes;
+		}
+	}
 
 	t1 = clock();
 	hoedown_document_render(document, ob, ib->data, ib->size);
@@ -434,6 +517,18 @@ main(int argc, char **argv)
 	(void)fwrite(ob->data, 1, ob->size, stdout);
 	hoedown_buffer_free(ob);
 
+	if (ferror(stdout)) {
+		hoedown_buffer_free(meta);
+		fprintf(stderr, "I/O errors found while writing output.\n");
+		return 5;
+	}
+
+	/* Meta block */
+	if (meta->size > 0) {
+		fprintf(stdout, "-- Meta Block --\n");
+		(void)fwrite(meta->data, 1, meta->size, stdout);
+	}
+	hoedown_buffer_free(meta);
 	if (ferror(stdout)) {
 		fprintf(stderr, "I/O errors found while writing output.\n");
 		return 5;

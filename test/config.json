@@ -122,9 +122,283 @@
             "flags": ["--fenced-code"]
         },
         {
+            "input": "Tests/Table.text",
+            "output": "Tests/Table.html",
+            "flags": ["--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/Headers.text",
+            "output": "Tests/Headers.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/EmptyHeaders.text",
+            "output": "Tests/EmptyHeaders.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/Images.text",
             "output": "Tests/Images.html",
             "flags": []
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Activation.text",
+            "output": "Tests/extras/Special_Attribute_Activation.html",
+            "flags": ["--special-attribute", "--fenced-code", "--tables", "--multiline-tables", "-a", ":"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Headers.text",
+            "output": "Tests/extras/Special_Attribute_Headers.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Links.text",
+            "output": "Tests/extras/Special_Attribute_Links.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Lists.text",
+            "output": "Tests/extras/Special_Attribute_Lists.html",
+            "flags": ["--special-attribute", "--tables"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_FencedCode.text",
+            "output": "Tests/extras/Special_Attribute_FencedCode.html",
+            "flags": ["--special-attribute", "--fenced-code"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Codespan.text",
+            "output": "Tests/extras/Special_Attribute_Codespan.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Tables.text",
+            "output": "Tests/extras/Special_Attribute_Tables.html",
+            "flags": ["--special-attribute", "--tables"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Escaped.text",
+            "output": "Tests/extras/Special_Attribute_Escaped.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Tables.text",
+            "output": "Tests/extras/Special_Attribute_Tables.html",
+            "flags": ["--special-attribute", "--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Multiline_Table.text",
+            "output": "Tests/extras/Special_Attribute_Multiline_Table.html",
+            "flags": ["--special-attribute", "--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/extras/Tasks.text",
+            "output": "Tests/extras/Tasks.html",
+            "flags": ["--task", "--special-attribute", "--definition-lists"]
+        },
+        {
+            "input": "Tests/extras/Special_Attribute_Paragraphs.text",
+            "output": "Tests/extras/Special_Attribute_Paragraphs.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Line_Continue.text",
+            "output": "Tests/extras/Line_Continue.html",
+            "flags": ["--line-continue"]
+        },
+        {
+            "input": "Tests/extras/Toc.text",
+            "output": "Tests/extras/Toc.html",
+            "flags": ["-t", "6", "--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Toc_Render.text",
+            "output": "Tests/extras/Toc_Render.html",
+            "flags": ["-t", "6", "--special-attribute", "--html-toc"]
+        },
+        {
+            "input": "Tests/extras/FencedCode_Script.text",
+            "output": "Tests/extras/FencedCode_Script.html",
+            "flags": ["--fenced-script"]
+        },
+        {
+            "input": "Tests/extras/Script_Tags.text",
+            "output": "Tests/extras/Script_Tags.html",
+            "flags": ["--script-tags"]
+        },
+        {
+            "input": "Tests/extras/Meta_Block.text",
+            "output": "Tests/extras/Meta_Block.html",
+            "flags": ["--meta-block"]
+        },
+        {
+            "input": "Tests/extras/Meta_Block_Multi.text",
+            "output": "Tests/extras/Meta_Block_Multi.html",
+            "flags": ["--meta-block"]
+        },
+        {
+            "input": "Tests/extras/Footnotes.text",
+            "output": "Tests/extras/Footnotes.html",
+            "flags": ["--footnotes"]
+        },
+        {
+            "input": "Tests/extras/HTML_Block.text",
+            "output": "Tests/extras/HTML_Block.html"
+        },
+        {
+            "input": "Tests/extras/HTML5_Block.text",
+            "output": "Tests/extras/HTML5_Block.html",
+            "flags": ["--html5-blocks"]
+        },
+        {
+            "input": "Tests/extras/Escape_Backticks.text",
+            "output": "Tests/extras/Escape_Backticks.html"
+        },
+        {
+            "input": "Tests/extras/List_Item_First_Line.text",
+            "output": "Tests/extras/List_Item_First_Line.html"
+        },
+        {
+            "input": "Tests/extras/List_Item_FencedCode.text",
+            "output": "Tests/extras/List_Item_FencedCode.html",
+            "flags": ["--fenced-code"]
+        },
+        {
+            "input": "Tests/extras/Table_Escape_Pipe.text",
+            "output": "Tests/extras/Table_Escape_Pipe.html",
+            "flags": ["--tables"]
+        },
+        {
+            "input": "Tests/extras/Header_Empty.text",
+            "output": "Tests/extras/Header_Empty.html"
+        },
+        {
+            "input": "Tests/extras/Header_Empty_Attribute.text",
+            "output": "Tests/extras/Header_Empty_Attribute.html",
+            "flags": ["--header-id", "--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Header_ID.text",
+            "output": "Tests/extras/Header_ID.html",
+            "flags": ["--header-id", "--special-attribute"]
+        },
+
+        {
+            "input": "Tests/extras/Toc_Header_Empty.text",
+            "output": "Tests/extras/Toc_Header_Empty.html",
+            "flags": ["--html-toc", "-t", "1"]
+        },
+        {
+            "input": "Tests/extras/Toc_Header_Empty_Attribute.text",
+            "output": "Tests/extras/Toc_Header_Empty_Attribute.html",
+            "flags": ["--html-toc", "-t", "1", "--header-id", "--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Codespans.text",
+            "output": "Tests/extras/Codespans.html",
+            "flags": []
+        },
+        {
+            "input": "Tests/extras/Attributes.text",
+            "output": "Tests/extras/Attributes.html",
+            "flags": ["--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Link_Attributes.text",
+            "output": "Tests/extras/Link_Attributes.html",
+            "flags": ["--special-attribute", "--autolink", "--link-attributes-test"]
+        },
+        {
+            "input": "Tests/extras/Multiline_Table.text",
+            "output": "Tests/extras/Multiline_Table.html",
+            "flags": ["--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/extras/Multiline_Table_Malformed.text",
+            "output": "Tests/extras/Multiline_Table_Malformed.html",
+            "flags": ["--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/extras/More_Tables.text",
+            "output": "Tests/extras/More_Tables.html",
+            "flags": ["--tables"]
+        },
+        {
+            "input": "Tests/extras/More_Tables.text",
+            "output": "Tests/extras/More_Tables.html",
+            "flags": ["--tables", "--multiline-tables"]
+        },
+        {
+            "input": "Tests/extras/Definition_Lists.text",
+            "output": "Tests/extras/Definition_Lists.html",
+            "flags": ["--definition-lists", "--tables", "--multiline-tables", "--fenced-code", "--special-attribute"]
+        },
+        {
+            "input": "Tests/extras/Emphases_Intra_Underline.text",
+            "output": "Tests/extras/Emphases_Intra_Underline.html",
+            "flags": ["--disable-intra-underline-emphasis"]
+        },
+        {
+            "input": "Tests/extras/Blockquote_Empty_Line.text",
+            "output": "Tests/extras/Blockquote_Empty_Line.html",
+            "flags": ["--blockquote-empty-line"]
+        },
+        {
+            "input": "Tests/extras/issues_46.text",
+            "output": "Tests/extras/issues_46.html"
+        },
+        {
+            "input": "Tests/extras/issues_47.text",
+            "output": "Tests/extras/issues_47.html"
+        },
+        {
+            "input": "Tests/extras/HTML_Nested.text",
+            "output": "Tests/extras/HTML_Nested.html"
+        },
+        {
+            "input": "Tests/context/Escaping.input",
+            "output": "Tests/context/Escaping.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/Links.input",
+            "output": "Tests/context/Links.output",
+            "flags": ["--context-test", "--special-attribute"]
+        },
+        {
+            "input": "Tests/context/Footnotes.input",
+            "output": "Tests/context/Footnotes.output",
+            "flags": ["--context-test", "--footnotes"]
+        },
+        {
+            "input": "Tests/context/Headers.input",
+            "output": "Tests/context/Headers.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/HRules.input",
+            "output": "Tests/context/HRules.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/Blockcode.input",
+            "output": "Tests/context/Blockcode.output",
+            "flags": ["--context-test", "--fenced-code"]
+        },
+        {
+            "input": "Tests/context/Unordered_Lists.input",
+            "output": "Tests/context/Unordered_Lists.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/Ordered_Lists.input",
+            "output": "Tests/context/Ordered_Lists.output",
+            "flags": ["--context-test"]
+        },
+        {
+            "input": "Tests/context/Depth.input",
+            "output": "Tests/context/Depth.output",
+            "flags": ["--context-test"]
         }
     ]
 }

@@ -1,0 +1,22 @@
+Paragraph {@paragraph #id .class}
+
+Paragraph {@paragraph  #id .class }
+
+Paragraph
+{@paragraph #id .class}
+
+Preserve {@paragraph #id .class} this
+
+Ignore this {@paragraph #id .class} but not this {@paragraph #id-2}
+
+This is not processed \{@paragraph #id\}
+
+This is not processed {#id}
+
+This is not processed {@random #id}
+
+* Testing paragraphs
+
+  In loose lists {@paragraph .p}
+
+  This does not activate {@random .nop}

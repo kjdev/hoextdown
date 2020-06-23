@@ -1,0 +1,35 @@
+[foo](/url/)
+
+[foo](/url/){.inline_attr}
+
+[foo][bar]
+
+[foo][]
+
+[foo]
+
+[foo]{.inline_attr}
+
+[foo][attr]
+
+[foo][attr]{.inline_attr}
+
+![foo](/url/)
+
+![foo](/url/){.inline_attr}
+
+![foo][bar]
+
+![foo][]
+
+![foo]
+
+![foo]{.inline_attr}
+
+![foo][attr]
+
+![foo][attr]{.inline_attr}
+
+[bar]: /url/
+[foo]: /url2/
+[attr]: /url3 "attr_title" {.ref_attr}

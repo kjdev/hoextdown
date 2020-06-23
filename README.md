@@ -1,104 +1,263 @@
-Hoedown
-=======
+# Hoextdown
 
-[![Build Status](https://travis-ci.org/hoedown/hoedown.png?branch=master)](https://travis-ci.org/hoedown/hoedown)
+[![Build Status](https://api.travis-ci.org/kjdev/hoextdown.png?branch=master)](https://travis-ci.org/kjdev/hoextdown)
+[![codecov.io](https://codecov.io/github/kjdev/hoextdown/coverage.svg?branch=master)](https://codecov.io/github/kjdev/hoextdown?branch=master)
 
-`Hoedown` is a revived fork of [Sundown](https://github.com/vmg/sundown),
-the Markdown parser based on the original code of the
-[Upskirt library](http://fossil.instinctive.eu/libupskirt/index)
-by Natacha Porté.
+`Hoextdown` is an extension to [Hoedown](https://github.com/hoedown/hoedown).
 
-Features
---------
+Extended the following functions.
 
-*	**Fully standards compliant**
+* [Special Attributes](#special-attributes)
+* [Task Lists](#task-lists)
+* [Line Continue](#line-continue)
+* [Header ID](#header-id)
+* [Fenced Script](#fenced-script)
+* [Script Tags](#script-tags)
+* [Meta Block](#meta-block)
+* [Definition Lists](#definition-lists)
 
-	`Hoedown` passes out of the box the official Markdown v1.0.0 and v1.0.3
-	test suites, and has been extensively tested with additional corner cases
-	to make sure its output is as sane as possible at all times.
+## Special Attributes
 
-*	**Massive extension support**
+Add the `HOEDOWN_EXT_SPECIAL_ATTRIBUTE` to Hoedown document flags.
 
-	`Hoedown` has optional support for several (unofficial) Markdown extensions,
-	such as non-strict emphasis, fenced code blocks, tables, autolinks,
-	strikethrough and more.
+Set the id and class attribute on certain elements using an attribute block.
 
-*	**UTF-8 aware**
+For instance, put the desired id prefixed by a hash inside curly brackets after
+the header at the end of the line, like this
 
-	`Hoedown` is fully UTF-8 aware, both when parsing the source document and when
-	generating the resulting (X)HTML code.
+```
+Header 1            {#header1}
+========
 
-*	**Tested & Ready to be used on production**
+## Header 2 ##      {#header2}
+```
 
-	`Hoedown` has been extensively security audited, and includes protection against
-	all possible DOS attacks (stack overflows, out of memory situations, malformed
-	Markdown syntax...).
+Then you can create links to different parts of the same document like this:
 
-	We've worked very hard to make `Hoedown` never leak or crash under *any* input.
+```
+[Link back to header 1](#header1)
+```
 
-	**Warning**: `Hoedown` doesn't validate or post-process the HTML in Markdown documents.
-	Unless you use `HTML_ESCAPE` or `HTML_SKIP`, you should strongly consider using a
-	good post-processor in conjunction with Hoedown to prevent client-side attacks.
+To add a class name, which can be used as a hook for a style sheet, use a dot
+like this:
 
-*	**Customizable renderers**
+```
+## The Site ##    {.main}
+```
 
-	`Hoedown` is not stuck with XHTML output: the Markdown parser of the library
-	is decoupled from the renderer, so it's trivial to extend the library with
-	custom renderers. A fully functional (X)HTML renderer is included.
+The id and multiple class names can be combined by putting them all into the
+same special attribute block:
 
-*	**Optimized for speed**
+```
+## The Site ##    {.main .shine #the-site}
+```
 
-	`Hoedown` is written in C, with a special emphasis on performance. When wrapped
-	on a dynamic language such as Python or Ruby, it has shown to be up to 40
-	times faster than other native alternatives.
+To add a other than id and class names, use a colon like this:
 
-*	**Zero-dependency**
+```
+## The Site ##    {.main .shine #the-site :color=red}
+```
 
-	`Hoedown` is a zero-dependency library composed of some `.c` files and their
-	headers. No dependencies, no bullshit. Only standard C99 that builds everywhere.
+At this time, special attribute blocks can be used with
 
-*	**Additional features**
+* headers
+* fenced code blocks
+* links
+* images
+* tables
+* paragraphs
 
-	`Hoedown` comes with a fully functional implementation of SmartyPants,
-	a separate autolinker, escaping utilities, buffers and stacks.
+For image and links, put the special attribute block immediately after the
+parenthesis containing the address:
 
-Bindings
---------
+```
+[link](url){#id .class}
+![img](url){#id .class}
+```
 
-You can see a community-maintained list of `Hoedown` bindings at
-[the wiki](https://github.com/hoedown/hoedown/wiki/Bindings). There is also a
-[migration guide](https://github.com/hoedown/hoedown/wiki/Migration-Guide)
-available for authors of Sundown bindings.
+Or if using reference-style links and images, put it at the end of the
+definition line like this:
 
-Help us
--------
+```
+[link][linkref] or [linkref]
+![img][linkref]
 
-`Hoedown` is all about security. If you find a (potential) security vulnerability in the
-library, or a way to make it crash through malicious input, please report it to us by
-emailing the private [Hoedown Security](mailto:hoedown-security@googlegroups.com)
-mailing list. The `Hoedown` security team will review the vulnerability and work with you
-to reproduce and resolve it.
+[linkref]: url "optional title" {#id .class}
+```
 
-Unicode character handling
---------------------------
+For paragraphs, put the special identifier `@paragraph` after the attribute.
+This helps prevent accidental parsing.
 
-Given that the Markdown spec makes no provision for Unicode character handling, `Hoedown`
-takes a conservative approach towards deciding which extended characters trigger Markdown
-features:
+```
+This is a paragraph. {@paragraph #id}
+```
 
-*	Punctuation characters outside of the U+007F codepoint are not handled as punctuation.
-	They are considered as normal, in-word characters for word-boundary checks.
+## Task Lists
 
-*	Whitespace characters outside of the U+007F codepoint are not considered as
-	whitespace. They are considered as normal, in-word characters for word-boundary checks.
+Add the `HOEDOWN_HTML_USE_TASK_LIST` to Hoedown html flags.
 
-Install
--------
+Add to support task lists, Task lists are lists with items marked as either [ ]
+or [x] (incomplete or complete), like this
 
-Just typing `make` will build `Hoedown` into a dynamic library and create the `hoedown`
-and `smartypants` executables, which are command-line tools to render Markdown to HTML
-and perform SmartyPants, respectively.
+```
+- [ ] a task list item
+- [ ] list syntax required
+- [ ] normal **formatting**, @mentions, #1234 refs
+- [ ] incomplete
+- [x] completed
+```
 
-If you are using [CocoaPods](http://cocoapods.org), just add the line `pod 'hoedown'` to your Podfile and call `pod install`.
+## Line Continue
 
-Or, if you prefer, you can just throw the files at `src` into your project.
+Add the `HOEDOWN_HTML_LINE_CONTINUE` to Hoedown html flags.
+
+Remove the line breaks at the end of the line.
+
+## Header ID
+
+Add the `HOEDOWN_HTML_HEADER_ID` to Hoedown html flags.
+
+Output header id.
+
+```
+# Header 1
+```
+
+becomes:
+
+```
+<h1 id="header-1">Header 1</h1>
+```
+
+## Fenced Script
+
+Add the `HOEDOWN_HTML_FENCED_CODE_SCRIPT` to Hoedown html flags.
+(`HOEDOWN_EXT_FENCED_CODE` also need to be specified at the same time)
+
+Output the script tag in the fenced code style.
+
+    ``` script@text/javascript
+    alert("Example");
+    ```
+
+becomes:
+
+```
+<script type="text/javascript">
+alert("Example");
+</script>
+```
+
+## Script Tags
+
+Add the `HOEDOWN_EXT_SCRIPT_TAGS` to Hoedown document flags.
+
+Add the parsing process of script tags `<?..?>`.
+
+```
+This is <?php echo "an example" ?> test.
+
+<?php
+echo "Example";
+?>
+```
+
+becomes:
+
+```
+<p>This is <?php echo "an example? ?> test.</p>
+
+<?php
+echo "Example";
+?>
+```
+
+## Meta Block
+
+Add the `HOEDOWN_EXT_META_BLOCK` to Hoedown document flags.
+
+Add the parsing process of meta block `<!--*..*-->`.
+
+Get a meta block by running in the following program.
+
+```c
+/*
+  Allocate meta block buffer
+ */
+hoedown_buffer *meta;
+meta = hoedown_buffer_new(64);
+
+/*
+  Set HOEDOWN_EXT_META_BLOCK to hoedown_extensions.
+  Specifies the meta block buffer to fifth argument.
+ */
+document = hoedown_document_new(renderer, HOEDOWN_EXT_META_BLOCK, 6, NULL, meta);
+
+/*
+  Print meta block buffer
+ */
+if (meta->size > 0) {
+  fprintf(stdout, "-- Meta Block --\n");
+  (void)fwrite(meta->data, 1, meta->size, stdout);
+}
+
+hoedown_buffer_free(meta);
+```
+
+Execution parse result.
+
+```
+<!--*
+  author: user
+  title: Readme markdown parser
+*-->
+
+This is hoextdown example.
+```
+
+becomes:
+
+```
+<p>This is hoextdown example.</p>
+--- Meta Block --
+  author: user
+  title: Readme markdown parser
+```
+
+## Definition Lists
+
+Add the `HOEXTDOWN_EXT_DEFINITION_LISTS` to Hoedown document flags.
+
+Add to support definition lists. Syntax follows [PHP Markdown Extra's syntax](https://michelf.ca/projects/php-markdown/extra/#def-list).
+
+```
+Term
+: Definition
+
+Term 1
+Term 2
+: Definition 2
+
+Term 3
+: Definition Line 1
+  Definition Line 2
+
+    Extra paragraphs need four spaces.
+```
+
+becomes:
+
+```
+<dl>
+<dt>Term</dt>
+<dd>Definition</dd>
+<dt>Term 1</dt>
+<dt>Term 2</dt>
+<dd>Definition 2</dd>
+<dt>Term 3</dt>
+<dd>
+<p>Definition Line 1 Definition Line 2</p>
+<p>Extra paragraphs need four spaces.</p>
+</dd>
+</dl>
+```

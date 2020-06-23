@@ -8,11 +8,17 @@ import re
 import subprocess
 import unittest
 
+EXTRA_BLOCKS = [
+    'nav', 'aside', 'video', 'canvas', 'footer', 'header', 'hgroup', 'output',
+    'article', 'section', 'figcaption'
+]
 TEST_ROOT = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.dirname(TEST_ROOT)
 HOEDOWN = [os.path.abspath(os.path.join(PROJECT_ROOT, 'hoedown'))]
-TIDY = ['tidy', '--show-body-only', '1', '--show-warnings', '0',
-        '--quiet', '1']
+TIDY = [
+    'tidy', '--show-body-only', '1', '--show-warnings', '0', '--quiet', '1',
+    '--new-blocklevel-tags', ','.join(EXTRA_BLOCKS)
+]
 CONFIG_PATH = os.path.join(TEST_ROOT, 'config.json')
 SLUGIFY_PATTERN = re.compile(r'\W')
 
