@@ -2409,8 +2409,9 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 		end++;
 
 	if (doc->ext_flags & HOEDOWN_EXT_FENCED_CODE) {
-		if (is_codefence(data + beg, end - beg, NULL, NULL)) {
+		if (fence_pre = is_codefence(data + beg, end - beg, &len, NULL)) {
 			in_fence = 1;
+			fence_pre = fence_pre + beg - len;
 		}
 	}
 
