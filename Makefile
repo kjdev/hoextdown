@@ -1,4 +1,4 @@
-CFLAGS = -g -O3 -ansi -pedantic -Wall -Wextra -Wno-unused-parameter
+CFLAGS = -g -O3 -std=c99 -D_DEFAULT_SOURCE -pedantic -Wall -Wextra -Wno-unused-parameter
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 LIBDIR = $(PREFIX)/lib
