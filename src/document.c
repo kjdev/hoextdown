@@ -1806,13 +1806,10 @@ is_codefence(uint8_t *data, size_t size, size_t *width, uint8_t *chr)
 	if (n < 3)
 		return 0;
 
-	for (j = i; j < size; ++j) {
+	for (j = i; j < size && data[j] != '\n'; ++j) {
 		if (data[j] == c) {
 			/* Avoid parsing codespan as fence. */
 			return 0;
-		}
-		if (data[j] == '\n') {
-			break;
 		}
 	}
 
