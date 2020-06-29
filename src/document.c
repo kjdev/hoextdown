@@ -1789,8 +1789,10 @@ is_codefence(uint8_t *data, size_t size, size_t *width, uint8_t *chr)
 	if (data[2] == ' ') { i++; } } }
 
 	/* looking at the hrule uint8_t */
+	if (i + 2 >= size)
+		return 0;
 	c = data[i];
-	if (i + 2 >= size || !(c=='~' || c=='`'))
+	if (!(c=='~' || c=='`'))
 		return 0;
 
 	/* the fence must be that same character */
