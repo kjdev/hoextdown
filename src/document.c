@@ -3345,7 +3345,7 @@ parse_table(
 
 		while (i < size) {
 			size_t row_start;
-			int pipes = 0;
+			size_t pipes = 0;
 			size_t rows = 1;
 
 			row_start = i;
@@ -3375,7 +3375,7 @@ parse_table(
 			if ((doc->ext_flags & HOEDOWN_EXT_MULTILINE_TABLES) != 0) {
 				while (i < size) {
 					size_t j = i + 1;
-					int colons = 0;
+					size_t colons = 0;
 
 					/* Require that a continued row starts with a colon. */
 					if (j >= size || data[j] != ':') break;
@@ -3397,7 +3397,7 @@ parse_table(
 					 * from `columns`. In this case, `parse_table_row` will add empty
 					 * cells. However, the code does not work in the multi-line case, so
 					 * we require the right number of columns. */
-					if (colons != pipes || colons != columns - 1) break;
+					if (colons != pipes || colons + 1 != columns) break;
 
 					rows++;
 					i = j;
