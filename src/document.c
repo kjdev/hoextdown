@@ -1471,7 +1471,7 @@ char_link(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t offse
 			}
 			else if (data[i] == ')') {
 				if (nb_p == 0) break;
-				else nb_p--; i++;
+				nb_p--; i++;
 			} else if (i >= 1 && _isspace(data[i-1]) && (data[i] == '\'' || data[i] == '"')) break;
 			else i++;
 		}
@@ -2415,7 +2415,8 @@ parse_listitem(hoedown_buffer *ob, hoedown_document *doc, uint8_t *data, size_t 
 		end++;
 
 	if (doc->ext_flags & HOEDOWN_EXT_FENCED_CODE) {
-		if (fence_pre = is_codefence(data + beg, end - beg, &len, NULL)) {
+		fence_pre = is_codefence(data + beg, end - beg, &len, NULL);
+		if (fence_pre) {
 			in_fence = 1;
 			fence_pre = fence_pre + beg - len;
 		}
