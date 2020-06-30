@@ -167,6 +167,11 @@
             "flags": ["--special-attribute", "--fenced-code"]
         },
         {
+            "input": "Tests/extras/Special_Attribute_CodeBlock.text",
+            "output": "Tests/extras/Special_Attribute_CodeBlock.html",
+            "flags": ["--special-attribute"]
+        },
+        {
             "input": "Tests/extras/Special_Attribute_Codespan.text",
             "output": "Tests/extras/Special_Attribute_Codespan.html",
             "flags": ["--special-attribute"]

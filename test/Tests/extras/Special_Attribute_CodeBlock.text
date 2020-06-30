@@ -1,0 +1,17 @@
+This is a space-indented code block.
+
+    {
+      /** JavaDoc with a {@link #somewhere}
+       */
+    }
+
+The link is *not* an extended attribute!
+
+    {
+      /** Code with attribute
+       */
+    } {@ .codesample }
+
+The above *is* an extended attribute, at least for now.
+See [#62](https://github.com/kjdev/hoextdown/issues/62) for a discussion about
+whether this kind of syntax should be supported.
