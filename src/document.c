@@ -697,13 +697,12 @@ static size_t parse_attributes(uint8_t *data, size_t size, struct hoedown_buffer
 				}
 				/* it might have matched only the first portion of block_id; make sure
 				 * there's no more to it here */
-				if (*block_id || (begin < end && data[begin] != ' ')) {
+				if (*block_id) {
 					return len;
 				}
-			} else {
-				while (begin < end && data[begin] != ' ') {
-					begin++;
-				}
+			}
+			if (begin < end && data[begin] != ' ') {
+				return len;
 			}
 			if (block_attr) {
 				if (block_attr->size) {
