@@ -24,7 +24,8 @@ typedef enum hoedown_html_flags {
 	HOEDOWN_HTML_USE_TASK_LIST = (1 << 4),
 	HOEDOWN_HTML_LINE_CONTINUE = (1 << 5),
 	HOEDOWN_HTML_HEADER_ID = (1 << 6),
-	HOEDOWN_HTML_FENCED_CODE_SCRIPT = (1 << 7)
+	HOEDOWN_HTML_FENCED_CODE_SCRIPT = (1 << 7),
+	HOEDOWN_HTML_USE_RADIO_LIST = (1 << 8),
 } hoedown_html_flags;
 
 typedef enum hoedown_html_tag {
@@ -55,6 +56,8 @@ struct hoedown_html_renderer_state {
 	} hash;
 
 	hoedown_html_flags flags;
+
+        int cur_list_id;
 
 	/* extra callbacks */
 	void (*link_attributes)(hoedown_buffer *ob, const hoedown_buffer *url, const hoedown_renderer_data *data);

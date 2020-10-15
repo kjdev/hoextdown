@@ -90,7 +90,8 @@ typedef enum hoedown_list_flags {
 	HOEDOWN_LI_END = (1 << 3),	/* internal list flag */
 	HOEDOWN_LIST_DEFINITION = (1 << 4),
 	HOEDOWN_LI_DT = (1 << 5),
-	HOEDOWN_LI_DD = (1 << 6)
+	HOEDOWN_LI_DD = (1 << 6),
+	HOEDOWN_LI_RADIO = (1 << 7),
 } hoedown_list_flags;
 
 typedef enum hoedown_table_flags {

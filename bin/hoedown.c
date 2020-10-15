@@ -78,6 +78,7 @@ static struct html_flag_info html_flags_info[] = {
 	{HOEDOWN_HTML_LINE_CONTINUE, "line-continue", "Render line continue."},
 	{HOEDOWN_HTML_HEADER_ID, "header-id", "Render header id."},
 	{HOEDOWN_HTML_FENCED_CODE_SCRIPT, "fenced-script", "Render fenced code blocks as script tag."},
+	{HOEDOWN_HTML_USE_RADIO_LIST, "radios", "Render radio lists."},
 };
 
 static const char *category_prefix = "all-";
