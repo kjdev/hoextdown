@@ -14,6 +14,11 @@
 
 #define USE_XHTML(opt) (opt->flags & HOEDOWN_HTML_USE_XHTML)
 #define USE_TASK_LIST(opt) (opt->flags & HOEDOWN_HTML_USE_TASK_LIST)
+#define USE_RADIO_LIST(opt) (opt->flags & HOEDOWN_HTML_USE_RADIO_LIST)
+
+#define RADIO_NAME_PREFIX "radio-list-"
+#define RADIO_NAME_THUNK RADIO_NAME_PREFIX "00000000"
+#define RADIO_NAME_THUNK_LEN (sizeof(RADIO_NAME_THUNK) - 1)
 
 hoedown_html_tag
 hoedown_html_is_tag(const uint8_t *data, size_t size, const char *tagname)
@@ -470,8 +475,34 @@ rndr_link(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffe
 }
 
 static void
+buffer_copy_with_replace(hoedown_buffer *dest, const hoedown_buffer *src, const char *search_str, hoedown_buffer *replace)
+{
+	const uint8_t *src_cur = src->data;
+	const uint8_t *src_end = src->data + src->size;
+	const char *search_end = search_str + replace->size;
+
+	while (src_cur < src_end) {
+		const char *search_ptr = search_str;
+		const uint8_t *scan_ptr = src_cur;
+		while (search_ptr < search_end && *search_ptr == *scan_ptr) {
+			search_ptr++;
+			scan_ptr++;
+		}
+		if (search_ptr == search_end) {
+			hoedown_buffer_put(dest, replace->data, replace->size);
+			src_cur += replace->size;
+		} else {
+			hoedown_buffer_putc(dest, *src_cur);
+			src_cur++;
+		}
+	}
+}
+
+static void
 rndr_list(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffer *attr, unsigned int flags, const hoedown_renderer_data *data)
 {
+        hoedown_html_renderer_state *state = data->opaque;
+
 	if (ob->size) hoedown_buffer_putc(ob, '\n');
 
 	if (flags & HOEDOWN_LIST_ORDERED) {
@@ -487,7 +518,17 @@ rndr_list(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffe
 
 	HOEDOWN_BUFPUTSL(ob, ">\n");
 
-	if (content) hoedown_buffer_put(ob, content->data, content->size);
+	if (content) {
+		if (flags & HOEDOWN_LI_RADIO) {
+			// Rewrite the content to fill in any list ids
+			state->cur_list_id++;
+			hoedown_buffer *replace = hoedown_buffer_new(RADIO_NAME_THUNK_LEN);
+			hoedown_buffer_printf(replace, "%s%08x", RADIO_NAME_PREFIX, state->cur_list_id);
+			buffer_copy_with_replace(ob, content, RADIO_NAME_THUNK, replace);
+		} else {
+			hoedown_buffer_put(ob, content->data, content->size);
+		}
+        }
 
 	if (flags & HOEDOWN_LIST_ORDERED) {
 		HOEDOWN_BUFPUTSL(ob, "</ol>\n");
@@ -541,6 +582,25 @@ rndr_listitem(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_b
 					hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
 					prefix += 3;
 					*flags |= HOEDOWN_LI_TASK;
+				}
+			}
+		}
+		if (USE_RADIO_LIST(state) && is_li_tag && size >= 3) {
+			if (*flags & HOEDOWN_LI_BLOCK) {
+				prefix = 3;
+				hoedown_buffer_put(ob, content->data, prefix);
+			}
+			if (size >= prefix + 3) {
+				if (strncmp((char *)content->data + prefix, "( )", 3) == 0) {
+					HOEDOWN_BUFPUTSL(ob, "<input type=\"radio\" name=\"" RADIO_NAME_THUNK "\"");
+					hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
+					prefix += 3;
+					*flags |= HOEDOWN_LI_RADIO;
+				} else if (strncasecmp((char *)content->data + prefix, "(x)", 3) == 0) {
+					HOEDOWN_BUFPUTSL(ob, "<input checked=\"\" type=\"radio\" name=\"" RADIO_NAME_THUNK "\"");
+					hoedown_buffer_puts(ob, USE_XHTML(state) ? "/>" : ">");
+					prefix += 3;
+					*flags |= HOEDOWN_LI_RADIO;
 				}
 			}
 		}

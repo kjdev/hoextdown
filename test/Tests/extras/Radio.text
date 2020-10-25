@@ -1,0 +1,34 @@
+
+Unordered list:
+
+* (X) Option 1
+* ( ) Option 2
+* ( ) Option 3
+
+Ordered list:
+
+1. ( ) Option 1
+2. (x) Option 2
+3. ( ) Option 3
+
+Nested list:
+
+* ( ) Option A
+  * ( ) Option A1
+  * ( ) Option A2
+  * ( ) Option A3
+* ( ) Option B
+  1. ( ) Option B1
+  2. ( ) Option B2
+  3. ( ) Option B3
+
+
+1. ( ) A loose list
+
+  ... can also ...
+
+2. (x) contain radios
+3. ... mixed with other items ...
+
+Definition lists
+: ( ) cannot contain tasks (this renders as `( )`).
