@@ -361,6 +361,11 @@
             "output": "Tests/extras/HTML_Nested.html"
         },
         {
+            "input": "Tests/extras/Radio.text",
+            "output": "Tests/extras/Radio.html",
+            "flags": ["--radios", "--special-attribute", "--definition-lists"]
+        },
+        {
             "input": "Tests/context/Escaping.input",
             "output": "Tests/context/Escaping.output",
             "flags": ["--context-test"]
@@ -404,11 +409,6 @@
             "input": "Tests/context/Depth.input",
             "output": "Tests/context/Depth.output",
             "flags": ["--context-test"]
-        },
-        {
-            "input": "Tests/extras/Radio.text",
-            "output": "Tests/extras/Radio.html",
-            "flags": ["--radios", "--special-attribute", "--definition-lists"]
         }
     ]
 }
