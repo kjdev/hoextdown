@@ -473,7 +473,7 @@ main(int argc, char **argv)
 			renderer_free = hoedown_html_renderer_free;
 			break;
 		case RENDERER_CONTEXT_TEST:
-			renderer = hoedown_context_test_renderer_new();
+			renderer = hoedown_context_test_renderer_new(NULL);
 			renderer_free = hoedown_context_test_renderer_free;
 			break;
 	};
