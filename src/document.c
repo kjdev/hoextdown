@@ -4187,9 +4187,18 @@ hoedown_document_render_inline(hoedown_document *doc, hoedown_buffer *ob, const 
 {
 	size_t i = 0, mark;
 	hoedown_buffer *text = hoedown_buffer_new(64);
+	int footnotes_enabled;
 
 	/* reset the references table */
 	memset(&doc->refs, 0x0, REF_TABLE_SIZE * sizeof(void *));
+
+	footnotes_enabled = doc->ext_flags & HOEDOWN_EXT_FOOTNOTES;
+
+	/* reset the footnotes lists */
+	if (footnotes_enabled) {
+		memset(&doc->footnotes_found, 0x0, sizeof(doc->footnotes_found));
+		memset(&doc->footnotes_used, 0x0, sizeof(doc->footnotes_used));
+	}
 
 	/* first pass: expand tabs and process newlines */
 	hoedown_buffer_grow(text, size);
@@ -4224,6 +4233,10 @@ hoedown_document_render_inline(hoedown_document *doc, hoedown_buffer *ob, const 
 
 	/* clean-up */
 	hoedown_buffer_free(text);
+	if (footnotes_enabled) {
+		free_footnote_list(&doc->footnotes_found, 1);
+		free_footnote_list(&doc->footnotes_used, 0);
+	}
 
 	assert(doc->work_bufs[BUFFER_SPAN].size == 0);
 	assert(doc->work_bufs[BUFFER_BLOCK].size == 0);

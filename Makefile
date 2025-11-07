@@ -72,6 +72,10 @@ test-pl: hoedown
 	perl test/MarkdownTest_1.0.3/MarkdownTest.pl \
 		--script=./hoedown --testdir=test/MarkdownTest_1.0.3/Tests --tidy
 
+test-issues-65: libhoedown.so
+	$(CXX) -fsanitize=address -g -O0 -o ./test/issues_65.out test/issues_65.cpp -I./src -L./ -Wl,-rpath,./ -lhoedown
+	./test/issues_65.out
+
 # Housekeeping
 
 clean:
