@@ -27,7 +27,7 @@ typedef struct hoedown_context_test_renderer_state hoedown_context_test_renderer
  *************/
 
 /* hoedown_context_test_renderer_new: allocates a context test renderer */
-hoedown_renderer *hoedown_context_test_renderer_new() __attribute__ ((malloc));
+hoedown_renderer *hoedown_context_test_renderer_new(hoedown_document *doc) __attribute__ ((malloc));
 
 /* hoedown_context_test_renderer_free: deallocate a context test renderer */
 void hoedown_context_test_renderer_free(hoedown_renderer *renderer);
