@@ -499,7 +499,7 @@ buffer_copy_with_replace(hoedown_buffer *dest, const hoedown_buffer *src, const 
 }
 
 static void
-rndr_list(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffer *attr, unsigned int flags, const hoedown_renderer_data *data)
+rndr_list(hoedown_buffer *ob, const hoedown_buffer *content, const hoedown_buffer *attr, hoedown_list_flags flags, const hoedown_renderer_data *data)
 {
         hoedown_html_renderer_state *state = data->opaque;
 

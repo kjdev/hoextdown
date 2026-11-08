@@ -1818,7 +1818,7 @@ is_codefence(uint8_t *data, size_t size, size_t *width, uint8_t *chr)
 }
 
 /* expects single line, checks if it's a codefence and extracts language */
-static int
+static size_t
 parse_codefence(hoedown_document *doc, uint8_t *data, size_t size, hoedown_buffer *lang, size_t *width, uint8_t *chr, unsigned int flags, hoedown_buffer *attr)
 {
 	size_t i, w, lang_start, attr_start = 0;
