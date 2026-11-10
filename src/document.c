@@ -3159,6 +3159,12 @@ parse_table_header(
 	int pipes, rows;
 	size_t i = 0, col, header_end, under_end;
 	hoedown_buffer *header_contents = 0;
+	size_t min_dashes = 3;
+
+	if (HOEDOWN_EXT_GFM & doc->ext_flags) {
+		// GFM allows 1 dashes
+		min_dashes = 1;
+	}
 
 	pipes = 0;
 	while (i < size && data[i] != '\n') {
@@ -3264,6 +3270,7 @@ parse_table_header(
 		under_end++;
 
 	for (col = 0; col < *columns && i < under_end; ++col) {
+		size_t colons = 0;
 		size_t dashes = 0;
 
 		while (i < under_end && data[i] == ' ')
@@ -3271,7 +3278,7 @@ parse_table_header(
 
 		if (i < under_end && data[i] == ':') {
 			i++; (*column_data)[col] |= HOEDOWN_TABLE_ALIGN_LEFT;
-			dashes++;
+			colons++;
 		}
 
 		while (i < under_end && data[i] == '-') {
@@ -3280,7 +3287,7 @@ parse_table_header(
 
 		if (i < under_end && data[i] == ':') {
 			i++; (*column_data)[col] |= HOEDOWN_TABLE_ALIGN_RIGHT;
-			dashes++;
+			colons++;
 		}
 
 		while (i < under_end && data[i] == ' ')
@@ -3289,7 +3296,7 @@ parse_table_header(
 		if (i < under_end && data[i] != '|' && data[i] != '+')
 			break;
 
-		if (dashes < 3)
+		if (dashes < 1 || colons + dashes < min_dashes)
 			break;
 
 		i++;
