@@ -51,7 +51,9 @@ typedef enum hoedown_extensions {
 	HOEDOWN_EXT_SCRIPT_TAGS = (1 << 16),
 
 	/* meta block */
-	HOEDOWN_EXT_META_BLOCK = (1 << 17)
+	HOEDOWN_EXT_META_BLOCK = (1 << 17),
+
+	HOEDOWN_EXT_GFM = (1 << 22)
 } hoedown_extensions;
 
 #define HOEDOWN_EXT_BLOCK (\
